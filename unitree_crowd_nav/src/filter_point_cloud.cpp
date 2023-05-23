@@ -6,6 +6,8 @@
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 
 using namespace std::chrono_literals;
@@ -57,6 +59,11 @@ class FilterPC : public rclcpp::Node
         RCLCPP_INFO_STREAM(get_logger(), "i: "<<i<<" data: "<<data);
       }
       RCLCPP_INFO_STREAM(get_logger(), "\n\n\n");
+
+      // helpful source I looked at for conversions
+      // https://github.com/GitRepJo/pcl_example/blob/main/src/pcl_example.cpp
+
+      pcl::PCLPointCloud2::Ptr cloud (new pcl::PCLPointCloud2 ());
     }
 };
 

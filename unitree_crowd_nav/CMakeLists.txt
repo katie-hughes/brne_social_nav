@@ -44,6 +44,7 @@ ament_target_dependencies(filter_point_cloud
   visualization_msgs
   nav_msgs
   sensor_msgs
+  PCL
   pcl_conversions)
 
 
