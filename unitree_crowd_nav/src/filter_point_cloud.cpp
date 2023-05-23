@@ -6,6 +6,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
+#include <pcl_conversions/pcl_conversions.h>
 
 using namespace std::chrono_literals;
 
@@ -38,13 +39,24 @@ class FilterPC : public rclcpp::Node
     // }
     void pc_cb(const sensor_msgs::msg::PointCloud2 & msg)
     {
-      const auto height = msg.height;
-      const auto width = msg.width;
-      const auto is_bigendian = msg.is_bigendian;
-      const auto point_step = msg.point_step;
-      const auto row_step = msg.row_step;
-      const auto data = msg.data;
-      RCLCPP_INFO_STREAM(get_logger(), "Width: "<<width<<" Height: "<<height);
+      // const auto height = msg.height;
+      // const auto width = msg.width;
+      // const auto is_bigendian = msg.is_bigendian;
+      // const auto point_step = msg.point_step;
+      // const auto row_step = msg.row_step;
+      // const auto data = msg.data;
+      // RCLCPP_INFO_STREAM(get_logger(), "Width: "<<width<<" Height: "<<height);
+      for (int i = 0; i < static_cast<int>(msg.fields.size()); i++) {
+        const auto field = msg.fields.at(i);
+        RCLCPP_INFO_STREAM(get_logger(), "Name: "<<field.name<<" Offset: "<<field.offset<<
+                                         " datatype: "<<field.datatype<<" count: "<<field.count);
+      }
+      const auto npoints = msg.data.size();
+      for (int i = 0; i < static_cast<int>(npoints); i++) {
+        const int data = static_cast<int>(msg.data.at(i));
+        RCLCPP_INFO_STREAM(get_logger(), "i: "<<i<<" data: "<<data);
+      }
+      RCLCPP_INFO_STREAM(get_logger(), "\n\n\n");
     }
 };
 

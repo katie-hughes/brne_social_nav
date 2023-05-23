@@ -21,7 +21,19 @@ find_package(nav_msgs REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
+find_package(PCL REQUIRED)
+find_package(pcl_conversions REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
 add_executable(filter_point_cloud src/filter_point_cloud.cpp)
+
+target_link_libraries(filter_point_cloud
+  # ${Boost_SYSTEM_LIBRARY}
+  ${PCL_LIBRARIES}
+)
+
 ament_target_dependencies(filter_point_cloud
   rclcpp
   std_msgs
@@ -31,7 +43,9 @@ ament_target_dependencies(filter_point_cloud
   geometry_msgs
   visualization_msgs
   nav_msgs
-  sensor_msgs)
+  sensor_msgs
+  pcl_conversions)
+
 
 
 target_include_directories(filter_point_cloud PUBLIC
