@@ -24,6 +24,7 @@
   <depend>nav_msgs</depend>
   <depend>tf2_msgs</depend>
   <depend>sensor_msgs</depend>
+  <depend>image_geometry</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

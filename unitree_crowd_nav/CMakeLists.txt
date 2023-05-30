@@ -20,6 +20,7 @@ find_package(visualization_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(image_geometry REQUIRED)
 
 find_package(PCL REQUIRED)
 find_package(pcl_conversions REQUIRED)
@@ -48,13 +49,33 @@ ament_target_dependencies(filter_point_cloud
   pcl_conversions)
 
 
-
 target_include_directories(filter_point_cloud PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+$<INSTALL_INTERFACE:include>)
 target_compile_features(filter_point_cloud PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
-install(TARGETS filter_point_cloud
+
+add_executable(track_pedestrians src/track_pedestrians.cpp)
+
+ament_target_dependencies(track_pedestrians
+  rclcpp
+  std_msgs
+  std_srvs
+  tf2
+  tf2_ros
+  geometry_msgs
+  visualization_msgs
+  nav_msgs
+  sensor_msgs
+  image_geometry)
+
+target_include_directories(track_pedestrians PUBLIC
+$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+$<INSTALL_INTERFACE:include>)
+target_compile_features(track_pedestrians PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+
+
+install(TARGETS filter_point_cloud track_pedestrians
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
