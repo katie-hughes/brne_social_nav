@@ -3,6 +3,10 @@ repositories:
     type: git
     url: https://github.com/ngmor/UnitreecameraSDK.git
     version: main
+  YOLOv7_ROS2:
+    type: git
+    url: git@github.com:katie-hughes/YOLOv7_ROS2.git
+    version: main
   rslidar_msg:
     type: git
     url: git@github.com:RoboSense-LiDAR/rslidar_msg.git
