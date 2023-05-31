@@ -25,6 +25,7 @@
   <depend>tf2_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>image_geometry</depend>
+  <depend>unitree_crowd_nav_interfaces</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

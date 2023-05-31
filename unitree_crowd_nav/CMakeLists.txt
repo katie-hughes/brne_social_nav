@@ -21,6 +21,7 @@ find_package(nav_msgs REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(image_geometry REQUIRED)
+find_package(unitree_crowd_nav_interfaces REQUIRED)
 
 find_package(PCL REQUIRED)
 find_package(pcl_conversions REQUIRED)
@@ -67,7 +68,8 @@ ament_target_dependencies(track_pedestrians
   visualization_msgs
   nav_msgs
   sensor_msgs
-  image_geometry)
+  image_geometry
+  unitree_crowd_nav_interfaces)
 
 target_include_directories(track_pedestrians PUBLIC
 $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
