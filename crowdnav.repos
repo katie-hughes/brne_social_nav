@@ -1,0 +1,29 @@
+repositories:
+  UnitreecameraSDK:
+    type: git
+    url: https://github.com/ngmor/UnitreecameraSDK.git
+    version: main
+  rslidar_msg:
+    type: git
+    url: git@github.com:RoboSense-LiDAR/rslidar_msg.git
+    version: master
+  rslidar_sdk_ros2:
+    type: git
+    url: git@github.com:Marnonel6/rslidar_sdk_ros2.git
+    version: unitree_go1
+  unitree_camera:
+    type: git
+    url: git@github.com:ngmor/unitree_camera.git
+    version: main
+  unitree_crowd_nav:
+    type: git
+    url: git@github.com:katie-hughes/unitree_crowd_nav.git
+    version: main
+  unitree_nav:
+    type: git
+    url: git@github.com:ngmor/unitree_nav.git
+    version: main
+  unitree_ros2:
+    type: git
+    url: git@github.com:katie-hughes/unitree_ros2.git
+    version: main
