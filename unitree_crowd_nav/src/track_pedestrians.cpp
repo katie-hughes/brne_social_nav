@@ -27,12 +27,25 @@ class TrackPedestrians : public rclcpp::Node
       rate_hz = get_parameter("rate").as_double();
       RCLCPP_INFO_STREAM(get_logger(), "Rate is " << ((int)(1000. / rate_hz)) << "ms");
       std::chrono::milliseconds rate = (std::chrono::milliseconds) ((int)(1000. / rate_hz));
+
+      pd.description = "Camera location on dog";
+      declare_parameter("dog_cam_location", "head/front", pd);
+      cam_loc = get_parameter("dog_cam_location").get_parameter_value().get<std::string>();
+
+      RCLCPP_INFO_STREAM(get_logger(), "Using: " << cam_loc);
+
       publisher_ = create_publisher<std_msgs::msg::String>("topic", 10);
 
-      pixel_head_front_left_sub_ = create_subscription<unitree_crowd_nav_interfaces::msg::PixelArray>(
-        "/head/front/pixels_left", 10, std::bind(&TrackPedestrians::pixel_hfl_cb, this, std::placeholders::_1));
-      pixel_head_front_right_sub_ = create_subscription<unitree_crowd_nav_interfaces::msg::PixelArray>(
-        "/head/front/pixels_right", 10, std::bind(&TrackPedestrians::pixel_hfr_cb, this, std::placeholders::_1));
+      const auto left_topic = '/' + cam_loc + "/pixels_left";
+      const auto right_topic = '/' + cam_loc + "/pixels_right";
+
+      RCLCPP_INFO_STREAM(get_logger(), "Left topic: " << left_topic);
+      RCLCPP_INFO_STREAM(get_logger(), "Right topic: " << right_topic);
+
+      pixel_left_sub_ = create_subscription<unitree_crowd_nav_interfaces::msg::PixelArray>(
+        left_topic, 10, std::bind(&TrackPedestrians::pixel_left_cb, this, std::placeholders::_1));
+      pixel_right_sub_ = create_subscription<unitree_crowd_nav_interfaces::msg::PixelArray>(
+        right_topic, 10, std::bind(&TrackPedestrians::pixel_right_cb, this, std::placeholders::_1));
 
       timer_ = create_wall_timer(
       rate, std::bind(&TrackPedestrians::timer_callback, this));
@@ -43,27 +56,29 @@ class TrackPedestrians : public rclcpp::Node
     rclcpp::TimerBase::SharedPtr timer_;
     image_geometry::StereoCameraModel stereo;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
-    rclcpp::Subscription<unitree_crowd_nav_interfaces::msg::PixelArray>::SharedPtr pixel_head_front_left_sub_;
-    rclcpp::Subscription<unitree_crowd_nav_interfaces::msg::PixelArray>::SharedPtr pixel_head_front_right_sub_;
+    rclcpp::Subscription<unitree_crowd_nav_interfaces::msg::PixelArray>::SharedPtr pixel_left_sub_;
+    rclcpp::Subscription<unitree_crowd_nav_interfaces::msg::PixelArray>::SharedPtr pixel_right_sub_;
 
     size_t count_;
 
-    void pixel_hfl_cb(const unitree_crowd_nav_interfaces::msg::PixelArray & msg)
+    std::string cam_loc;
+
+    void pixel_left_cb(const unitree_crowd_nav_interfaces::msg::PixelArray & msg)
     {
       RCLCPP_INFO_STREAM(get_logger(), "Received Left");
     }
 
-    void pixel_hfr_cb(const unitree_crowd_nav_interfaces::msg::PixelArray & msg)
+    void pixel_right_cb(const unitree_crowd_nav_interfaces::msg::PixelArray & msg)
     {
       RCLCPP_INFO_STREAM(get_logger(), "Received Right");
     }
 
     void timer_callback()
     {
-      auto message = std_msgs::msg::String();
-      message.data = "Hello, world! " + std::to_string(count_++);
-      // RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
-      publisher_->publish(message);
+      // auto message = std_msgs::msg::String();
+      // message.data = "Hello, world! " + std::to_string(count_++);
+      // // RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
+      // publisher_->publish(message);
     }
 };
 

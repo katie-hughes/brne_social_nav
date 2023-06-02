@@ -1,10 +1,13 @@
 <launch>
 
+    <arg name="dog_cam_location" default="head/front" description="Options: head/front, body/left, body/right"/>
+
     <!-- Launch YOLO object detection -->
     <include file="$(find-pkg-share object_detection)/object_detection.launch.xml">
       <arg name="use_realsense" value="False" />
       <arg name="use_YOLOv7" value="True" />
       <arg name="use_dog_cam" value="True" />
+      <arg name="dog_cam_location" value="$(var dog_cam_location)"/>
     </include>
 
     <!-- launch my pedestrian tracker node -->
