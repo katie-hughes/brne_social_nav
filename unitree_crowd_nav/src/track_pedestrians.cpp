@@ -86,16 +86,18 @@ class TrackPedestrians : public rclcpp::Node
 
     void pixel_left_cb(const unitree_crowd_nav_interfaces::msg::PixelArray & msg)
     {
-      for (int i = 0; i < static_cast<int>(msg.pixels.size()); i++){
-        RCLCPP_INFO_STREAM(get_logger(), "Left center: ("<<msg.pixels.at(i).x << ","<<msg.pixels.at(i).y<<")");
-      }
+      left_pixels = msg;
+      // for (int i = 0; i < static_cast<int>(msg.pixels.size()); i++){
+      //   RCLCPP_INFO_STREAM(get_logger(), "Left center: ("<<msg.pixels.at(i).x << ","<<msg.pixels.at(i).y<<")");
+      // }
     }
 
     void pixel_right_cb(const unitree_crowd_nav_interfaces::msg::PixelArray & msg)
     {
-      for (int i = 0; i < static_cast<int>(msg.pixels.size()); i++){
-        RCLCPP_INFO_STREAM(get_logger(), "Right center: ("<<msg.pixels.at(i).x << ","<<msg.pixels.at(i).y<<")");
-      }
+      right_pixels = msg;
+      // for (int i = 0; i < static_cast<int>(msg.pixels.size()); i++){
+      //   RCLCPP_INFO_STREAM(get_logger(), "Right center: ("<<msg.pixels.at(i).x << ","<<msg.pixels.at(i).y<<")");
+      // }
     }
 
     void info_left_cb(const sensor_msgs::msg::CameraInfo & msg)
@@ -121,7 +123,17 @@ class TrackPedestrians : public rclcpp::Node
         RCLCPP_INFO_STREAM(get_logger(), "Success???"<<success);
       }
       // in here I should analyze the pixels that come in and try to match them up.
-
+      if (stereo.initialized()){
+        for (int i = 0; i < static_cast<int>(left_pixels.pixels.size()); i++){
+          RCLCPP_INFO_STREAM(get_logger(), "Left center: ("<<left_pixels.pixels.at(i).x << ","<<left_pixels.pixels.at(i).y<<")");
+        }
+        for (int i = 0; i < static_cast<int>(right_pixels.pixels.size()); i++){
+          RCLCPP_INFO_STREAM(get_logger(), "Right center: ("<<right_pixels.pixels.at(i).x << ","<<right_pixels.pixels.at(i).y<<")");
+        }
+        // match them up 
+        // compute disparity 
+        // calculate 3d points
+      }
 
       // auto message = std_msgs::msg::String();
       // message.data = "Hello, world! " + std::to_string(count_++);
