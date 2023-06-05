@@ -153,7 +153,7 @@ class TrackPedestrians : public rclcpp::Node
             // publish markers
             visualization_msgs::msg::Marker m;
             m.header.stamp = this->get_clock()->now();
-            m.header.frame_id = "base_footprint";
+            m.header.frame_id = "camera_face";
             m.id = i;         // so each has a unique ID
             m.type = 3;       // cylinder
             // Set color as yellow
@@ -166,9 +166,9 @@ class TrackPedestrians : public rclcpp::Node
             m.scale.y = 2 * 0.4;
             m.scale.z = 1.0;
             // set position
-            m.pose.position.x = xyz.z;
-            m.pose.position.y = xyz.x;
-            m.pose.position.z = m.scale.z/2;
+            m.pose.position.x = xyz.x;
+            m.pose.position.y = xyz.y;
+            m.pose.position.z = xyz.z;
             // Add to marker array
             ma.markers.push_back(m);
             }
