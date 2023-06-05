@@ -9,6 +9,7 @@
 #include "sensor_msgs/msg/camera_info.hpp"
 #include "unitree_crowd_nav_interfaces/msg/pixel.hpp"
 #include "unitree_crowd_nav_interfaces/msg/pixel_array.hpp"
+#include <opencv2/highgui.hpp>
 
 using namespace std::chrono_literals;
 
@@ -134,10 +135,14 @@ class TrackPedestrians : public rclcpp::Node
           for (int i = 0; i < static_cast<int>(left_pixels.pixels.size()); i++){
             RCLCPP_INFO_STREAM(get_logger(), "L: ("<<left_pixels.pixels.at(i).x << ","<<left_pixels.pixels.at(i).y<<")"<<
                                             " R: ("<<right_pixels.pixels.at(i).x << ","<<right_pixels.pixels.at(i).y<<")");
-            }
-            // compute disparity
+            // compute disparity: difference in x
+            const auto disparity = left_pixels.pixels.at(i).x - right_pixels.pixels.at(i).x;
+            RCLCPP_INFO_STREAM(get_logger(), "Disparity: " << disparity);
             // calculate 3d point
+            // use this function I think: 
+            // projectDisparityTo3d (const cv::Point2d &left_uv_rect, float disparity, cv::Point3d &xyz) const
             // publish
+            }
         }
       }
 
