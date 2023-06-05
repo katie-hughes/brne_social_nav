@@ -137,10 +137,16 @@ class TrackPedestrians : public rclcpp::Node
                                             " R: ("<<right_pixels.pixels.at(i).x << ","<<right_pixels.pixels.at(i).y<<")");
             // compute disparity: difference in x
             const auto disparity = left_pixels.pixels.at(i).x - right_pixels.pixels.at(i).x;
-            RCLCPP_INFO_STREAM(get_logger(), "Disparity: " << disparity);
+            // RCLCPP_INFO_STREAM(get_logger(), "Disparity: " << disparity);
             // calculate 3d point
             // use this function I think: 
             // projectDisparityTo3d (const cv::Point2d &left_uv_rect, float disparity, cv::Point3d &xyz) const
+            cv::Point2d left_uv_rect(left_pixels.pixels.at(i).x, left_pixels.pixels.at(i).y);
+            // RCLCPP_INFO_STREAM(get_logger(), "leftuv: " << left_uv_rect.x << "  "<< left_uv_rect.y);
+            cv::Point3d xyz;
+            stereo.projectDisparityTo3d(left_uv_rect, disparity, xyz);
+            // print out person location
+            RCLCPP_INFO_STREAM(get_logger(), "xyz (" << xyz.x << ", "<< xyz.y << ", "<<xyz.z<<")");
             // publish
             }
         }
