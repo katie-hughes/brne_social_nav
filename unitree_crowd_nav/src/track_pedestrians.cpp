@@ -39,6 +39,9 @@ class TrackPedestrians : public rclcpp::Node
       const auto left_topic = '/' + cam_loc + "/pixels_left";
       const auto right_topic = '/' + cam_loc + "/pixels_right";
 
+      const auto left_cam_info_topic = '/' + cam_loc + "/cam/image_rect/left/camera_info";
+      const auto right_cam_info_topic = '/' + cam_loc + "/cam/image_rect/right/camera_info";
+
       RCLCPP_INFO_STREAM(get_logger(), "Left topic: " << left_topic);
       RCLCPP_INFO_STREAM(get_logger(), "Right topic: " << right_topic);
 
@@ -47,6 +50,11 @@ class TrackPedestrians : public rclcpp::Node
       pixel_right_sub_ = create_subscription<unitree_crowd_nav_interfaces::msg::PixelArray>(
         right_topic, 10, std::bind(&TrackPedestrians::pixel_right_cb, this, std::placeholders::_1));
 
+      info_left_sub_ = create_subscription<sensor_msgs::msg::CameraInfo>(
+        left_cam_info_topic, 10, std::bind(&TrackPedestrians::info_left_cb, this, std::placeholders::_1));
+      info_right_sub_ = create_subscription<sensor_msgs::msg::CameraInfo>(
+        right_cam_info_topic, 10, std::bind(&TrackPedestrians::info_right_cb, this, std::placeholders::_1));
+
       timer_ = create_wall_timer(
       rate, std::bind(&TrackPedestrians::timer_callback, this));
     }
@@ -54,27 +62,67 @@ class TrackPedestrians : public rclcpp::Node
   private:
     double rate_hz;
     rclcpp::TimerBase::SharedPtr timer_;
-    image_geometry::StereoCameraModel stereo;
+
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
+
     rclcpp::Subscription<unitree_crowd_nav_interfaces::msg::PixelArray>::SharedPtr pixel_left_sub_;
     rclcpp::Subscription<unitree_crowd_nav_interfaces::msg::PixelArray>::SharedPtr pixel_right_sub_;
+
+    rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr info_left_sub_;
+    rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr info_right_sub_;
 
     size_t count_;
 
     std::string cam_loc;
 
+    sensor_msgs::msg::CameraInfo info_left, info_right;
+
+    bool info_left_received = false;
+    bool info_right_received = false;
+
+    unitree_crowd_nav_interfaces::msg::PixelArray left_pixels, right_pixels;
+
+    image_geometry::StereoCameraModel stereo;
+
     void pixel_left_cb(const unitree_crowd_nav_interfaces::msg::PixelArray & msg)
     {
-      RCLCPP_INFO_STREAM(get_logger(), "Received Left");
+      for (int i = 0; i < static_cast<int>(msg.pixels.size()); i++){
+        RCLCPP_INFO_STREAM(get_logger(), "Left center: ("<<msg.pixels.at(i).x << ","<<msg.pixels.at(i).y<<")");
+      }
     }
 
     void pixel_right_cb(const unitree_crowd_nav_interfaces::msg::PixelArray & msg)
     {
-      RCLCPP_INFO_STREAM(get_logger(), "Received Right");
+      for (int i = 0; i < static_cast<int>(msg.pixels.size()); i++){
+        RCLCPP_INFO_STREAM(get_logger(), "Right center: ("<<msg.pixels.at(i).x << ","<<msg.pixels.at(i).y<<")");
+      }
+    }
+
+    void info_left_cb(const sensor_msgs::msg::CameraInfo & msg)
+    {
+      // RCLCPP_INFO_STREAM(get_logger(), "Received Left Info");
+      info_left = msg;
+      info_left_received = true;
+    }
+
+    void info_right_cb(const sensor_msgs::msg::CameraInfo & msg)
+    {
+      // RCLCPP_INFO_STREAM(get_logger(), "Received Right Info");
+      info_right = msg;
+      info_right_received = true;
     }
 
     void timer_callback()
     {
+      // check if camera has been initialized
+      if (!stereo.initialized() && (info_left_received && info_right_received)){
+        RCLCPP_INFO_STREAM(get_logger(), "Initialize camera stupid");
+        const auto success = stereo.fromCameraInfo(info_left, info_right);
+        RCLCPP_INFO_STREAM(get_logger(), "Success???"<<success);
+      }
+      // in here I should analyze the pixels that come in and try to match them up.
+
+
       // auto message = std_msgs::msg::String();
       // message.data = "Hello, world! " + std::to_string(count_++);
       // // RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
