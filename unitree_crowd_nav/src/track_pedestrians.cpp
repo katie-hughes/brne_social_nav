@@ -10,6 +10,8 @@
 #include "unitree_crowd_nav_interfaces/msg/pixel.hpp"
 #include "unitree_crowd_nav_interfaces/msg/pixel_array.hpp"
 #include <opencv2/highgui.hpp>
+#include "visualization_msgs/msg/marker.hpp"
+#include "visualization_msgs/msg/marker_array.hpp"
 
 using namespace std::chrono_literals;
 
@@ -35,7 +37,7 @@ class TrackPedestrians : public rclcpp::Node
 
       RCLCPP_INFO_STREAM(get_logger(), "Using: " << cam_loc);
 
-      publisher_ = create_publisher<std_msgs::msg::String>("topic", 10);
+      people_pub_ = create_publisher<visualization_msgs::msg::MarkerArray>("people", 10);
 
       const auto left_topic = '/' + cam_loc + "/pixels_left";
       const auto right_topic = '/' + cam_loc + "/pixels_right";
@@ -64,7 +66,7 @@ class TrackPedestrians : public rclcpp::Node
     double rate_hz;
     rclcpp::TimerBase::SharedPtr timer_;
 
-    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
+    rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr people_pub_;
 
     rclcpp::Subscription<unitree_crowd_nav_interfaces::msg::PixelArray>::SharedPtr pixel_left_sub_;
     rclcpp::Subscription<unitree_crowd_nav_interfaces::msg::PixelArray>::SharedPtr pixel_right_sub_;
@@ -132,6 +134,7 @@ class TrackPedestrians : public rclcpp::Node
         if ((left_pixels.pixels.size() == right_pixels.pixels.size()) 
             && left_pixels.pixels.size() > 0){
           RCLCPP_INFO_STREAM(get_logger(), "Same size");
+          visualization_msgs::msg::MarkerArray ma;
           for (int i = 0; i < static_cast<int>(left_pixels.pixels.size()); i++){
             RCLCPP_INFO_STREAM(get_logger(), "L: ("<<left_pixels.pixels.at(i).x << ","<<left_pixels.pixels.at(i).y<<")"<<
                                             " R: ("<<right_pixels.pixels.at(i).x << ","<<right_pixels.pixels.at(i).y<<")");
@@ -139,7 +142,7 @@ class TrackPedestrians : public rclcpp::Node
             const auto disparity = left_pixels.pixels.at(i).x - right_pixels.pixels.at(i).x;
             // RCLCPP_INFO_STREAM(get_logger(), "Disparity: " << disparity);
             // calculate 3d point
-            // use this function I think: 
+            // use this function: 
             // projectDisparityTo3d (const cv::Point2d &left_uv_rect, float disparity, cv::Point3d &xyz) const
             cv::Point2d left_uv_rect(left_pixels.pixels.at(i).x, left_pixels.pixels.at(i).y);
             // RCLCPP_INFO_STREAM(get_logger(), "leftuv: " << left_uv_rect.x << "  "<< left_uv_rect.y);
@@ -147,15 +150,31 @@ class TrackPedestrians : public rclcpp::Node
             stereo.projectDisparityTo3d(left_uv_rect, disparity, xyz);
             // print out person location
             RCLCPP_INFO_STREAM(get_logger(), "xyz (" << xyz.x << ", "<< xyz.y << ", "<<xyz.z<<")");
-            // publish
+            // publish markers
+            visualization_msgs::msg::Marker m;
+            m.header.stamp = this->get_clock()->now();
+            m.header.frame_id = "base_footprint";
+            m.id = i;         // so each has a unique ID
+            m.type = 3;       // cylinder
+            // Set color as yellow
+            m.color.r = 1.0;
+            m.color.g = 1.0;
+            m.color.b = 0.0;
+            m.color.a = 1.0;
+            // Set Radius
+            m.scale.x = 2 * 0.4;
+            m.scale.y = 2 * 0.4;
+            m.scale.z = 1.0;
+            // set position
+            m.pose.position.x = xyz.z;
+            m.pose.position.y = xyz.x;
+            m.pose.position.z = m.scale.z/2;
+            // Add to marker array
+            ma.markers.push_back(m);
             }
+          people_pub_->publish(ma);
         }
       }
-
-      // auto message = std_msgs::msg::String();
-      // message.data = "Hello, world! " + std::to_string(count_++);
-      // // RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
-      // publisher_->publish(message);
     }
 };
 
