@@ -12,6 +12,11 @@
 
     <!-- launch my pedestrian tracker node -->
     <node pkg="unitree_crowd_nav" exec="track_pedestrians">
+      <param name="dog_cam_location" value="$(var dog_cam_location)"/>
     </node>
+
+    <!-- launch dummy camera calibration info node -->
+    <include file="$(find-pkg-share unitree_camera)/launch/info_publisher.launch.py">
+    </include>
 
 </launch>
