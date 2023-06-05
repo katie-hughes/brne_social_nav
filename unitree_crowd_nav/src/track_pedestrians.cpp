@@ -124,15 +124,21 @@ class TrackPedestrians : public rclcpp::Node
       }
       // in here I should analyze the pixels that come in and try to match them up.
       if (stereo.initialized()){
-        for (int i = 0; i < static_cast<int>(left_pixels.pixels.size()); i++){
-          RCLCPP_INFO_STREAM(get_logger(), "Left center: ("<<left_pixels.pixels.at(i).x << ","<<left_pixels.pixels.at(i).y<<")");
-        }
-        for (int i = 0; i < static_cast<int>(right_pixels.pixels.size()); i++){
-          RCLCPP_INFO_STREAM(get_logger(), "Right center: ("<<right_pixels.pixels.at(i).x << ","<<right_pixels.pixels.at(i).y<<")");
-        }
         // match them up 
-        // compute disparity 
-        // calculate 3d points
+        // naive approach: Right now I only have one person walking around. 
+        // so I just check if there is one point in left and one point in right.
+        // if there is I just assume these two are from the same image!!
+        if ((left_pixels.pixels.size() == right_pixels.pixels.size()) 
+            && left_pixels.pixels.size() > 0){
+          RCLCPP_INFO_STREAM(get_logger(), "Same size");
+          for (int i = 0; i < static_cast<int>(left_pixels.pixels.size()); i++){
+            RCLCPP_INFO_STREAM(get_logger(), "L: ("<<left_pixels.pixels.at(i).x << ","<<left_pixels.pixels.at(i).y<<")"<<
+                                            " R: ("<<right_pixels.pixels.at(i).x << ","<<right_pixels.pixels.at(i).y<<")");
+            }
+            // compute disparity
+            // calculate 3d point
+            // publish
+        }
       }
 
       // auto message = std_msgs::msg::String();
