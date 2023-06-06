@@ -7,7 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /TF1/Frames1
-      Splitter Ratio: 0.5
+      Splitter Ratio: 0.7179487347602844
     Tree Height: 515
   - Class: rviz_common/Selection
     Name: Selection
@@ -314,19 +314,201 @@ Visualization Manager:
       Value: true
       Visual Enabled: true
     - Class: rviz_default_plugins/TF
-      Enabled: false
+      Enabled: true
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        FL_calf:
+          Value: false
+        FL_calf_rotor:
+          Value: false
+        FL_foot:
+          Value: false
+        FL_hip:
+          Value: false
+        FL_hip_rotor:
+          Value: false
+        FL_thigh:
+          Value: false
+        FL_thigh_rotor:
+          Value: false
+        FR_calf:
+          Value: false
+        FR_calf_rotor:
+          Value: false
+        FR_foot:
+          Value: false
+        FR_hip:
+          Value: false
+        FR_hip_rotor:
+          Value: false
+        FR_thigh:
+          Value: false
+        FR_thigh_rotor:
+          Value: false
+        RL_calf:
+          Value: false
+        RL_calf_rotor:
+          Value: false
+        RL_foot:
+          Value: false
+        RL_hip:
+          Value: false
+        RL_hip_rotor:
+          Value: false
+        RL_thigh:
+          Value: false
+        RL_thigh_rotor:
+          Value: false
+        RR_calf:
+          Value: false
+        RR_calf_rotor:
+          Value: false
+        RR_foot:
+          Value: false
+        RR_hip:
+          Value: false
+        RR_hip_rotor:
+          Value: false
+        RR_thigh:
+          Value: false
+        RR_thigh_rotor:
+          Value: false
+        base:
+          Value: false
+        base_footprint:
+          Value: false
+        base_laser:
+          Value: false
+        base_link:
+          Value: false
+        camera_chin:
+          Value: false
+        camera_face:
+          Value: true
+        camera_laserscan_link_left:
+          Value: false
+        camera_laserscan_link_right:
+          Value: false
+        camera_left:
+          Value: true
+        camera_optical_chin:
+          Value: false
+        camera_optical_face:
+          Value: false
+        camera_optical_left:
+          Value: false
+        camera_optical_rearDown:
+          Value: false
+        camera_optical_right:
+          Value: false
+        camera_rearDown:
+          Value: false
+        camera_right:
+          Value: true
+        height_measurement:
+          Value: false
+        imu_link:
+          Value: false
+        person1:
+          Value: true
+        trunk:
+          Value: false
+        ultraSound_face:
+          Value: false
+        ultraSound_left:
+          Value: false
+        ultraSound_right:
+          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
-      Show Names: false
+      Show Names: true
       Tree:
-        {}
+        base_link:
+          base:
+            trunk:
+              FL_hip:
+                FL_thigh:
+                  FL_calf:
+                    FL_foot:
+                      {}
+                  FL_calf_rotor:
+                    {}
+                FL_thigh_rotor:
+                  {}
+              FL_hip_rotor:
+                {}
+              FR_hip:
+                FR_thigh:
+                  FR_calf:
+                    FR_foot:
+                      {}
+                  FR_calf_rotor:
+                    {}
+                FR_thigh_rotor:
+                  {}
+              FR_hip_rotor:
+                {}
+              RL_hip:
+                RL_thigh:
+                  RL_calf:
+                    RL_foot:
+                      {}
+                  RL_calf_rotor:
+                    {}
+                RL_thigh_rotor:
+                  {}
+              RL_hip_rotor:
+                {}
+              RR_hip:
+                RR_thigh:
+                  RR_calf:
+                    RR_foot:
+                      {}
+                  RR_calf_rotor:
+                    {}
+                RR_thigh_rotor:
+                  {}
+              RR_hip_rotor:
+                {}
+              camera_chin:
+                camera_optical_chin:
+                  {}
+              camera_face:
+                camera_optical_face:
+                  {}
+                person1:
+                  {}
+              camera_left:
+                camera_laserscan_link_left:
+                  {}
+                camera_optical_left:
+                  {}
+              camera_rearDown:
+                camera_optical_rearDown:
+                  {}
+              camera_right:
+                camera_laserscan_link_right:
+                  {}
+                camera_optical_right:
+                  {}
+              imu_link:
+                {}
+              ultraSound_face:
+                {}
+              ultraSound_left:
+                {}
+              ultraSound_right:
+                {}
+          base_laser:
+            {}
+          height_measurement:
+            base_footprint:
+              {}
       Update Interval: 0
-      Value: false
+      Value: true
     - Class: rviz_default_plugins/MarkerArray
       Enabled: true
       Name: MarkerArray
@@ -385,7 +567,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 4.9417195320129395
+      Distance: 4.8564348220825195
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -400,10 +582,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.4803978204727173
+      Pitch: 0.355398029088974
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.065399646759033
+      Yaw: 2.590386152267456
     Saved: ~
 Window Geometry:
   Displays:
@@ -421,5 +603,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 663
+  X: 720
   Y: 0

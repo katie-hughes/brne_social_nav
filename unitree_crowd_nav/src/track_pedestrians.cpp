@@ -12,6 +12,8 @@
 #include <opencv2/highgui.hpp>
 #include "visualization_msgs/msg/marker.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
+#include "tf2_ros/transform_broadcaster.h"
+#include "tf2/LinearMath/Quaternion.h"
 
 using namespace std::chrono_literals;
 
@@ -60,6 +62,9 @@ class TrackPedestrians : public rclcpp::Node
 
       timer_ = create_wall_timer(
       rate, std::bind(&TrackPedestrians::timer_callback, this));
+
+      tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+
     }
 
   private:
@@ -73,6 +78,8 @@ class TrackPedestrians : public rclcpp::Node
 
     rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr info_left_sub_;
     rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr info_right_sub_;
+
+    std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
     size_t count_;
 
@@ -121,9 +128,8 @@ class TrackPedestrians : public rclcpp::Node
     {
       // check if camera has been initialized
       if (!stereo.initialized() && (info_left_received && info_right_received)){
-        RCLCPP_INFO_STREAM(get_logger(), "Initialize camera stupid");
         const auto success = stereo.fromCameraInfo(info_left, info_right);
-        RCLCPP_INFO_STREAM(get_logger(), "Success???"<<success);
+        RCLCPP_INFO_STREAM(get_logger(), "Initialized camera: Success? "<<success);
       }
       // in here I should analyze the pixels that come in and try to match them up.
       if (stereo.initialized()){
@@ -133,14 +139,13 @@ class TrackPedestrians : public rclcpp::Node
         // if there is I just assume these two are from the same image!!
         if ((left_pixels.pixels.size() == right_pixels.pixels.size()) 
             && left_pixels.pixels.size() > 0){
-          RCLCPP_INFO_STREAM(get_logger(), "Same size");
-          visualization_msgs::msg::MarkerArray ma;
+          // visualization_msgs::msg::MarkerArray ma;
           for (int i = 0; i < static_cast<int>(left_pixels.pixels.size()); i++){
             RCLCPP_INFO_STREAM(get_logger(), "L: ("<<left_pixels.pixels.at(i).x << ","<<left_pixels.pixels.at(i).y<<")"<<
                                             " R: ("<<right_pixels.pixels.at(i).x << ","<<right_pixels.pixels.at(i).y<<")");
-            // compute disparity: difference in x
+            // compute disparity: difference in x (left - right)
             const auto disparity = left_pixels.pixels.at(i).x - right_pixels.pixels.at(i).x;
-            // RCLCPP_INFO_STREAM(get_logger(), "Disparity: " << disparity);
+            RCLCPP_INFO_STREAM(get_logger(), "Disparity: " << disparity);
             // calculate 3d point
             // use this function: 
             // projectDisparityTo3d (const cv::Point2d &left_uv_rect, float disparity, cv::Point3d &xyz) const
@@ -149,30 +154,43 @@ class TrackPedestrians : public rclcpp::Node
             cv::Point3d xyz;
             stereo.projectDisparityTo3d(left_uv_rect, disparity, xyz);
             // print out person location
-            RCLCPP_INFO_STREAM(get_logger(), "xyz (" << xyz.x << ", "<< xyz.y << ", "<<xyz.z<<")");
-            // publish markers
-            visualization_msgs::msg::Marker m;
-            m.header.stamp = this->get_clock()->now();
-            m.header.frame_id = "camera_face";
-            m.id = i;         // so each has a unique ID
-            m.type = 3;       // cylinder
-            // Set color as yellow
-            m.color.r = 1.0;
-            m.color.g = 1.0;
-            m.color.b = 0.0;
-            m.color.a = 1.0;
-            // Set Radius
-            m.scale.x = 2 * 0.4;
-            m.scale.y = 2 * 0.4;
-            m.scale.z = 1.0;
-            // set position
-            m.pose.position.x = xyz.x;
-            m.pose.position.y = xyz.y;
-            m.pose.position.z = xyz.z;
-            // Add to marker array
-            ma.markers.push_back(m);
+            RCLCPP_INFO_STREAM(get_logger(), "xyz: (" << xyz.x << ", "<< xyz.y << ", "<<xyz.z<<")");
+
+            geometry_msgs::msg::TransformStamped T_person;
+            T_person.header.frame_id = "camera_face";
+            T_person.child_frame_id = "person1";
+            T_person.header.stamp = this->get_clock()->now();
+            // on the unitree, x faces forward from camera. Y to the right. Z down. 
+            // (tf: x: red, y: green, z: blue)
+            // I think this gives to me with z out from camera. 
+            T_person.transform.translation.x = xyz.z;
+            T_person.transform.translation.y = xyz.x;
+            T_person.transform.translation.z = xyz.y;
+            tf_broadcaster_->sendTransform(T_person);
+
+            // // publish markers
+            // visualization_msgs::msg::Marker m;
+            // m.header.stamp = this->get_clock()->now();
+            // m.header.frame_id = "camera_face";
+            // m.id = i;         // so each has a unique ID
+            // m.type = 3;       // cylinder
+            // // Set color as yellow
+            // m.color.r = 1.0;
+            // m.color.g = 1.0;
+            // m.color.b = 0.0;
+            // m.color.a = 1.0;
+            // // Set Radius
+            // m.scale.x = 2 * 0.4;
+            // m.scale.y = 2 * 0.4;
+            // m.scale.z = 1.0;
+            // // set position
+            // m.pose.position.x = 0; // xyz.x;
+            // m.pose.position.y = 0; // xyz.y;
+            // m.pose.position.z = xyz.z;
+            // // Add to marker array
+            // ma.markers.push_back(m);
             }
-          people_pub_->publish(ma);
+          // people_pub_->publish(ma);
         }
       }
     }

@@ -2,6 +2,8 @@
 
     <arg name="dog_cam_location" default="head/front" description="Options: head/front, body/left, body/right"/>
 
+    <arg name="connect_to_dog" default="True" description="Options: False, True"/>
+
     <!-- Launch YOLO object detection -->
     <include file="$(find-pkg-share object_detection)/object_detection.launch.xml">
       <arg name="use_realsense" value="False" />
@@ -20,11 +22,11 @@
     </include>
 
     <!-- load go1 model -->
-    <include file="$(find-pkg-share unitree_legged_real)/launch/high.launch.py">
+    <include file="$(find-pkg-share unitree_legged_real)/launch/high.launch.py" if="$(eval '\'$(var connect_to_dog)\' == \'True\'')">
       <arg name="use_rviz" value="false" />
     </include>
 
     <!-- launch rviz -->
-    <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share unitree_crowd_nav)/config/crowdnav.rviz"/>
+    <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share unitree_crowd_nav)/config/crowdnav.rviz" if="$(eval '\'$(var connect_to_dog)\' == \'True\'')"/>
 
 </launch>
