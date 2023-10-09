@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>unitree_crowd_nav</name>
+  <name>pedestrian_tracking</name>
   <version>0.0.0</version>
-  <description>A package for performing crowd navigation with a Unitree Go1 robot</description>
+  <description>Track pedestrians for crowd navigation</description>
   <maintainer email="katiereeshughes@gmail.com">Katie Hughes</maintainer>
   <license>MIT</license>
 
@@ -25,7 +25,7 @@
   <depend>tf2_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>image_geometry</depend>
-  <depend>unitree_crowd_nav_interfaces</depend>
+  <depend>crowd_nav_interfaces</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

@@ -1,0 +1,15 @@
+<launch>
+
+    <!-- launch control node -->
+    <node pkg="crowd_nav" exec="brne">
+    </node>
+
+    <!-- load go1 model
+    <include file="$(find-pkg-share unitree_legged_real)/launch/high.launch.py" if="$(eval '\'$(var connect_to_dog)\' == \'True\'')">
+      <arg name="use_rviz" value="false" />
+    </include> -->
+
+    <!-- launch rviz -->
+    <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share crowd_nav)/config/crowdnav.rviz"/>
+
+</launch>

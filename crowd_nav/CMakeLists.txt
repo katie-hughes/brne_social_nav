@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(unitree_crowd_nav)
+project(crowd_nav)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -21,7 +21,7 @@ find_package(nav_msgs REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(image_geometry REQUIRED)
-find_package(unitree_crowd_nav_interfaces REQUIRED)
+find_package(crowd_nav_interfaces REQUIRED)
 
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED)
@@ -31,36 +31,10 @@ include_directories(${PCL_INCLUDE_DIRS}
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-add_executable(filter_point_cloud src/filter_point_cloud.cpp)
 
-target_link_libraries(filter_point_cloud
-  # ${Boost_SYSTEM_LIBRARY}
-  ${PCL_LIBRARIES}
-)
+add_executable(brne src/brne.cpp)
 
-ament_target_dependencies(filter_point_cloud
-  rclcpp
-  std_msgs
-  std_srvs
-  tf2
-  tf2_ros
-  geometry_msgs
-  visualization_msgs
-  nav_msgs
-  sensor_msgs
-  PCL
-  pcl_conversions)
-
-
-target_include_directories(filter_point_cloud PUBLIC
-$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-$<INSTALL_INTERFACE:include>)
-target_compile_features(filter_point_cloud PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-
-
-add_executable(track_pedestrians src/track_pedestrians.cpp)
-
-ament_target_dependencies(track_pedestrians
+ament_target_dependencies(brne
   rclcpp
   std_msgs
   std_srvs
@@ -71,16 +45,15 @@ ament_target_dependencies(track_pedestrians
   nav_msgs
   sensor_msgs
   image_geometry
-  unitree_crowd_nav_interfaces)
+  crowd_nav_interfaces)
 
-target_link_libraries(track_pedestrians ${OpenCV_LIBRARIES})
-target_include_directories(track_pedestrians PUBLIC
+target_include_directories(brne PUBLIC
 $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 $<INSTALL_INTERFACE:include>)
-target_compile_features(track_pedestrians PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+target_compile_features(brne PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
 
-install(TARGETS filter_point_cloud track_pedestrians
+install(TARGETS brne
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY

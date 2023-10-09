@@ -9,4 +9,4 @@ To set up all necessary packages:
 
 `$ git clone git@github.com:katie-hughes/unitree_crowd_nav.git`
 
-`$ vcs import < unitree_crowd_nav/crowdnav.repos`
+`$ vcs import < crowd_nav/crowdnav.repos`

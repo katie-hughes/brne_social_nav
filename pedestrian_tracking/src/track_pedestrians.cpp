@@ -7,8 +7,8 @@
 #include "std_msgs/msg/string.hpp"
 #include "image_geometry/stereo_camera_model.h"
 #include "sensor_msgs/msg/camera_info.hpp"
-#include "unitree_crowd_nav_interfaces/msg/pixel.hpp"
-#include "unitree_crowd_nav_interfaces/msg/pixel_array.hpp"
+#include "crowd_nav_interfaces/msg/pixel.hpp"
+#include "crowd_nav_interfaces/msg/pixel_array.hpp"
 #include <opencv2/highgui.hpp>
 #include "visualization_msgs/msg/marker.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
@@ -50,9 +50,9 @@ class TrackPedestrians : public rclcpp::Node
       RCLCPP_INFO_STREAM(get_logger(), "Left topic: " << left_topic);
       RCLCPP_INFO_STREAM(get_logger(), "Right topic: " << right_topic);
 
-      pixel_left_sub_ = create_subscription<unitree_crowd_nav_interfaces::msg::PixelArray>(
+      pixel_left_sub_ = create_subscription<crowd_nav_interfaces::msg::PixelArray>(
         left_topic, 10, std::bind(&TrackPedestrians::pixel_left_cb, this, std::placeholders::_1));
-      pixel_right_sub_ = create_subscription<unitree_crowd_nav_interfaces::msg::PixelArray>(
+      pixel_right_sub_ = create_subscription<crowd_nav_interfaces::msg::PixelArray>(
         right_topic, 10, std::bind(&TrackPedestrians::pixel_right_cb, this, std::placeholders::_1));
 
       info_left_sub_ = create_subscription<sensor_msgs::msg::CameraInfo>(
@@ -73,8 +73,8 @@ class TrackPedestrians : public rclcpp::Node
 
     rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr people_pub_;
 
-    rclcpp::Subscription<unitree_crowd_nav_interfaces::msg::PixelArray>::SharedPtr pixel_left_sub_;
-    rclcpp::Subscription<unitree_crowd_nav_interfaces::msg::PixelArray>::SharedPtr pixel_right_sub_;
+    rclcpp::Subscription<crowd_nav_interfaces::msg::PixelArray>::SharedPtr pixel_left_sub_;
+    rclcpp::Subscription<crowd_nav_interfaces::msg::PixelArray>::SharedPtr pixel_right_sub_;
 
     rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr info_left_sub_;
     rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr info_right_sub_;
@@ -90,11 +90,11 @@ class TrackPedestrians : public rclcpp::Node
     bool info_left_received = false;
     bool info_right_received = false;
 
-    unitree_crowd_nav_interfaces::msg::PixelArray left_pixels, right_pixels;
+    crowd_nav_interfaces::msg::PixelArray left_pixels, right_pixels;
 
     image_geometry::StereoCameraModel stereo;
 
-    void pixel_left_cb(const unitree_crowd_nav_interfaces::msg::PixelArray & msg)
+    void pixel_left_cb(const crowd_nav_interfaces::msg::PixelArray & msg)
     {
       left_pixels = msg;
       // for (int i = 0; i < static_cast<int>(msg.pixels.size()); i++){
@@ -102,7 +102,7 @@ class TrackPedestrians : public rclcpp::Node
       // }
     }
 
-    void pixel_right_cb(const unitree_crowd_nav_interfaces::msg::PixelArray & msg)
+    void pixel_right_cb(const crowd_nav_interfaces::msg::PixelArray & msg)
     {
       right_pixels = msg;
       // for (int i = 0; i < static_cast<int>(msg.pixels.size()); i++){
@@ -126,6 +126,7 @@ class TrackPedestrians : public rclcpp::Node
 
     void timer_callback()
     {
+      RCLCPP_INFO_STREAM(get_logger(), "Track Ped");
       // check if camera has been initialized
       if (!stereo.initialized() && (info_left_received && info_right_received)){
         const auto success = stereo.fromCameraInfo(info_left, info_right);
@@ -167,30 +168,7 @@ class TrackPedestrians : public rclcpp::Node
             T_person.transform.translation.y = xyz.x;
             T_person.transform.translation.z = xyz.y;
             tf_broadcaster_->sendTransform(T_person);
-
-            // // publish markers
-            // visualization_msgs::msg::Marker m;
-            // m.header.stamp = this->get_clock()->now();
-            // m.header.frame_id = "camera_face";
-            // m.id = i;         // so each has a unique ID
-            // m.type = 3;       // cylinder
-            // // Set color as yellow
-            // m.color.r = 1.0;
-            // m.color.g = 1.0;
-            // m.color.b = 0.0;
-            // m.color.a = 1.0;
-            // // Set Radius
-            // m.scale.x = 2 * 0.4;
-            // m.scale.y = 2 * 0.4;
-            // m.scale.z = 1.0;
-            // // set position
-            // m.pose.position.x = 0; // xyz.x;
-            // m.pose.position.y = 0; // xyz.y;
-            // m.pose.position.z = xyz.z;
-            // // Add to marker array
-            // ma.markers.push_back(m);
             }
-          // people_pub_->publish(ma);
         }
       }
     }

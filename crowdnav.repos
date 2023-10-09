@@ -19,7 +19,7 @@ repositories:
     type: git
     url: git@github.com:ngmor/unitree_camera.git
     version: main
-  unitree_crowd_nav:
+  crowd_nav:
     type: git
     url: git@github.com:katie-hughes/unitree_crowd_nav.git
     version: main
