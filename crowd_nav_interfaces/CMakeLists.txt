@@ -30,6 +30,7 @@ rosidl_generate_interfaces(  ${PROJECT_NAME}
   "msg/PixelArray.msg"
   "msg/Pedestrian.msg"
   "msg/PedestrianArray.msg"
+  "msg/TwistArray.msg"
   DEPENDENCIES std_msgs geometry_msgs
   )
 

@@ -47,13 +47,23 @@ ament_target_dependencies(brne
   image_geometry
   crowd_nav_interfaces)
 
-target_include_directories(brne PUBLIC
-$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-$<INSTALL_INTERFACE:include>)
-target_compile_features(brne PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
+add_executable(controller src/controller.cpp)
 
-install(TARGETS brne
+ament_target_dependencies(controller
+  rclcpp
+  std_msgs
+  std_srvs
+  tf2
+  tf2_ros
+  geometry_msgs
+  visualization_msgs
+  nav_msgs
+  sensor_msgs
+  image_geometry
+  crowd_nav_interfaces)
+
+install(TARGETS brne controller
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY
