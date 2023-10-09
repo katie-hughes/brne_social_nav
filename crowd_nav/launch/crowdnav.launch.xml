@@ -1,7 +1,11 @@
 <launch>
 
-    <!-- launch control node -->
+    <!-- launch algorithm node -->
     <node pkg="crowd_nav" exec="brne">
+    </node>
+
+    <!-- launch control node -->
+    <node pkg="crowd_nav" exec="controller">
     </node>
 
     <!-- load go1 model
@@ -10,6 +14,6 @@
     </include> -->
 
     <!-- launch rviz -->
-    <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share crowd_nav)/config/crowdnav.rviz"/>
+    <!-- <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share crowd_nav)/config/crowdnav.rviz"/> -->
 
 </launch>

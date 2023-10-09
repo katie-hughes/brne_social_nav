@@ -53,7 +53,7 @@ class Controller : public rclcpp::Node
 
     void cmd_buf_cb(const crowd_nav_interfaces::msg::TwistArray & msg)
     {
-      RCLCPP_INFO_STREAM(get_logger(), "Received buffer.");
+      RCLCPP_INFO_STREAM(get_logger(), "Received buffer. Size="<<msg.twists.size());
     }
 
     void timer_callback()

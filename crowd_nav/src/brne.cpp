@@ -7,8 +7,8 @@
 #include "std_msgs/msg/string.hpp"
 #include "image_geometry/stereo_camera_model.h"
 #include "sensor_msgs/msg/camera_info.hpp"
-#include "crowd_nav_interfaces/msg/pixel.hpp"
-#include "crowd_nav_interfaces/msg/pixel_array.hpp"
+#include "crowd_nav_interfaces/msg/pedestrian_array.hpp"
+#include "crowd_nav_interfaces/msg/twist_array.hpp"
 #include <opencv2/highgui.hpp>
 #include "visualization_msgs/msg/marker.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
@@ -33,8 +33,10 @@ class PathPlan : public rclcpp::Node
       RCLCPP_INFO_STREAM(get_logger(), "Rate is " << ((int)(1000. / rate_hz)) << "ms");
       std::chrono::milliseconds rate = (std::chrono::milliseconds) ((int)(1000. / rate_hz));
 
-      people_sub_ = create_subscription<visualization_msgs::msg::MarkerArray>(
+      pedestrian_sub_ = create_subscription<crowd_nav_interfaces::msg::PedestrianArray>(
         "pedestrians", 10, std::bind(&PathPlan::pedestrians_cb, this, std::placeholders::_1));
+
+      cmd_buf_pub_ = create_publisher<crowd_nav_interfaces::msg::TwistArray>("cmd_buf", 10);
 
       timer_ = create_wall_timer(
       rate, std::bind(&PathPlan::timer_callback, this));
@@ -45,16 +47,20 @@ class PathPlan : public rclcpp::Node
     double rate_hz;
     rclcpp::TimerBase::SharedPtr timer_;
 
-    rclcpp::Subscription<visualization_msgs::msg::MarkerArray>::SharedPtr people_sub_;
+    rclcpp::Subscription<crowd_nav_interfaces::msg::PedestrianArray>::SharedPtr pedestrian_sub_;
 
-    void pedestrians_cb(const visualization_msgs::msg::MarkerArray & msg)
+    rclcpp::Publisher<crowd_nav_interfaces::msg::TwistArray>::SharedPtr cmd_buf_pub_;
+
+    void pedestrians_cb(const crowd_nav_interfaces::msg::PedestrianArray & msg)
     {
       RCLCPP_INFO_STREAM(get_logger(), "Received pedestrians");
     }
 
     void timer_callback()
     {
-      RCLCPP_INFO_STREAM(get_logger(), "Timer tick");
+      // RCLCPP_INFO_STREAM(get_logger(), "Timer tick");
+      crowd_nav_interfaces::msg::TwistArray buf;
+      cmd_buf_pub_->publish(buf);
     }
 };
 
