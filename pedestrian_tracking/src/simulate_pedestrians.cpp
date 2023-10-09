@@ -7,8 +7,8 @@
 #include "std_msgs/msg/string.hpp"
 #include "image_geometry/stereo_camera_model.h"
 #include "sensor_msgs/msg/camera_info.hpp"
-#include "crowd_nav_interfaces/msg/pixel.hpp"
-#include "crowd_nav_interfaces/msg/pixel_array.hpp"
+#include "crowd_nav_interfaces/msg/pedestrian.hpp"
+#include "crowd_nav_interfaces/msg/pedestrian_array.hpp"
 #include <opencv2/highgui.hpp>
 #include "visualization_msgs/msg/marker.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
@@ -32,7 +32,7 @@ class SimulatePedestrians : public rclcpp::Node
       RCLCPP_INFO_STREAM(get_logger(), "Rate is " << ((int)(1000. / rate_hz)) << "ms");
       std::chrono::milliseconds rate = (std::chrono::milliseconds) ((int)(1000. / rate_hz));
 
-      people_pub_ = create_publisher<visualization_msgs::msg::MarkerArray>("pedestrians", 10);
+      pedestrian_pub_ = create_publisher<crowd_nav_interfaces::msg::PedestrianArray>("pedestrians", 10);
 
       timer_ = create_wall_timer(
       rate, std::bind(&SimulatePedestrians::timer_callback, this));
@@ -42,11 +42,19 @@ class SimulatePedestrians : public rclcpp::Node
     double rate_hz;
     rclcpp::TimerBase::SharedPtr timer_;
 
-    rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr people_pub_;
+    rclcpp::Publisher<crowd_nav_interfaces::msg::PedestrianArray>::SharedPtr pedestrian_pub_;
 
     void timer_callback()
     {
-      RCLCPP_INFO_STREAM(get_logger(), "Track Ped");
+      crowd_nav_interfaces::msg::PedestrianArray peds;
+      const auto current_time = this->get_clock()->now();
+      // create a fake pedestrian with an id of 1
+      crowd_nav_interfaces::msg::Pedestrian ped1;
+      ped1.header.stamp = current_time;
+      ped1.id = 1;
+      ped1.pose.position.y = 1.0;
+      peds.pedestrians.push_back(ped1);
+      pedestrian_pub_->publish(peds);
     }
 };
 

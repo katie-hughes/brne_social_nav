@@ -58,7 +58,6 @@ class Controller : public rclcpp::Node
 
     void timer_callback()
     {
-      // RCLCPP_INFO_STREAM(get_logger(), "Timer tick");
       geometry_msgs::msg::Twist vel;
       cmd_vel_pub_->publish(vel);
     }

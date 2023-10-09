@@ -24,42 +24,8 @@ find_package(image_geometry REQUIRED)
 find_package(crowd_nav_interfaces REQUIRED)
 
 find_package(OpenCV REQUIRED)
-find_package(PCL REQUIRED)
-find_package(pcl_conversions REQUIRED)
-include_directories(${PCL_INCLUDE_DIRS}
-                    ${OpenCV_INCLUDE_DIRS})
-link_directories(${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
-
-add_executable(filter_point_cloud src/filter_point_cloud.cpp)
-
-target_link_libraries(filter_point_cloud
-  # ${Boost_SYSTEM_LIBRARY}
-  ${PCL_LIBRARIES}
-)
-
-ament_target_dependencies(filter_point_cloud
-  rclcpp
-  std_msgs
-  std_srvs
-  tf2
-  tf2_ros
-  geometry_msgs
-  visualization_msgs
-  nav_msgs
-  sensor_msgs
-  PCL
-  pcl_conversions)
-
-
-target_include_directories(filter_point_cloud PUBLIC
-$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-$<INSTALL_INTERFACE:include>)
-target_compile_features(filter_point_cloud PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-
 
 add_executable(track_pedestrians src/track_pedestrians.cpp)
-
 ament_target_dependencies(track_pedestrians
   rclcpp
   std_msgs
@@ -72,15 +38,24 @@ ament_target_dependencies(track_pedestrians
   sensor_msgs
   image_geometry
   crowd_nav_interfaces)
-
 target_link_libraries(track_pedestrians ${OpenCV_LIBRARIES})
-target_include_directories(track_pedestrians PUBLIC
-$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-$<INSTALL_INTERFACE:include>)
-target_compile_features(track_pedestrians PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+
+add_executable(simulate_pedestrians src/simulate_pedestrians.cpp)
+ament_target_dependencies(simulate_pedestrians
+  rclcpp
+  std_msgs
+  std_srvs
+  tf2
+  tf2_ros
+  geometry_msgs
+  visualization_msgs
+  nav_msgs
+  sensor_msgs
+  image_geometry
+  crowd_nav_interfaces)
 
 
-install(TARGETS filter_point_cloud track_pedestrians
+install(TARGETS track_pedestrians simulate_pedestrians
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY

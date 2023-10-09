@@ -4,8 +4,10 @@
 
     <arg name="launch_yolo" default="False" description="Options: False, True"/>
 
+    <arg name="simulate" default="True" description="Options: False, True"/>
+
     <!-- Launch YOLO object detection -->
-    <include file="$(find-pkg-share object_detection)/object_detection.launch.xml"  if="$(eval '\'$(launch_yolo)\' == \'True\'')">
+    <include file="$(find-pkg-share object_detection)/object_detection.launch.xml"  if="$(eval '\'$(var launch_yolo)\' == \'True\'')">
       <arg name="use_realsense" value="False" />
       <arg name="use_YOLOv7" value="True" />
       <arg name="use_dog_cam" value="True" />
@@ -13,8 +15,12 @@
     </include>
 
     <!-- launch my pedestrian tracker node -->
-    <node pkg="pedestrian_tracking" exec="track_pedestrians">
+    <node pkg="pedestrian_tracking" exec="track_pedestrians" if="$(eval '\'$(var simulate)\' == \'False\'')">
       <param name="dog_cam_location" value="$(var dog_cam_location)"/>
+    </node>
+
+    <!-- launch simulated pedestrian node -->
+    <node pkg="pedestrian_tracking" exec="simulate_pedestrians" if="$(eval '\'$(var simulate)\' == \'True\'')">
     </node>
 
 </launch>
