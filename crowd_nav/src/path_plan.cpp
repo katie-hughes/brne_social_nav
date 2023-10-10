@@ -53,7 +53,7 @@ class PathPlan : public rclcpp::Node
 
     void pedestrians_cb(const crowd_nav_interfaces::msg::PedestrianArray & msg)
     {
-      RCLCPP_INFO_STREAM(get_logger(), "Received pedestrians");
+      RCLCPP_INFO_STREAM(get_logger(), "Received pedestrians, number="<<msg.pedestrians.size());
     }
 
     void timer_callback()

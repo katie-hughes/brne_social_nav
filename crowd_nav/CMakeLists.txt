@@ -32,9 +32,9 @@ link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
 
-add_executable(brne src/brne.cpp)
+add_executable(path_plan src/path_plan.cpp)
 
-ament_target_dependencies(brne
+ament_target_dependencies(path_plan
   rclcpp
   std_msgs
   std_srvs
@@ -63,7 +63,7 @@ ament_target_dependencies(controller
   image_geometry
   crowd_nav_interfaces)
 
-install(TARGETS brne controller
+install(TARGETS path_plan controller
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY

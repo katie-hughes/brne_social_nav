@@ -1,7 +1,7 @@
 <launch>
 
     <!-- launch algorithm node -->
-    <node pkg="crowd_nav" exec="brne">
+    <node pkg="crowd_nav" exec="path_plan">
     </node>
 
     <!-- launch control node -->
