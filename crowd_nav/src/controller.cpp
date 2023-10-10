@@ -9,7 +9,6 @@
 #include "sensor_msgs/msg/camera_info.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "crowd_nav_interfaces/msg/twist_array.hpp"
-#include <opencv2/highgui.hpp>
 #include "visualization_msgs/msg/marker.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
 #include "tf2_ros/transform_broadcaster.h"

@@ -21,15 +21,9 @@ find_package(nav_msgs REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(image_geometry REQUIRED)
-find_package(crowd_nav_interfaces REQUIRED)
 
-find_package(OpenCV REQUIRED)
-find_package(PCL REQUIRED)
-find_package(pcl_conversions REQUIRED)
-include_directories(${PCL_INCLUDE_DIRS}
-                    ${OpenCV_INCLUDE_DIRS})
-link_directories(${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
+find_package(crowd_nav_interfaces REQUIRED)
+find_package(brnelib REQUIRED)
 
 
 add_executable(path_plan src/path_plan.cpp)
@@ -47,6 +41,7 @@ ament_target_dependencies(path_plan
   image_geometry
   crowd_nav_interfaces)
 
+target_link_libraries(path_plan brnelib::brnelib "${cpp_typesupport_target}")
 
 add_executable(controller src/controller.cpp)
 
