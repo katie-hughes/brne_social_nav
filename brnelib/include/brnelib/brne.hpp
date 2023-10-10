@@ -8,45 +8,39 @@
 
 namespace brnelib
 {
-  /// @brief Specification of polar coordinates (what lidar uses)
-  struct Polar
-  {
-    /// @brief Range in m
-    double r = 0.0;
-    /// @brief Bearing in radians
-    double theta = 0.0;
-  };
+  // Return the kernel matrix for parameters a1 and a2
+  // feel confident about these types
+  arma::mat get_kernel_mat(arma::vec t1, arma::vec t2, double a1, double a2);
 
-  /// @brief Circle representation in the 2D plane
-  struct Circle
-  {
-    /// @brief X coordinate of origin (m)
-    double x = 0.0;
-    /// @brief Y coordinate of origin (m)
-    double y = 0.0;
-    /// @brief Radius of circle (m)
-    double r = 0.0;
-  };
+  // multivariate normal distribution sampling
+  // do not feel confident for return type
+  arma::vec mvn_sample_normal(int nsamples, int tsteps, arma::mat Lmat);
 
-  /// \brief output a Polar coordinate as "Theta: x r: y"
-  /// os - stream to output to
-  /// p - the coordinates to print
-  std::ostream & operator<<(std::ostream & os, const Polar & p);
+  // no idea of types
+  double get_min_dist(arma::vec xtraj, arma::vec ytraj);
 
-  /// \brief output a Circle as Center: (x,y) Radius: R"
-  /// os - stream to output to
-  /// c - the coordinates to print
-  std::ostream & operator<<(std::ostream & os, const Circle & c);
+  // cholesky: already exists
 
-  /// @brief Obtain the euclidean distance between two Polar coordinates
-  /// @param p1 polar coordinate 1
-  /// @param p2 polar coordinate 2
-  /// @return distance between the two points
-  double polarDistance(const Polar p1, const Polar p2);
+  // feel ok about types
+  arma::mat get_Lmat(arma::vec train_ts, arma::vec test_ts, 
+                     double train_noise, double a1, double a2);
 
-  /// @brief simple check if point is at (0,0)
-  /// @param p point
-  /// @return true if the point is at the origin, false otherwise
-  bool atOrigin(const Polar p);
+  // feel ok about types
+  arma::mat costs_nb(arma::vec trajx, arma::vec trajy, int n_agents, int n_points, int tsteps, 
+                     double a1, double a2, double a3);
 
+  // 
+  arma::vec weights_update(arma::mat all_costs, arma::vec old_weights, arma::vec index_table, 
+                           arma::mat all_pt_index, int num_agents, int num_points);
+
+  // types good
+  arma::mat get_index_table(int num_agents);
+
+  // no idea of types
+  arma::vec coll_beck(arma::vec trajy, double ymin, double ymax);
+
+  // very unsure of types
+  arma::vec brne_nav(arma::vec xtraj_samples, arma::vec ytraj_samples, 
+                     int n_agents, int tsteps, int n_points, double a1, double a2, double a3, 
+                     double ymin, double ymax);
 }
