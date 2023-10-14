@@ -54,8 +54,22 @@ ament_target_dependencies(simulate_pedestrians
   image_geometry
   crowd_nav_interfaces)
 
+add_executable(show_pedestrians src/show_pedestrians.cpp)
+  ament_target_dependencies(show_pedestrians
+  rclcpp
+  std_msgs
+  std_srvs
+  tf2
+  tf2_ros
+  geometry_msgs
+  visualization_msgs
+  nav_msgs
+  sensor_msgs
+  image_geometry
+  crowd_nav_interfaces)
 
-install(TARGETS track_pedestrians simulate_pedestrians
+
+install(TARGETS track_pedestrians simulate_pedestrians show_pedestrians
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY

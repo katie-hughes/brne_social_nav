@@ -87,6 +87,18 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /odom
       Value: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /ped_markers
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -148,10 +160,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.3903982639312744
+      Pitch: 0.6953983902931213
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.9503977298736572
+      Yaw: 1.0604002475738525
     Saved: ~
 Window Geometry:
   Displays:
