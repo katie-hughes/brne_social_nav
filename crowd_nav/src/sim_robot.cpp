@@ -66,7 +66,7 @@ class SimRobot : public rclcpp::Node
       if (!first_time){
         const auto dt = (current_time - last_time).nanoseconds();
         const auto vx = msg.linear.x;
-        const auto vy = msg.linear.y;
+        // const auto vy = msg.linear.y;
         const auto vw = msg.angular.z;
         // assume diff drive so no vy
         theta += vw*dt*1e-9;
