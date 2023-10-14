@@ -1,0 +1,7 @@
+<launch>
+
+    <!-- launch algorithm node -->
+    <node pkg="brne_py" exec="brne_nav">
+    </node>
+
+</launch>

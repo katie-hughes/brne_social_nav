@@ -8,6 +8,8 @@
     <node pkg="crowd_nav" exec="controller">
     </node>
 
+    <!-- launch brne python implementation -->
+
     <!-- load go1 model
     <include file="$(find-pkg-share unitree_legged_real)/launch/high.launch.py" if="$(eval '\'$(var connect_to_dog)\' == \'True\'')">
       <arg name="use_rviz" value="false" />

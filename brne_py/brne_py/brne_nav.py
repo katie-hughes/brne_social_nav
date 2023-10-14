@@ -167,10 +167,10 @@ class BrneNavRos(Node):
 
         # we go through each perceived pedestrian and save the information
         for ped, stamp in self.ped_msg_buffer.values():
-            dist2ped = np.sqrt((self.robot_pose[0]-ped.pose.x)**2 + (self.robot_pose[1]-ped.pose.y)**2)
+            dist2ped = np.sqrt((self.robot_pose[0]-ped.pose.position.x)**2 + (self.robot_pose[1]-ped.pose.position.y)**2)
             if dist2ped < self.brne_activate_threshold:  # only consider pedestrians within the activate threshold
                 ped_info = np.array([
-                    ped.pose.x, ped.pose.y, ped.velocity.x, ped.velocity.y
+                    ped.pose.position.x, ped.pose.position.y, ped.velocity.linear.x, ped.velocity.linear.y
                 ])
                 ped_info_list.append(ped_info)
 
@@ -435,10 +435,7 @@ class BrneNavRos(Node):
         points and convert the way points to optimal control commands, these commands will update the control buffer
         """
 
-        stamp = Time.from_msg(msg.header.stamp)
-
         # there should be an initialization flag, but in practice it does not really matter
-        num_peds = len(msg.pedestrians)
         self.prev_ped_array = self.curr_ped_array.copy()
         # self.curr_ped_array = np.zeros((num_peds, 2))
         self.curr_ped_array = []
@@ -451,10 +448,9 @@ class BrneNavRos(Node):
             self.ped_msg_buffer[key][0].velocity.x = 0.0
             self.ped_msg_buffer[key][0].velocity.y = 0.0
 
-        for i, ped in enumerate(msg.pedestrians):
-            ped_pose = ped.pedestrian.pose
-            # ped_vel = ped.pedestrian.velocity  # no longer in use
-
+        for ped in msg.pedestrians:
+            stamp = Time.from_msg(ped.header.stamp)
+            ped_pose = ped.pose.position
             if np.isnan(ped_pose.x) or np.isnan(ped_pose.y):
                 self.get_logger().info(f'Detect NAN on {ped.pedestrian.identifier} !!!')
                 continue  # skip the pedestrian is reading is nan
@@ -474,14 +470,11 @@ class BrneNavRos(Node):
                 if self.staircase_truncation:
                     f2f_vel = self.staircase_velocity(f2f_vel)
 
-            ped.pedestrian.velocity.x = f2f_vel[0]
-            ped.pedestrian.velocity.y = f2f_vel[1]
+            ped.velocity.linear.x = f2f_vel[0]
+            ped.velocity.linear.y = f2f_vel[1]
 
             # self.ped_msg_buffer.append(new_ped_msg)
-            self.ped_msg_buffer[ped.pedestrian.identifier] = ped.pedestrian, stamp
-
-            assert(ped.pedestrian.velocity.x == f2f_vel[0])
-            assert(ped.pedestrian.velocity.y == f2f_vel[1])
+            self.ped_msg_buffer[ped.id] = ped, stamp
 
         self.curr_ped_array = np.array(self.curr_ped_array)
 
