@@ -5,17 +5,15 @@ from .traj_tracker import TrajTracker
 
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist
-from nav_2d_msgs.msg import Twist2D
-from geometry_msgs.msg import PoseStamped, PoseArray, Pose2D, Pose, Quaternion
-from nav_msgs.msg import OccupancyGrid, Odometry, Path
+from geometry_msgs.msg import Twist, PoseStamped, PoseArray
+from nav_msgs.msg import Odometry, Path
 from crowd_nav_interfaces.msg import Pedestrian, PedestrianArray
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy
 from geometry_msgs.msg import Point
 from visualization_msgs.msg import Marker, MarkerArray
 from std_msgs.msg import Int16, String
 from action_msgs.msg import GoalStatus
-from tf_transformations import euler_from_quaternion, quaternion_from_euler
+from tf_transformations import euler_from_quaternion
 from rclpy.time import Time
 from rclpy.duration import Duration
 import yaml
@@ -39,7 +37,6 @@ class BrneNavRos(Node):
         self.marker_pub = self.create_publisher(MarkerArray, '/brne_markers', 1)
         self.num_peds_pub = self.create_publisher(Int16, '/brne/n_pedestrians', 1)
         self.result_pub = self.create_publisher(GoalStatus, '/navigation_result', 1)
-        self.log_pub = self.create_publisher(String, '/brne/log', 1)
 
         latching_qos = QoSProfile(
             depth=1,
@@ -112,9 +109,7 @@ class BrneNavRos(Node):
         parallel_cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
 
         self.ped_sub = self.create_subscription(PedestrianArray,
-                                                '/top/zed/obj_det/pedestrians', self.ped_cb, 1,
-                                                callback_group=parallel_cb_group)
-        self.map_sub = self.create_subscription(OccupancyGrid, '/static_map', self.map_cb, latching_qos,
+                                                '/pedestrians', self.ped_cb, 1,
                                                 callback_group=parallel_cb_group)
         self.odom_sub = self.create_subscription(Odometry, '/odom', self.odom_cb, 1,
                                                  callback_group=parallel_cb_group)
@@ -149,8 +144,6 @@ class BrneNavRos(Node):
         test_ts = tlist
         self.cov_Lmat, self.cov_mat = brne.get_Lmat_nb(train_ts, test_ts, train_noise, self.kernel_a1, self.kernel_a2)
 
-        self.cmd_log = []
-
         ### F2F velocity estimation
         self.curr_ped_array = np.array([])  # np.array([[]])
         self.prev_ped_array = np.array([])  # np.array([[]])
@@ -161,8 +154,6 @@ class BrneNavRos(Node):
     def brne_cb(self):
         # if self.robot_goal is None:
         #     return
-        xmean_list = np.zeros((self.num_agents, self.plan_steps))
-        xmean_list = np.zeros((self.num_agents, self.plan_steps))
 
         ped_info_list = []
         dists2peds = []
@@ -198,8 +189,8 @@ class BrneNavRos(Node):
         num_peds_msg.data = int(num_agents-1)
         self.num_peds_pub.publish(num_peds_msg)
 
-        self.log(f'total # pedestrians: {self.num_peds}.')
-        self.log(f'brne # agents: {num_agents}.')
+        self.get_logger().info(f'total # pedestrians: {self.num_peds}.')
+        self.get_logger().info(f'brne # agents: {num_agents}.')
 
         # self.num_peds = 0
         if num_agents > 1:
@@ -281,14 +272,14 @@ class BrneNavRos(Node):
             robot_samples2ped = np.min(np.sqrt(robot_samples2ped), axis=1)
             safety_mask = (robot_samples2ped > self.close_stop_threshold).astype(float)
             safety_samples_percent = safety_mask.mean() * 100
-            self.log('percent of safe samples: {:.2f}%'.format(safety_samples_percent))
-            self.log('dist 2 ped: {:.2f} m'.format(closest_dist2ped))
+            self.get_logger().info('percent of safe samples: {:.2f}%'.format(safety_samples_percent))
+            self.get_logger().info('dist 2 ped: {:.2f} m'.format(closest_dist2ped))
 
             self.close_stop_flag = False
             if np.max(safety_mask) == 0.0:
                 safety_mask = np.ones_like(safety_mask)
                 self.close_stop_flag = True
-            # self.log('safety mask: {}'.format(safety_mask))
+            # self.get_logger().info('safety mask: {}'.format(safety_mask))
 
             # BRNE OPTIMIZATION HERE !!!
             weights = brne.brne_nav(
@@ -465,7 +456,7 @@ class BrneNavRos(Node):
             # ped_vel = ped.pedestrian.velocity  # no longer in use
 
             if np.isnan(ped_pose.x) or np.isnan(ped_pose.y):
-                self.log(f'Detect NAN on {ped.pedestrian.identifier} !!!')
+                self.get_logger().info(f'Detect NAN on {ped.pedestrian.identifier} !!!')
                 continue  # skip the pedestrian is reading is nan
 
             ### F2F implementation
@@ -494,11 +485,6 @@ class BrneNavRos(Node):
 
         self.curr_ped_array = np.array(self.curr_ped_array)
 
-
-    def map_cb(self, msg):
-        # we don't need to process map for now
-        pass
-
     def goal_cb(self, msg):
         position = msg.pose.position
         self.robot_goal = np.array([position.x, position.y])
@@ -517,7 +503,7 @@ class BrneNavRos(Node):
 
     def check_goal(self):
         dist2goal = np.sqrt((self.robot_pose[0]-self.robot_goal[0])**2 + (self.robot_pose[1]-self.robot_goal[1])**2)
-        # self.log(f'dist2goal: {dist2goal}')
+        # self.get_logger().info(f'dist2goal: {dist2goal}')
         if dist2goal < 0.5:
             self.robot_goal = None
 
@@ -531,7 +517,7 @@ class BrneNavRos(Node):
         This the control callback function, it receives a fixed frequency timer signal,
         and publish the control command at the same frequency (10Hz here because dt = 0.1)
         """
-        # self.log(f'cmd counter: {self.cmd_counter}')
+        # self.get_logger().info(f'cmd counter: {self.cmd_counter}')
         cmd = Twist()
 
         # here we get the command from the buffer, using self.cmd_counter to track the index
@@ -544,21 +530,8 @@ class BrneNavRos(Node):
             cmd.angular.z = float(self.cmds[self.cmd_counter][1])
             self.cmd_counter += 1
 
-        self.log(f'current control: [{cmd.linear.x}, {cmd.angular.z}]')
+        self.get_logger().info(f'current control: [{cmd.linear.x}, {cmd.angular.z}]')
         self.cmd_vel_pub.publish(cmd)
-        self.cmd_log.append([cmd.linear.x, cmd.angular.z])
-        # np.savetxt('/home/msun/Downloads/brne_ros_cmd_log.txt', np.array(self.cmd_log))
-
-        # self.cmd_counter += 1
-
-    def _publish_log(self, s):
-        msg = String()
-        msg.data = s
-        self.log_pub.publish(msg)
-
-    def log(self, s):
-        self._publish_log(s)
-        self.get_logger().info(s)
 
 
 def main(args=None):
