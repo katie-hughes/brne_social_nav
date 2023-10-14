@@ -35,3 +35,4 @@
 
 .vscode/
 brnelib/build
+__pycache__/
