@@ -1,0 +1,10 @@
+<launch>
+
+    <!-- launch algorithm node -->
+    <node pkg="crowd_nav" exec="sim_robot">
+    </node>
+
+    <!-- launch rviz -->
+    <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share crowd_nav)/config/odom_test.rviz"/>
+
+</launch>

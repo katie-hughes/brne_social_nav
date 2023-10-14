@@ -58,6 +58,7 @@ class SimRobot : public rclcpp::Node
     rclcpp::Time last_time;
     rclcpp::Time current_time;
     bool first_time;
+    double theta = 0;
 
     void cmd_vel_cb(const geometry_msgs::msg::Twist & msg)
     {
@@ -66,10 +67,18 @@ class SimRobot : public rclcpp::Node
         const auto dt = (current_time - last_time).nanoseconds();
         const auto vx = msg.linear.x;
         const auto vy = msg.linear.y;
-        // const auto vw = msg.angular.z;
-        RCLCPP_INFO_STREAM(get_logger(), "update odom ");
-        odom.pose.pose.position.x += vx*dt*1e-9;
-        odom.pose.pose.position.y += vy*dt*1e-9;
+        const auto vw = msg.angular.z;
+        // assume diff drive so no vy
+        theta += vw*dt*1e-9;
+        odom.header.stamp = current_time;
+        odom.pose.pose.position.x += (vx*cos(theta))*dt*1e-9;
+        odom.pose.pose.position.y += (vx*sin(theta))*dt*1e-9;
+        tf2::Quaternion q;
+        q.setRPY(0, 0, theta);
+        odom.pose.pose.orientation.x = q.x();
+        odom.pose.pose.orientation.y = q.y();
+        odom.pose.pose.orientation.z = q.z();
+        odom.pose.pose.orientation.w = q.w();
       } else {
         first_time = false;
       }
