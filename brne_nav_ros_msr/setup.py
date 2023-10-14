@@ -11,7 +11,6 @@ setup(
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', glob('launch/*launch.py')),
-        ('share/' + package_name + '/', ['im.rviz', 'requirements.txt']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -23,7 +22,6 @@ setup(
     entry_points={
         'console_scripts': [
             'brne_nav_ros = brne_nav_ros.brne_nav_ros:main',
-            'manual = brne_nav_ros.manual:main',
         ]
     },
 )
