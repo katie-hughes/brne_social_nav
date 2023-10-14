@@ -73,8 +73,6 @@ class BrneNavRos(Node):
         self.declare_parameter('open_space_velocity', 0.6)  # nominal velocity when the robot is in open space
         self.declare_parameter('brne_activate_threshold', 3.5)  # distance threshold from a pedestrian to enable BRNE
         ####################################################################################
-
-
         self.num_agents = self.get_parameter('maximum_agents').value
         self.num_samples = self.get_parameter('num_samples').value
         self.dt = self.get_parameter('dt').value
@@ -152,14 +150,10 @@ class BrneNavRos(Node):
 
 
     def brne_cb(self):
-        # if self.robot_goal is None:
-        #     return
 
         ped_info_list = []
         dists2peds = []
-
         now = self.get_clock().now()
-
         if self.people_timeout_off == False:
             for ped_ident, (ped, stamp) in list(self.ped_msg_buffer.items()):
                 if now - stamp > self.people_timeout:

@@ -1,3 +1,8 @@
+/// Dead reckoning estimation 
+/// Subscriptions
+///   - cmd_vel
+/// Publishes
+///   - odom
 #include <chrono>
 #include <functional>
 #include <memory>
@@ -23,7 +28,7 @@ class SimRobot : public rclcpp::Node
       auto pd = rcl_interfaces::msg::ParameterDescriptor{};
 
       pd.description = "Timer rate (Hz)";
-      declare_parameter("rate", 2., pd);
+      declare_parameter("rate", 50., pd);
 
       rate_hz = get_parameter("rate").as_double();
       RCLCPP_INFO_STREAM(get_logger(), "Rate is " << ((int)(1000. / rate_hz)) << "ms");
@@ -37,29 +42,43 @@ class SimRobot : public rclcpp::Node
       timer_ = create_wall_timer(
       rate, std::bind(&SimRobot::timer_callback, this));
 
+      odom.header.frame_id = "odom";
+      odom.child_frame_id = "base_link";
+
+      first_time = true;
     }
 
   private:
     double rate_hz;
     nav_msgs::msg::Odometry odom;
-
     rclcpp::TimerBase::SharedPtr timer_;
-
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
-
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
+
+    rclcpp::Time last_time;
+    rclcpp::Time current_time;
+    bool first_time;
 
     void cmd_vel_cb(const geometry_msgs::msg::Twist & msg)
     {
-      const auto vx = msg.linear.x;
-      const auto vy = msg.linear.y;
-      const auto vw = msg.angular.z;
-      RCLCPP_INFO_STREAM(get_logger(), "Cmd vel:"<<vx<<" "<<vy<<" "<<vw);
-      odom_pub_->publish(odom);
+      current_time = this->get_clock()->now();
+      if (!first_time){
+        const auto dt = (current_time - last_time).nanoseconds();
+        const auto vx = msg.linear.x;
+        const auto vy = msg.linear.y;
+        // const auto vw = msg.angular.z;
+        RCLCPP_INFO_STREAM(get_logger(), "update odom ");
+        odom.pose.pose.position.x += vx*dt*1e-9;
+        odom.pose.pose.position.y += vy*dt*1e-9;
+      } else {
+        first_time = false;
+      }
+      last_time = current_time;
     }
 
     void timer_callback()
-    {      
+    {
+      odom_pub_->publish(odom);
     }
 };
 
