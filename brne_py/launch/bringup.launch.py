@@ -6,8 +6,8 @@ def generate_launch_description():
     ld = LaunchDescription()
 
     ld.add_action(Node(
-        package='brne_nav_ros',
-        executable='brne_nav_ros',
+        package='brne_py',
+        executable='brne_nav',
         output='screen',
     ))
 

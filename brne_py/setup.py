@@ -1,7 +1,7 @@
 from setuptools import setup
 from glob import glob
 
-package_name = 'brne_nav_ros'
+package_name = 'brne_py'
 
 setup(
     name=package_name,
@@ -21,7 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'brne_nav_ros = brne_nav_ros.brne_nav_ros:main',
+            'brne_nav = brne_py.brne_nav:main',
         ]
     },
 )
