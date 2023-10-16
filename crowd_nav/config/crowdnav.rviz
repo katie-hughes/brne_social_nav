@@ -6,8 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /TF1/Frames1
-      Splitter Ratio: 0.7179487347602844
+        - /Odometry1/Shape1
+      Splitter Ratio: 0.5312976837158203
     Tree Height: 515
   - Class: rviz_common/Selection
     Name: Selection
@@ -48,483 +48,117 @@ Visualization Manager:
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
       Value: true
-    - Alpha: 1
-      Class: rviz_default_plugins/RobotModel
-      Collision Enabled: false
-      Description File: ""
-      Description Source: Topic
-      Description Topic:
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz_default_plugins/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Keep: 100
+      Name: Odometry
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 255; 25; 0
+        Head Length: 0.10000000149011612
+        Head Radius: 0.10000000149011612
+        Shaft Length: 0.20000000298023224
+        Shaft Radius: 0.05000000074505806
+        Value: Arrow
+      Topic:
         Depth: 5
         Durability Policy: Volatile
+        Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot_description
-      Enabled: true
-      Links:
-        All Links Enabled: true
-        Expand Joint Details: false
-        Expand Link Details: false
-        Expand Tree: false
-        FL_calf:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        FL_calf_rotor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        FL_foot:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        FL_hip:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        FL_hip_rotor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        FL_thigh:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        FL_thigh_rotor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        FR_calf:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        FR_calf_rotor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        FR_foot:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        FR_hip:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        FR_hip_rotor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        FR_thigh:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        FR_thigh_rotor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        Link Tree Style: Links in Alphabetic Order
-        RL_calf:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RL_calf_rotor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RL_foot:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RL_hip:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RL_hip_rotor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RL_thigh:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RL_thigh_rotor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RR_calf:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RR_calf_rotor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RR_foot:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RR_hip:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RR_hip_rotor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RR_thigh:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RR_thigh_rotor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        base:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        base_footprint:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        base_laser:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_chin:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        camera_face:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        camera_laserscan_link_left:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_laserscan_link_right:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_left:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        camera_optical_chin:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_optical_face:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_optical_left:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_optical_rearDown:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_optical_right:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_rearDown:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        camera_right:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        height_measurement:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        imu_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        trunk:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        ultraSound_face:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        ultraSound_left:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        ultraSound_right:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-      Mass Properties:
-        Inertia: false
-        Mass: false
-      Name: RobotModel
-      TF Prefix: ""
-      Update Interval: 0
-      Value: true
-      Visual Enabled: true
-    - Class: rviz_default_plugins/TF
-      Enabled: true
-      Frame Timeout: 15
-      Frames:
-        All Enabled: false
-        FL_calf:
-          Value: false
-        FL_calf_rotor:
-          Value: false
-        FL_foot:
-          Value: false
-        FL_hip:
-          Value: false
-        FL_hip_rotor:
-          Value: false
-        FL_thigh:
-          Value: false
-        FL_thigh_rotor:
-          Value: false
-        FR_calf:
-          Value: false
-        FR_calf_rotor:
-          Value: false
-        FR_foot:
-          Value: false
-        FR_hip:
-          Value: false
-        FR_hip_rotor:
-          Value: false
-        FR_thigh:
-          Value: false
-        FR_thigh_rotor:
-          Value: false
-        RL_calf:
-          Value: false
-        RL_calf_rotor:
-          Value: false
-        RL_foot:
-          Value: false
-        RL_hip:
-          Value: false
-        RL_hip_rotor:
-          Value: false
-        RL_thigh:
-          Value: false
-        RL_thigh_rotor:
-          Value: false
-        RR_calf:
-          Value: false
-        RR_calf_rotor:
-          Value: false
-        RR_foot:
-          Value: false
-        RR_hip:
-          Value: false
-        RR_hip_rotor:
-          Value: false
-        RR_thigh:
-          Value: false
-        RR_thigh_rotor:
-          Value: false
-        base:
-          Value: false
-        base_footprint:
-          Value: false
-        base_laser:
-          Value: false
-        base_link:
-          Value: false
-        camera_chin:
-          Value: false
-        camera_face:
-          Value: true
-        camera_laserscan_link_left:
-          Value: false
-        camera_laserscan_link_right:
-          Value: false
-        camera_left:
-          Value: true
-        camera_optical_chin:
-          Value: false
-        camera_optical_face:
-          Value: false
-        camera_optical_left:
-          Value: false
-        camera_optical_rearDown:
-          Value: false
-        camera_optical_right:
-          Value: false
-        camera_rearDown:
-          Value: false
-        camera_right:
-          Value: true
-        height_measurement:
-          Value: false
-        imu_link:
-          Value: false
-        person1:
-          Value: true
-        trunk:
-          Value: false
-        ultraSound_face:
-          Value: false
-        ultraSound_left:
-          Value: false
-        ultraSound_right:
-          Value: false
-      Marker Scale: 1
-      Name: TF
-      Show Arrows: true
-      Show Axes: true
-      Show Names: true
-      Tree:
-        base_link:
-          base:
-            trunk:
-              FL_hip:
-                FL_thigh:
-                  FL_calf:
-                    FL_foot:
-                      {}
-                  FL_calf_rotor:
-                    {}
-                FL_thigh_rotor:
-                  {}
-              FL_hip_rotor:
-                {}
-              FR_hip:
-                FR_thigh:
-                  FR_calf:
-                    FR_foot:
-                      {}
-                  FR_calf_rotor:
-                    {}
-                FR_thigh_rotor:
-                  {}
-              FR_hip_rotor:
-                {}
-              RL_hip:
-                RL_thigh:
-                  RL_calf:
-                    RL_foot:
-                      {}
-                  RL_calf_rotor:
-                    {}
-                RL_thigh_rotor:
-                  {}
-              RL_hip_rotor:
-                {}
-              RR_hip:
-                RR_thigh:
-                  RR_calf:
-                    RR_foot:
-                      {}
-                  RR_calf_rotor:
-                    {}
-                RR_thigh_rotor:
-                  {}
-              RR_hip_rotor:
-                {}
-              camera_chin:
-                camera_optical_chin:
-                  {}
-              camera_face:
-                camera_optical_face:
-                  {}
-                person1:
-                  {}
-              camera_left:
-                camera_laserscan_link_left:
-                  {}
-                camera_optical_left:
-                  {}
-              camera_rearDown:
-                camera_optical_rearDown:
-                  {}
-              camera_right:
-                camera_laserscan_link_right:
-                  {}
-                camera_optical_right:
-                  {}
-              imu_link:
-                {}
-              ultraSound_face:
-                {}
-              ultraSound_left:
-                {}
-              ultraSound_right:
-                {}
-          base_laser:
-            {}
-          height_measurement:
-            base_footprint:
-              {}
-      Update Interval: 0
+        Value: /odom
       Value: true
     - Class: rviz_default_plugins/MarkerArray
       Enabled: true
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /people
+        Value: /ped_markers
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 25; 255; 0
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: Optimal Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /optimal_path
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 0; 0; 255
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: BRNE Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /brne_path
       Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: base_footprint
+    Fixed Frame: odom
     Frame Rate: 30
   Name: root
   Tools:
@@ -567,7 +201,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 4.8564348220825195
+      Distance: 4.6314778327941895
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -582,10 +216,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.355398029088974
+      Pitch: 0.6953983902931213
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.590386152267456
+      Yaw: 1.0604002475738525
     Saved: ~
 Window Geometry:
   Displays:
@@ -604,4 +238,4 @@ Window Geometry:
     collapsed: false
   Width: 1200
   X: 720
-  Y: 0
+  Y: 38

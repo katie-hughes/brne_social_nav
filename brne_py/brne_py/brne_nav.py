@@ -183,8 +183,8 @@ class BrneNavRos(Node):
         num_peds_msg.data = int(num_agents-1)
         self.num_peds_pub.publish(num_peds_msg)
 
-        self.get_logger().info(f'total # pedestrians: {self.num_peds}.')
-        self.get_logger().info(f'brne # agents: {num_agents}.')
+        self.get_logger().debug(f'total # pedestrians: {self.num_peds}.')
+        self.get_logger().debug(f'brne # agents: {num_agents}.')
 
         # self.num_peds = 0
         if num_agents > 1:
@@ -266,14 +266,14 @@ class BrneNavRos(Node):
             robot_samples2ped = np.min(np.sqrt(robot_samples2ped), axis=1)
             safety_mask = (robot_samples2ped > self.close_stop_threshold).astype(float)
             safety_samples_percent = safety_mask.mean() * 100
-            self.get_logger().info('percent of safe samples: {:.2f}%'.format(safety_samples_percent))
-            self.get_logger().info('dist 2 ped: {:.2f} m'.format(closest_dist2ped))
+            self.get_logger().debug('percent of safe samples: {:.2f}%'.format(safety_samples_percent))
+            self.get_logger().debug('dist 2 ped: {:.2f} m'.format(closest_dist2ped))
 
             self.close_stop_flag = False
             if np.max(safety_mask) == 0.0:
                 safety_mask = np.ones_like(safety_mask)
                 self.close_stop_flag = True
-            # self.get_logger().info('safety mask: {}'.format(safety_mask))
+            # self.get_logger().debug('safety mask: {}'.format(safety_mask))
 
             # BRNE OPTIMIZATION HERE !!!
             weights = brne.brne_nav(
@@ -446,7 +446,7 @@ class BrneNavRos(Node):
             stamp = Time.from_msg(ped.header.stamp)
             ped_pose = ped.pose.position
             if np.isnan(ped_pose.x) or np.isnan(ped_pose.y):
-                self.get_logger().info(f'Detect NAN on {ped.pedestrian.identifier} !!!')
+                self.get_logger().debug(f'Detect NAN on {ped.pedestrian.identifier} !!!')
                 continue  # skip the pedestrian is reading is nan
 
             ### F2F implementation
@@ -490,7 +490,7 @@ class BrneNavRos(Node):
 
     def check_goal(self):
         dist2goal = np.sqrt((self.robot_pose[0]-self.robot_goal[0])**2 + (self.robot_pose[1]-self.robot_goal[1])**2)
-        # self.get_logger().info(f'dist2goal: {dist2goal}')
+        # self.get_logger().debug(f'dist2goal: {dist2goal}')
         if dist2goal < 0.5:
             self.robot_goal = None
 
@@ -504,7 +504,7 @@ class BrneNavRos(Node):
         This the control callback function, it receives a fixed frequency timer signal,
         and publish the control command at the same frequency (10Hz here because dt = 0.1)
         """
-        # self.get_logger().info(f'cmd counter: {self.cmd_counter}')
+        # self.get_logger().debug(f'cmd counter: {self.cmd_counter}')
         cmd = Twist()
 
         # here we get the command from the buffer, using self.cmd_counter to track the index
@@ -517,7 +517,7 @@ class BrneNavRos(Node):
             cmd.angular.z = float(self.cmds[self.cmd_counter][1])
             self.cmd_counter += 1
 
-        self.get_logger().info(f'current control: [{cmd.linear.x}, {cmd.angular.z}]')
+        self.get_logger().debug(f'current control: [{cmd.linear.x}, {cmd.angular.z}]')
         self.cmd_vel_pub.publish(cmd)
 
 

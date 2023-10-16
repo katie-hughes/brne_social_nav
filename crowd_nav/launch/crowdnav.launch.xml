@@ -1,21 +1,32 @@
 <launch>
 
-    <!-- launch algorithm node -->
-    <node pkg="crowd_nav" exec="path_plan">
-    </node>
+  <arg name="lang" default="PYTHON" description="Choose whether python or C++ BRNE nodes are launched. options: PYTHON, C++"/>
+  <arg name="sim_odom" default="true" description="Simulate cmd_vel->odom update"/>
+  <arg name="sim_ped" default="true" description="Simulate a pedestrian"/>
 
-    <!-- launch control node -->
-    <node pkg="crowd_nav" exec="controller">
-    </node>
+  <!-- Python algorithm node -->
+  <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\'')">
+  </node>
 
-    <!-- launch brne python implementation -->
+  <!-- C++ algorithm nodes -->
+  <node pkg="crowd_nav" exec="path_plan" if="$(eval '\'$(var lang)\' == \'C++\'')">
+  </node>
+  <node pkg="crowd_nav" exec="controller" if="$(eval '\'$(var lang)\' == \'C++\'')">
+  </node>
 
-    <!-- load go1 model
-    <include file="$(find-pkg-share unitree_legged_real)/launch/high.launch.py" if="$(eval '\'$(var connect_to_dog)\' == \'True\'')">
-      <arg name="use_rviz" value="false" />
-    </include> -->
+  <!-- simulate cmd_vel to odom updates -->
+  <node pkg="crowd_nav" exec="sim_robot" if="$(eval '\'$(var sim_odom)\' == \'true\'')">
+  </node>
 
-    <!-- launch rviz -->
-    <!-- <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share crowd_nav)/config/crowdnav.rviz"/> -->
+  <!-- simulate a pedestrian at 1,0 -->
+  <node pkg="pedestrian_tracking" exec="simulate_pedestrians" if="$(eval '\'$(var sim_ped)\' == \'true\'')">
+  </node>
+
+   <!-- publish pedestrian markers -->
+  <node pkg="pedestrian_tracking" exec="show_pedestrians">
+  </node>
+
+  <!-- launch visualizations -->
+  <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share crowd_nav)/config/crowdnav.rviz"/>
 
 </launch>

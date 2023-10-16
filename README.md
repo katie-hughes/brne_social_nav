@@ -10,8 +10,12 @@ ros2 launch unitree_nav control.launch.py
 
 Then, to set up the publishing of `cmd_vel` on your own computer, run:
 ```
-ros2 launch crowd_nav py_crowdnav.launch.xml
+ros2 launch crowd_nav crowdnav.launch.xml
 ```
+### Arguments
+* `lang`: Choose `PYTHON` or `C++` for the main BRNE algorithm node. Currently, only `PYTHON` is supported.
+* `sim_odom`: simulate the odometry updates of the robot using dead reckoning.
+* `sim_ped`: simulate a static pedestrian 1m ahead of the starting location.
 
 ## ROS 2 Packages
 - [brne_py](brne_py) - A python implementation of the BRNE algorithm
