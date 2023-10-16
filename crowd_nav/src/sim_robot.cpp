@@ -59,6 +59,7 @@ class SimRobot : public rclcpp::Node
     rclcpp::Time current_time;
     bool first_time;
     double theta = 0;
+    const double pi = 3.14159;
 
     void cmd_vel_cb(const geometry_msgs::msg::Twist & msg)
     {
@@ -70,6 +71,12 @@ class SimRobot : public rclcpp::Node
         const auto vw = msg.angular.z;
         // assume diff drive so no vy
         theta += vw*dt*1e-9;
+        // normalize theta
+        if (theta > pi){
+          theta -= 2*pi;
+        } else if (theta <= -pi){
+          theta += 2*pi;
+        }
         odom.header.stamp = current_time;
         odom.pose.pose.position.x += (vx*cos(theta))*dt*1e-9;
         odom.pose.pose.position.y += (vx*sin(theta))*dt*1e-9;

@@ -52,7 +52,8 @@ class SimulatePedestrians : public rclcpp::Node
       crowd_nav_interfaces::msg::Pedestrian ped1;
       ped1.header.stamp = current_time;
       ped1.id = 1;
-      ped1.pose.position.y = 1.0;
+      ped1.pose.position.x = 1.0;
+      ped1.pose.position.y = 0.0;
       peds.pedestrians.push_back(ped1);
       pedestrian_pub_->publish(peds);
     }
