@@ -31,6 +31,7 @@ rosidl_generate_interfaces(  ${PROJECT_NAME}
   "msg/Pedestrian.msg"
   "msg/PedestrianArray.msg"
   "msg/TwistArray.msg"
+  "srv/GoalReq.srv"
   DEPENDENCIES std_msgs geometry_msgs
   )
 

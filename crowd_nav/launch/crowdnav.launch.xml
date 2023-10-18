@@ -27,6 +27,10 @@
   <node pkg="pedestrian_tracking" exec="show_pedestrians">
   </node>
 
+   <!-- Service to publish goal pose -->
+  <node pkg="crowd_nav" exec="pub_goal">
+  </node>
+
   <!-- launch visualizations -->
   <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share crowd_nav)/config/crowdnav.rviz"/>
 

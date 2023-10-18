@@ -58,22 +58,30 @@ ament_target_dependencies(controller
   image_geometry
   crowd_nav_interfaces)
 
-  add_executable(sim_robot src/sim_robot.cpp)
+add_executable(sim_robot src/sim_robot.cpp)
 
-  ament_target_dependencies(sim_robot
-    rclcpp
-    std_msgs
-    std_srvs
-    tf2
-    tf2_ros
-    geometry_msgs
-    visualization_msgs
-    nav_msgs
-    sensor_msgs
-    image_geometry
-    crowd_nav_interfaces)
+ament_target_dependencies(sim_robot
+  rclcpp
+  std_msgs
+  std_srvs
+  tf2
+  tf2_ros
+  geometry_msgs
+  visualization_msgs
+  nav_msgs
+  sensor_msgs
+  image_geometry
+  crowd_nav_interfaces)
 
-install(TARGETS path_plan controller sim_robot
+add_executable(pub_goal src/pub_goal.cpp)
+
+ament_target_dependencies(pub_goal
+  rclcpp
+  std_srvs
+  geometry_msgs
+  crowd_nav_interfaces)
+
+install(TARGETS path_plan controller sim_robot pub_goal
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY

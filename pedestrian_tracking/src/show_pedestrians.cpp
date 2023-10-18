@@ -38,7 +38,7 @@ class ShowPedestrians : public rclcpp::Node
     {
       const auto current_time = this->get_clock()->now();
       visualization_msgs::msg::MarkerArray ma;
-      for (int i = 0; i < msg.pedestrians.size(); i++){
+      for (int i = 0; i < static_cast<int>(msg.pedestrians.size()); i++){
         const auto ped = msg.pedestrians.at(i);
         visualization_msgs::msg::Marker m;
         m.header.stamp = current_time;
@@ -46,9 +46,9 @@ class ShowPedestrians : public rclcpp::Node
         m.id = ped.id;
         m.type = 3;       // cylinder
         m.action = 0;     // add/modify
-        // Set color as red
+        // Set color as orange
         m.color.r = 1.0;
-        m.color.g = 0.0;
+        m.color.g = 0.67;
         m.color.b = 0.0;
         m.color.a = 1.0;
         // Set Radius
