@@ -3,9 +3,10 @@
   <arg name="lang" default="PYTHON" description="Choose whether python or C++ BRNE nodes are launched. options: PYTHON, C++"/>
   <arg name="sim_odom" default="true" description="Simulate cmd_vel->odom update"/>
   <arg name="sim_ped" default="true" description="Simulate a pedestrian"/>
+  <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
 
   <!-- Python algorithm node -->
-  <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\'')">
+  <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\'')" args="--ros-args --log-level brne_nav:=$(var debug_level)">
   </node>
 
   <!-- C++ algorithm nodes -->

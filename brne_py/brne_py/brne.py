@@ -222,7 +222,7 @@ def get_ulist_essemble(ulist, u1_max, u2_max, num_samples):
         u2_max+ulist[:,1].min(),
         u2_max-ulist[:,1].max()
     )
-    print('u offsets: ', u1_offset, u2_offset)
+    # print('u offsets: ', u1_offset, u2_offset)
 
     # u1_offset = np.minimum(ulist[0][0], 0.2)
     # u2_offset = 1.2

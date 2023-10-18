@@ -28,7 +28,7 @@ def pose2d_transform(msg):
 # THIS IS THE NAVIGATION CLASS !!!
 class BrneNavRos(Node):
     def __init__(self):
-        super().__init__('brne_nav_ros')
+        super().__init__('brne_nav')
 
         self.cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel', 1)
         self.ped_info_pub = self.create_publisher(PoseArray, '/brne_peds', 1)
@@ -475,6 +475,7 @@ class BrneNavRos(Node):
     def goal_cb(self, msg):
         position = msg.pose.position
         self.robot_goal = np.array([position.x, position.y])
+        self.get_logger().info(f'Robot Goal Received: {position.x}, {position.y}')
         self.params_pub.publish(self.params_msg)
 
         self.check_goal()
@@ -482,7 +483,7 @@ class BrneNavRos(Node):
     def odom_cb(self, msg):
         # the odometry callback function updates the robot's current pose
         self.robot_pose = pose2d_transform(msg.pose.pose)
-
+        self.get_logger().debug(f'odom pose: {self.robot_pose}')
         if self.robot_goal is None:
             return
 
@@ -493,7 +494,7 @@ class BrneNavRos(Node):
         # self.get_logger().debug(f'dist2goal: {dist2goal}')
         if dist2goal < 0.5:
             self.robot_goal = None
-
+            self.get_logger().info('Close to goal! Stopping.')
             # Minor hack: Instead of implementing an action server, we just publish a GoalStatus for bookkeeping
             g = GoalStatus()
             g.status = GoalStatus.STATUS_SUCCEEDED
