@@ -40,7 +40,7 @@ class BrneNavRos(Node):
 
         latching_qos = QoSProfile(
             depth=1,
-            durability=QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL
+            durability=QoSDurabilityPolicy.TRANSIENT_LOCAL
         )
         self.params_pub = self.create_publisher(String, '/brne/params', qos_profile=latching_qos)
 
@@ -147,6 +147,8 @@ class BrneNavRos(Node):
         self.prev_ped_array = np.array([])  # np.array([[]])
 
         self.close_stop_flag = False
+
+        self.brne_first_time = True
 
 
     def brne_cb(self):
@@ -282,6 +284,9 @@ class BrneNavRos(Node):
                 self.cost_a1, self.cost_a2, self.cost_a3, self.ped_sample_scale,
                 self.corridor_y_min, self.corridor_y_max
             )
+            if self.brne_first_time:
+                self.get_logger().info("BRNE initialization complete!")
+                self.brne_first_time = False
 
             # apply safety mask
             weights[0] *= safety_mask
