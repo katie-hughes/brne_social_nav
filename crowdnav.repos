@@ -1,0 +1,9 @@
+repositories:
+  src/unitree_crowd_nav:
+    type: git
+    url: git@github.com:katie-hughes/unitree_crowd_nav.git
+    version: main
+  src/zed-ros2-wrapper:
+    type: git
+    url: git@github.com:katie-hughes/zed-ros2-wrapper.git
+    version: master
