@@ -22,6 +22,7 @@ find_package(tf2_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(image_geometry REQUIRED)
 find_package(crowd_nav_interfaces REQUIRED)
+find_package(zed_interfaces REQUIRED)
 
 find_package(OpenCV REQUIRED)
 
@@ -68,8 +69,22 @@ add_executable(show_pedestrians src/show_pedestrians.cpp)
   image_geometry
   crowd_nav_interfaces)
 
+add_executable(convert_zed_ped src/convert_zed_ped.cpp)
+  ament_target_dependencies(convert_zed_ped
+  rclcpp
+  std_msgs
+  std_srvs
+  tf2
+  tf2_ros
+  geometry_msgs
+  visualization_msgs
+  nav_msgs
+  sensor_msgs
+  image_geometry
+  crowd_nav_interfaces
+  zed_interfaces)
 
-install(TARGETS track_pedestrians simulate_pedestrians show_pedestrians
+install(TARGETS track_pedestrians simulate_pedestrians show_pedestrians convert_zed_ped
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY

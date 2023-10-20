@@ -447,8 +447,8 @@ class BrneNavRos(Node):
             self.ped_msg_buffer[key][0].velocity.x = 0.0
             self.ped_msg_buffer[key][0].velocity.y = 0.0
 
+        stamp = Time.from_msg(msg.header.stamp)
         for ped in msg.pedestrians:
-            stamp = Time.from_msg(ped.header.stamp)
             ped_pose = ped.pose.position
             if np.isnan(ped_pose.x) or np.isnan(ped_pose.y):
                 self.get_logger().debug(f'Detect NAN on {ped.pedestrian.identifier} !!!')

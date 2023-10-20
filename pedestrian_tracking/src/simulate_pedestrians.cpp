@@ -48,9 +48,9 @@ class SimulatePedestrians : public rclcpp::Node
     {
       crowd_nav_interfaces::msg::PedestrianArray peds;
       const auto current_time = this->get_clock()->now();
+      peds.header.stamp = current_time;
       // create a fake pedestrian with an id of 1
       crowd_nav_interfaces::msg::Pedestrian ped1;
-      ped1.header.stamp = current_time;
       ped1.id = 1;
       ped1.pose.position.x = 1.0;
       ped1.pose.position.y = 0.0;

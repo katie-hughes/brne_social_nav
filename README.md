@@ -27,7 +27,7 @@ ros2 launch unitree_nav control.launch.py use_rviz:=false
 ### Creating `odom` updates
 The onboard Xavier is also responsible for providing odometry updates of the robot. If you need to generate a map of the area, run the following launchfile. You should only need to do this once provided the resulting map is good.
 ```
-ros2 launch unitree_nav mapping.launch.py use_rviz:=false restart_map:=false localize_only:=true
+ros2 launch unitree_nav mapping.launch.py use_rviz:=false restart_map:=true localize_only:=false
 ```
 While you are mapping, you can 
 Then to localize yourself within this map, run the following launchfile to get `/odom` updates.
@@ -51,10 +51,8 @@ ros2 launch crowd_nav crowdnav.launch.xml
 ```
 ### Arguments
 * `lang`: Choose `PYTHON` or `C++` for the main BRNE algorithm node. Currently, only `PYTHON` is supported.
-* `sim_odom`: simulate the odometry updates of the robot using dead reckoning.
+* `sim_odom`: simulate the odometry updates of the robot using dead reckoning. You can use this for simple tests of the BRNE algorithm if you're not connected to the robot.
 * `sim_ped`: simulate a static pedestrian 1m ahead of the starting location.
-
-
 
 ## ROS 2 Packages
 - [brne_py](brne_py) - A python implementation of the BRNE algorithm

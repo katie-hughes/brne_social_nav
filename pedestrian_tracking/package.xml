@@ -26,6 +26,7 @@
   <depend>sensor_msgs</depend>
   <depend>image_geometry</depend>
   <depend>crowd_nav_interfaces</depend>
+  <depend>zed_interfaces</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
