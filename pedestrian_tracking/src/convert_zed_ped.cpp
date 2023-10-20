@@ -39,13 +39,22 @@ class ConvertPeds : public rclcpp::Node
     void zed_cb(const zed_interfaces::msg::ObjectsStamped & msg)
     {
       crowd_nav_interfaces::msg::PedestrianArray pa;
+      pa.header.stamp = msg.header.stamp;
       const int n_peds = msg.objects.size();
       RCLCPP_INFO_STREAM(get_logger(), "\n\nMESSAGE");
       for (int i = 0; i < n_peds; i++){
         const auto p = msg.objects.at(i);
         RCLCPP_INFO_STREAM(get_logger(), "id "<<p.label_id);
         RCLCPP_INFO_STREAM(get_logger(), "pos:"   <<p.position.at(0)<<" "<<p.position.at(1)<<" "<<p.position.at(2));
+        crowd_nav_interfaces::msg::Pedestrian ped;
+        ped.id = p.label_id;
+        // TODO: These positions are in zed frame. Need to be converted into odom frame.
+        ped.pose.position.x = p.position.at(0);
+        ped.pose.position.y = p.position.at(1);
+        ped.pose.position.z = p.position.at(2);
+        pa.pedestrians.push_back(ped);
       }
+      pedestrian_pub_->publish(pa);
     }
 };
 

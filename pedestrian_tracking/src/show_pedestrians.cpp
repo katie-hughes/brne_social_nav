@@ -43,7 +43,7 @@ class ShowPedestrians : public rclcpp::Node
         visualization_msgs::msg::Marker m;
         m.header.stamp = current_time;
         m.header.frame_id = "odom";
-        m.id = ped.id;
+        m.id = i; // ped.id;
         m.type = 3;       // cylinder
         m.action = 0;     // add/modify
         // Set color as orange

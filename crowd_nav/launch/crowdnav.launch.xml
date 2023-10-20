@@ -23,6 +23,10 @@
   <node pkg="pedestrian_tracking" exec="simulate_pedestrians" if="$(eval '\'$(var sim_ped)\' == \'true\'')">
   </node>
 
+  <!-- Convert zed messages to the right type if not simulating pedestrians -->
+  <node pkg="pedestrian_tracking" exec="convert_zed_ped" if="$(eval '\'$(var sim_ped)\' == \'false\'')">
+  </node>
+
    <!-- publish pedestrian markers -->
   <node pkg="pedestrian_tracking" exec="show_pedestrians">
   </node>
