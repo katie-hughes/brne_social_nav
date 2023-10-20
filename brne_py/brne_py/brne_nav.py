@@ -451,7 +451,7 @@ class BrneNavRos(Node):
         for ped in msg.pedestrians:
             ped_pose = ped.pose.position
             if np.isnan(ped_pose.x) or np.isnan(ped_pose.y):
-                self.get_logger().debug(f'Detect NAN on {ped.pedestrian.identifier} !!!')
+                self.get_logger().debug(f'Detect NAN on {ped.id} !!!')
                 continue  # skip the pedestrian is reading is nan
 
             ### F2F implementation
