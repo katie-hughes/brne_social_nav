@@ -5,5 +5,5 @@ repositories:
     version: main
   src/zed-ros2-wrapper:
     type: git
-    url: git@github.com:katie-hughes/zed-ros2-wrapper.git
+    url: git@github.com:stereolabs/zed-ros2-wrapper.git
     version: master

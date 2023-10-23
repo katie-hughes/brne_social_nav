@@ -1,26 +1,17 @@
 <launch>
 
-    <arg name="dog_cam_location" default="head/front" description="Options: head/front, body/left, body/right"/>
+    <arg name="launch_zed" default="true" description="Options: false, true"/>
 
-    <arg name="launch_yolo" default="False" description="Options: False, True"/>
-
-    <arg name="simulate" default="True" description="Options: False, True"/>
-
-    <!-- Launch YOLO object detection -->
-    <include file="$(find-pkg-share object_detection)/object_detection.launch.xml"  if="$(eval '\'$(var launch_yolo)\' == \'True\'')">
-      <arg name="use_realsense" value="False" />
-      <arg name="use_YOLOv7" value="True" />
-      <arg name="use_dog_cam" value="True" />
-      <arg name="dog_cam_location" value="$(var dog_cam_location)"/>
+    <!-- Launch ZED wrapper -->
+    <include file="$(find-pkg-share zed_wrapper)/launch/zed2i.launch.py"  if="$(eval '\'$(var launch_zed)\' == \'true\'')">
+      <arg name="camera_model" value="2i" />
+      <arg name="publish_tf" value="false" />
+      <arg name="base_frame" value="zed_link" />
+      <arg name="config_path" value="$(find-pkg-share pedestrian_tracking)/config/zed_config.yaml"/>
     </include>
 
-    <!-- launch my pedestrian tracker node -->
-    <node pkg="pedestrian_tracking" exec="track_pedestrians" if="$(eval '\'$(var simulate)\' == \'False\'')">
-      <param name="dog_cam_location" value="$(var dog_cam_location)"/>
-    </node>
-
     <!-- launch simulated pedestrian node -->
-    <node pkg="pedestrian_tracking" exec="simulate_pedestrians" if="$(eval '\'$(var simulate)\' == \'True\'')">
+    <node pkg="pedestrian_tracking" exec="simulate_pedestrians" if="$(eval '\'$(var launch_zed)\' == \'false\'')">
     </node>
 
 </launch>
