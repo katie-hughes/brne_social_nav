@@ -13,7 +13,8 @@
     <node pkg="pedestrian_tracking" exec="convert_zed_ped">
     </node>
 
-    <!-- connect zed frame to map frame -->
+    <!-- connect zed frame to map frame if external.-->
+    <!-- TODO there must be a better way to pass in this config -->
     <node pkg="tf2_ros" exec="static_transform_publisher" 
         args="--frame-id map
               --child-frame-id zed_link
@@ -26,7 +27,7 @@
         if="$(eval '\'$(var location)\' == \'external\'')">
     </node>
 
-     <!-- connect zed frame to odom frame -->
+    <!-- connect zed frame to odom frame if onboard -->
     <node pkg="tf2_ros" exec="static_transform_publisher" 
         args="--frame-id odom
               --child-frame-id zed_link
