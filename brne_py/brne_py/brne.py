@@ -145,6 +145,10 @@ def brne_nav(xtraj_samples, ytraj_samples, num_agents, tsteps, num_pts, cost_a1,
 
     coll_mask = coll_beck(ytraj_samples[0:num_pts], y_min, y_max).all(axis=1).astype(float)
 
+    # if we are going out of bounds, coll_mask is all 0s and we will encounter divide by 0 error.
+    if not np.any(coll_mask):
+        return None
+
     for iter_num in range(11):
         weights = weights_update_nb(all_costs, weights, index_table, all_pt_index, num_agents, num_pts)
 

@@ -35,6 +35,7 @@ class BrneNavRos(Node):
         self.opt_traj_pub = self.create_publisher(Path, '/optimal_path', 1)
         self.brne_traj_pub = self.create_publisher(Path, '/brne_path', 1)
         self.marker_pub = self.create_publisher(MarkerArray, '/brne_markers', 1)
+        self.wall_pub = self.create_publisher(MarkerArray, '/walls', 1)
         self.num_peds_pub = self.create_publisher(Int16, '/brne/n_pedestrians', 1)
         self.result_pub = self.create_publisher(GoalStatus, '/navigation_result', 1)
 
@@ -143,15 +144,58 @@ class BrneNavRos(Node):
         self.cov_Lmat, self.cov_mat = brne.get_Lmat_nb(train_ts, test_ts, train_noise, self.kernel_a1, self.kernel_a2)
 
         ### F2F velocity estimation
-        self.curr_ped_array = np.array([])  # np.array([[]])
-        self.prev_ped_array = np.array([])  # np.array([[]])
+        self.curr_ped_array = np.array([])
+        self.prev_ped_array = np.array([])
 
         self.close_stop_flag = False
 
         self.brne_first_time = True
 
+    def publish_walls(self):
+        now = self.get_clock().now().to_msg()
+        height = 1.0
+        length = 10.0
+        thickness = 0.01
+        transparency = 0.2
+
+        wall1 = Marker()
+        wall1.header.frame_id = "odom"
+        wall1.header.stamp = now
+        wall1.id = 0
+        wall1.type = 1 # cube
+        wall1.action = 0
+        wall1.pose.position.x = 0.0
+        wall1.pose.position.y = self.corridor_y_min
+        wall1.pose.position.z = 0.5*height
+        wall1.color.a = transparency
+        wall1.color.b = 1.0
+        wall1.scale.x = length
+        wall1.scale.y = thickness
+        wall1.scale.z = height
+
+        wall2 = Marker()
+        wall2.header.frame_id = "odom"
+        wall2.header.stamp = now
+        wall2.id = 1
+        wall2.type = 1 # cube
+        wall2.action = 0
+        wall2.pose.position.x = 0.0
+        wall2.pose.position.y = self.corridor_y_max
+        wall2.pose.position.z = 0.5*height
+        wall2.color.a = transparency
+        wall2.color.b = 1.0
+        wall2.scale.x = length
+        wall2.scale.y = thickness
+        wall2.scale.z = height
+
+        ma = MarkerArray()
+        ma.markers.append(wall1)
+        ma.markers.append(wall2)
+        self.wall_pub.publish(ma)
 
     def brne_cb(self):
+
+        self.publish_walls()
 
         ped_info_list = []
         dists2peds = []
@@ -284,9 +328,18 @@ class BrneNavRos(Node):
                 self.cost_a1, self.cost_a2, self.cost_a3, self.ped_sample_scale,
                 self.corridor_y_min, self.corridor_y_max
             )
+
             if self.brne_first_time:
                 self.get_logger().info("BRNE initialization complete!")
                 self.brne_first_time = False
+
+            if weights is None:
+                self.get_logger().info("We are going out of bounds. Stop going to this goal")
+                self.robot_goal = None
+                g = GoalStatus()
+                g.status = GoalStatus.STATUS_SUCCEEDED
+                self.result_pub.publish(g)
+                return
 
             # apply safety mask
             weights[0] *= safety_mask
