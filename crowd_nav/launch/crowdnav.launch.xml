@@ -2,7 +2,8 @@
 
   <arg name="lang" default="PYTHON" description="Choose whether python or C++ BRNE nodes are launched. options: PYTHON, C++"/>
   <arg name="sim_odom" default="true" description="Simulate cmd_vel->odom update"/>
-  <arg name="sim_ped" default="true" description="Simulate a pedestrian"/>
+  <arg name="launch_zed" default="false" description="Launch the zed camera node"/>
+  <arg name="sim_ped" default="true" description="Simulate a static pedestrian"/>
   <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
 
   <!-- Python algorithm node -->
@@ -15,20 +16,14 @@
   <node pkg="crowd_nav" exec="controller" if="$(eval '\'$(var lang)\' == \'C++\'')">
   </node>
 
+  <!-- perception nodes -->
+  <include file="$(find-pkg-share pedestrian_tracking)/launch/perception.launch.xml">
+      <arg name="launch_zed" value="$(var launch_zed)"/>
+      <arg name="simulate" value="$(var sim_ped)"/>
+    </include>
+
   <!-- simulate cmd_vel to odom updates -->
   <node pkg="crowd_nav" exec="sim_robot" if="$(eval '\'$(var sim_odom)\' == \'true\'')">
-  </node>
-
-  <!-- simulate a pedestrian at 1,0 -->
-  <node pkg="pedestrian_tracking" exec="simulate_pedestrians" if="$(eval '\'$(var sim_ped)\' == \'true\'')">
-  </node>
-
-  <!-- Convert zed messages to the right type if not simulating pedestrians -->
-  <node pkg="pedestrian_tracking" exec="convert_zed_ped" if="$(eval '\'$(var sim_ped)\' == \'false\'')">
-  </node>
-
-   <!-- publish pedestrian markers -->
-  <node pkg="pedestrian_tracking" exec="show_pedestrians">
   </node>
 
    <!-- Service to publish goal pose -->

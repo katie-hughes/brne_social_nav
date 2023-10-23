@@ -1,17 +1,25 @@
 <launch>
 
     <arg name="launch_zed" default="true" description="Options: false, true"/>
+    <arg name="simulate" default="false" description="Options: false, true"/>
 
     <!-- Launch ZED wrapper -->
     <include file="$(find-pkg-share zed_wrapper)/launch/zed2i.launch.py"  if="$(eval '\'$(var launch_zed)\' == \'true\'')">
-      <arg name="camera_model" value="2i" />
       <arg name="publish_tf" value="false" />
       <arg name="base_frame" value="zed_link" />
       <arg name="config_path" value="$(find-pkg-share pedestrian_tracking)/config/zed_config.yaml"/>
     </include>
 
+    <!-- convert zed object message to a type that is easier to work with -->
+    <node pkg="pedestrian_tracking" exec="convert_zed_ped" if="$(eval '\'$(var launch_zed)\' == \'true\'')">
+    </node>
+
     <!-- launch simulated pedestrian node -->
-    <node pkg="pedestrian_tracking" exec="simulate_pedestrians" if="$(eval '\'$(var launch_zed)\' == \'false\'')">
+    <node pkg="pedestrian_tracking" exec="simulate_pedestrians" if="$(eval '\'$(var simulate)\' == \'true\'')">
+    </node>
+
+    <!-- publish pedestrian markers -->
+    <node pkg="pedestrian_tracking" exec="show_pedestrians">
     </node>
 
 </launch>
