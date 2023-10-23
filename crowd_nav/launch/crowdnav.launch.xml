@@ -7,7 +7,8 @@
   <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
 
   <!-- Python algorithm node -->
-  <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\'')" args="--ros-args --log-level brne_nav:=$(var debug_level)">
+  <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\'')" 
+        args="--ros-args --log-level brne_nav:=$(var debug_level)">
   </node>
 
   <!-- C++ algorithm nodes -->
@@ -24,6 +25,11 @@
 
   <!-- simulate cmd_vel to odom updates -->
   <node pkg="crowd_nav" exec="sim_robot" if="$(eval '\'$(var sim_odom)\' == \'true\'')">
+  </node>
+  <!-- if we are simulating odom, we also need to add a dummy map frame for tf continuity -->
+  <node pkg="tf2_ros" exec="static_transform_publisher" 
+        args="0 0 0 1 0 0 0 'map' 'odom'" 
+        if="$(eval '\'$(var sim_odom)\' == \'true\'')">
   </node>
 
    <!-- Service to publish goal pose -->

@@ -1,0 +1,42 @@
+<launch>
+
+    <arg name="location" default="external" description="Location of the zed. Options: external, onboard"/>
+
+    <!-- Launch ZED wrapper -->
+    <include file="$(find-pkg-share zed_wrapper)/launch/zed2i.launch.py">
+      <arg name="publish_tf" value="false" />
+      <arg name="base_frame" value="zed_link" />
+      <arg name="config_path" value="$(find-pkg-share pedestrian_tracking)/config/zed_config.yaml"/>
+    </include>
+
+    <!-- convert zed object message to a type that is easier to work with -->
+    <node pkg="pedestrian_tracking" exec="convert_zed_ped">
+    </node>
+
+    <!-- connect zed frame to map frame -->
+    <node pkg="tf2_ros" exec="static_transform_publisher" 
+        args="--frame-id map
+              --child-frame-id zed_link
+              --x 0
+              --y 0
+              --z 0
+              --roll 0
+              --pitch 0
+              --yaw 0" 
+        if="$(eval '\'$(var location)\' == \'external\'')">
+    </node>
+
+     <!-- connect zed frame to odom frame -->
+    <node pkg="tf2_ros" exec="static_transform_publisher" 
+        args="--frame-id odom
+              --child-frame-id zed_link
+              --x 0
+              --y 0
+              --z 0
+              --roll 0
+              --pitch 0
+              --yaw 0" 
+        if="$(eval '\'$(var location)\' == \'onboard\'')">
+    </node>
+
+</launch>
