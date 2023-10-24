@@ -189,24 +189,6 @@ Visualization Manager:
           Value: true
         odom:
           Value: true
-        ped_0:
-          Value: true
-        zed2i_base_link:
-          Value: true
-        zed2i_camera_center:
-          Value: true
-        zed2i_imu_link:
-          Value: true
-        zed2i_left_camera_frame:
-          Value: true
-        zed2i_left_camera_optical_frame:
-          Value: true
-        zed2i_right_camera_frame:
-          Value: true
-        zed2i_right_camera_optical_frame:
-          Value: true
-        zed_link:
-          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -214,61 +196,9 @@ Visualization Manager:
       Show Names: false
       Tree:
         map:
-          {}
-        odom:
-          zed_link:
-            zed2i_base_link:
-              zed2i_camera_center:
-                zed2i_left_camera_frame:
-                  ped_0:
-                    {}
-                  zed2i_imu_link:
-                    {}
-                  zed2i_left_camera_optical_frame:
-                    {}
-                zed2i_right_camera_frame:
-                  zed2i_right_camera_optical_frame:
-                    {}
+          odom:
+            {}
       Update Interval: 0
-      Value: true
-    - Angle Tolerance: 0.10000000149011612
-      Class: rviz_default_plugins/Odometry
-      Covariance:
-        Orientation:
-          Alpha: 0.5
-          Color: 255; 255; 127
-          Color Style: Unique
-          Frame: Local
-          Offset: 1
-          Scale: 1
-          Value: true
-        Position:
-          Alpha: 0.30000001192092896
-          Color: 204; 51; 204
-          Scale: 1
-          Value: true
-        Value: true
-      Enabled: true
-      Keep: 100
-      Name: ZEDOdometry
-      Position Tolerance: 0.10000000149011612
-      Shape:
-        Alpha: 1
-        Axes Length: 1
-        Axes Radius: 0.10000000149011612
-        Color: 255; 25; 0
-        Head Length: 0.10000000149011612
-        Head Radius: 0.10000000149011612
-        Shaft Length: 0.20000000298023224
-        Shaft Radius: 0.05000000074505806
-        Value: Arrow
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        Filter size: 10
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /zed2i/zed_node/odom
       Value: true
   Enabled: true
   Global Options:

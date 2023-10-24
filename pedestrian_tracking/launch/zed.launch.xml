@@ -41,4 +41,8 @@
         if="$(eval '\'$(var onboard)\' == \'true\'')">
     </node>
 
+    <!-- "remap" zed odom topic to regular odom topic -->
+    <node pkg="pedestrian_tracking" exec="odom_passthrough" if="$(eval '\'$(var localize)\' == \'true\'')">
+    </node>
+
 </launch>

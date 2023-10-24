@@ -24,23 +24,6 @@ find_package(image_geometry REQUIRED)
 find_package(crowd_nav_interfaces REQUIRED)
 find_package(zed_interfaces REQUIRED)
 
-find_package(OpenCV REQUIRED)
-
-add_executable(track_pedestrians src/track_pedestrians.cpp)
-ament_target_dependencies(track_pedestrians
-  rclcpp
-  std_msgs
-  std_srvs
-  tf2
-  tf2_ros
-  geometry_msgs
-  visualization_msgs
-  nav_msgs
-  sensor_msgs
-  image_geometry
-  crowd_nav_interfaces)
-target_link_libraries(track_pedestrians ${OpenCV_LIBRARIES})
-
 add_executable(simulate_pedestrians src/simulate_pedestrians.cpp)
 ament_target_dependencies(simulate_pedestrians
   rclcpp
@@ -84,7 +67,13 @@ add_executable(convert_zed_ped src/convert_zed_ped.cpp)
   crowd_nav_interfaces
   zed_interfaces)
 
-install(TARGETS track_pedestrians simulate_pedestrians show_pedestrians convert_zed_ped
+
+add_executable(odom_passthrough src/odom_passthrough.cpp)
+  ament_target_dependencies(odom_passthrough
+  rclcpp
+  nav_msgs)
+
+install(TARGETS simulate_pedestrians show_pedestrians convert_zed_ped odom_passthrough 
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY

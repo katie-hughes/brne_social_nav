@@ -25,7 +25,7 @@ The result of the BRNE algorithm is a motion plan represented as a series of `cm
 ros2 launch unitree_nav control.launch.py use_rviz:=false
 ```
 ### Creating `odom` updates
-The onboard Xavier is also responsible for providing odometry updates of the robot. If you need to generate a map of the area, run the following launchfile. You should only need to do this once provided the resulting map is good.
+The onboard Xavier can be responsible for providing odometry updates of the robot. If you need to generate a map of the area, run the following launchfile. You should only need to do this once provided the resulting map is good.
 ```
 ros2 launch unitree_nav mapping.launch.py use_rviz:=false restart_map:=true localize_only:=false
 ```
@@ -47,17 +47,17 @@ ros2 launch crowd_nav crowdnav.launch.xml
 
 To do everything in simulation -- simulated odometry updates as well as simulated pedestrians -- run:
 ```
-ros2 launch crowd_nav crowdnav_sim.launch.xml
+ros2 launch crowd_nav sim.launch.xml
 ```
 
-For external ZED tracking but onboard odometry run:
+For external ZED tracking but odometry updates from LIDAR run:
 ```
-ros2 launch crowd_nav crowdnav_external_zed.launch.xml
+ros2 launch crowd_nav external.launch.xml
 ```
 
-Finally, for the ZED tracking to be done onboard the robot, run:
+Finally, to do pedestrian tracking AND odometry updates with an onboard ZED, run:
 ```
-ros2 launch crowd_nav crowdnav_onboard_zed.launch.xml
+ros2 launch crowd_nav onboard.launch.xml
 ```
 
 
