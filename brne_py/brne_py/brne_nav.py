@@ -65,8 +65,8 @@ class BrneNavRos(Node):
         self.declare_parameter('R_ang', 2.0)  # control penalty weight on angular velocity, the larger it is, the smoother the rotation motion will be, but way point tracking accuracy might be compromised
         self.declare_parameter('replan_freq', 10.0)  # unit: Hz
         self.declare_parameter('people_timeout', 5.0)  # unit: seconds
-        self.declare_parameter('corridor_y_min', -1.0)  # lower bound of y coordinate (one side of corridor)
-        self.declare_parameter('corridor_y_max', 1.0)  # upper bound of y coordinate (the other side of corridor)
+        self.declare_parameter('corridor_y_min', -0.75)  # lower bound of y coordinate (one side of corridor)
+        self.declare_parameter('corridor_y_max', 0.75)  # upper bound of y coordinate (the other side of corridor)
         self.declare_parameter('staircase_truncation', False)  # saturate F2F velocity in a staircase manner
         self.declare_parameter('people_timeout_off', True)
         self.declare_parameter('close_stop_threshold', 0.5)  # threshold for safety mask, leading to estop

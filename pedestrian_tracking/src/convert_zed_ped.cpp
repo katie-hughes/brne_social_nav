@@ -85,9 +85,52 @@ class ConvertPeds : public rclcpp::Node
         } catch (const tf2::TransformException & ex) {
           RCLCPP_INFO_STREAM(get_logger(), "Could not transform");
         }
+
+        // // Tried to do this in a way that doesn't need to publish tf as sometimes this blows up. Doesn't work great.
+        // tf2::Transform T_camera_ped;
+        // T_camera_ped.setOrigin(tf2::Vector3(p.position.at(0),p.position.at(1),p.position.at(2)));
+        
+        // RCLCPP_INFO_STREAM(get_logger(), "\nT CAMERA PED");
+        // printTransform(T_camera_ped);
+
+        // geometry_msgs::msg::TransformStamped t;
+        // try {
+        //   t = tf_buffer_->lookupTransform(
+        //     "odom", "zed2i_left_camera_frame",
+        //     tf2::TimePointZero);
+        //   tf2::Transform T_odom_camera;
+        //   T_odom_camera.setOrigin(tf2::Vector3(t.transform.translation.x,
+        //                                        t.transform.translation.y,
+        //                                        t.transform.translation.z));
+        //   T_odom_camera.setRotation(tf2::Quaternion(t.transform.rotation.w,
+        //                                             t.transform.rotation.x,
+        //                                             t.transform.rotation.y,
+        //                                             t.transform.rotation.z));
+        //   tf2::Transform T_odom_ped;
+        //   T_odom_ped = T_odom_camera * T_camera_ped;
+        //   crowd_nav_interfaces::msg::Pedestrian ped;
+        //   ped.id = p.label_id;
+        //   ped.pose.position.x = T_odom_ped.getOrigin().getX();
+        //   ped.pose.position.y = T_odom_ped.getOrigin().getY();
+        //   ped.pose.position.z = T_odom_ped.getOrigin().getZ();
+        //   pa.pedestrians.push_back(ped);
+
+        // } catch (const tf2::TransformException & ex) {
+        //   RCLCPP_INFO_STREAM(get_logger(), "Could not transform odom to camera");
+        // }
       }
       pedestrian_pub_->publish(pa);
     }
+
+    // void printTransform(tf2::Transform & t){
+    //   RCLCPP_INFO_STREAM(get_logger(), "Pos: "<<t.getOrigin().getX() << " " << 
+    //                                             t.getOrigin().getY() << " " << 
+    //                                             t.getOrigin().getZ());
+    //   RCLCPP_INFO_STREAM(get_logger(), "Ori: "<<t.getRotation().getW() << " " << 
+    //                                             t.getRotation().getX() << " " << 
+    //                                             t.getRotation().getY() << " " << 
+    //                                             t.getRotation().getZ());
+    // }
 };
 
 int main(int argc, char * argv[])

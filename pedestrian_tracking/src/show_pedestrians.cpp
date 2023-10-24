@@ -37,8 +37,8 @@ class ShowPedestrians : public rclcpp::Node
 
     void pedestrians_cb(const crowd_nav_interfaces::msg::PedestrianArray & msg)
     {
-      // issue: if the pedestrian disappears, the marker will stay.
-      // 
+      // issue: if the pedestrian disappears, the marker will stay. 
+      // This is solved by making the lifetime small.
       const auto current_time = this->get_clock()->now();
       visualization_msgs::msg::MarkerArray ma;
       const int n_pedestrians = msg.pedestrians.size();
