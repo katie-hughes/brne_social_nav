@@ -50,9 +50,14 @@ To do everything in simulation -- simulated odometry updates as well as simulate
 ros2 launch crowd_nav crowdnav_sim.launch.xml
 ```
 
-To do everything in simulation -- simulated odometry updates as well as simulated pedestrians -- run:
+For external ZED tracking but onboard odometry run:
 ```
-ros2 launch crowd_nav crowdnav_sim.launch.xml
+ros2 launch crowd_nav crowdnav_external_zed.launch.xml
+```
+
+Finally, for the ZED tracking to be done onboard the robot, run:
+```
+ros2 launch crowd_nav crowdnav_onboard_zed.launch.xml
 ```
 
 
