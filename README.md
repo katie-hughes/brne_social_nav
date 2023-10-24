@@ -37,28 +37,30 @@ ros2 launch unitree_nav mapping.launch.py use_rviz:=false restart_map:=false loc
 
 ## What needs to be running on the external computer?
 
-### Detecting Pedestrians
-With the ZED camera attached, run:
-```
-ros2 launch zed_wrapper zed2i.launch.py
-```
-This sets up publishing of pedestrian locations with respect to the ZED camera frame.
+The external camera is responsible for detecting pedestrians as well as running the BRNE algorithm. 
 
-### BRNE algorithm
-To generate the motion plans, run:
+The core launchfile is below. You can see the various arguments with `--show-args`.
 ```
 ros2 launch crowd_nav crowdnav.launch.xml
 ```
-### Arguments
-* `lang`: Choose `PYTHON` or `C++` for the main BRNE algorithm node. Currently, only `PYTHON` is supported.
-* `sim_odom`: simulate the odometry updates of the robot using dead reckoning. You can use this for simple tests of the BRNE algorithm if you're not connected to the robot.
-* `sim_ped`: simulate a static pedestrian 1m ahead of the starting location.
+
+
+To do everything in simulation -- simulated odometry updates as well as simulated pedestrians -- run:
+```
+ros2 launch crowd_nav crowdnav_sim.launch.xml
+```
+
+To do everything in simulation -- simulated odometry updates as well as simulated pedestrians -- run:
+```
+ros2 launch crowd_nav crowdnav_sim.launch.xml
+```
+
 
 ## ROS 2 Packages
 - [brne_py](brne_py) - A python implementation of the BRNE algorithm
 - [crowd_nav_interfaces](crowd_nav_interfaces) - Defines some custom message types relevant to crowd navigation
 - [crowd_nav](crowd_nav) - Framework for a C++ implementation of the BRNE algorithm. Still in progress.
-- [pedestrian_tracking](pedestrian_tracking) - Framework for tracking and publishing pedestrian locations, either simulated or from a camera stream. Still in progress.
+- [pedestrian_tracking](pedestrian_tracking) - Tracks, displays, and can simulate pedestrian locations.
 
 ## Libraries
 - [brnelib](brnelib) - Framework for the BRNE algorithm in C++. Still in progress.

@@ -1,10 +1,11 @@
 <launch>
 
-    <arg name="location" default="external" description="Location of the zed. Options: external, onboard"/>
+    <arg name="onboard" default="true" description="Is ZED onboard the dog? Options: true, false"/>
+    <arg name="localize" default="false" description="Publish odom updates from ZED. Options: true, false"/>
 
     <!-- Launch ZED wrapper -->
     <include file="$(find-pkg-share zed_wrapper)/launch/zed2i.launch.py">
-      <arg name="publish_tf" value="false" />
+      <arg name="publish_tf" value="$(var localize)" />
       <arg name="base_frame" value="zed_link" />
       <arg name="config_path" value="$(find-pkg-share pedestrian_tracking)/config/zed_config.yaml"/>
     </include>
@@ -24,7 +25,7 @@
               --roll 0
               --pitch 0
               --yaw 0" 
-        if="$(eval '\'$(var location)\' == \'external\'')">
+        if="$(eval '\'$(var onboard)\' == \'false\'')">
     </node>
 
     <!-- connect zed frame to odom frame if onboard -->
@@ -37,7 +38,7 @@
               --roll 0
               --pitch 0
               --yaw 0" 
-        if="$(eval '\'$(var location)\' == \'onboard\'')">
+        if="$(eval '\'$(var onboard)\' == \'true\'')">
     </node>
 
 </launch>

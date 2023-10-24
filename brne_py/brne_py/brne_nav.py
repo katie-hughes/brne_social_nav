@@ -33,7 +33,6 @@ class BrneNavRos(Node):
         self.cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel', 1)
         self.ped_info_pub = self.create_publisher(PoseArray, '/brne_peds', 1)
         self.opt_traj_pub = self.create_publisher(Path, '/optimal_path', 1)
-        self.brne_traj_pub = self.create_publisher(Path, '/brne_path', 1)
         self.marker_pub = self.create_publisher(MarkerArray, '/brne_markers', 1)
         self.wall_pub = self.create_publisher(MarkerArray, '/walls', 1)
         self.num_peds_pub = self.create_publisher(Int16, '/brne/n_pedestrians', 1)
@@ -73,6 +72,7 @@ class BrneNavRos(Node):
         self.declare_parameter('close_stop_threshold', 0.5)  # threshold for safety mask, leading to estop
         self.declare_parameter('open_space_velocity', 0.6)  # nominal velocity when the robot is in open space
         self.declare_parameter('brne_activate_threshold', 3.5)  # distance threshold from a pedestrian to enable BRNE
+        self.declare_parameter('odom_topic', '/odom')  # odometry topic to subscribe to
         ####################################################################################
         self.num_agents = self.get_parameter('maximum_agents').value
         self.num_samples = self.get_parameter('num_samples').value
@@ -96,6 +96,7 @@ class BrneNavRos(Node):
         self.close_stop_threshold = self.get_parameter('close_stop_threshold').value
         self.open_space_velocity = self.get_parameter('open_space_velocity').value
         self.brne_activate_threshold = self.get_parameter('brne_activate_threshold').value
+        self.odom_topic = self.get_parameter('odom_topic').value
 
         self.params_msg = String()
         param_dict = {}
@@ -110,7 +111,7 @@ class BrneNavRos(Node):
         self.ped_sub = self.create_subscription(PedestrianArray,
                                                 '/pedestrians', self.ped_cb, 1,
                                                 callback_group=parallel_cb_group)
-        self.odom_sub = self.create_subscription(Odometry, '/odom', self.odom_cb, 1,
+        self.odom_sub = self.create_subscription(Odometry, self.odom_topic, self.odom_cb, 1,
                                                  callback_group=parallel_cb_group)
         self.goal_sub = self.create_subscription(PoseStamped, 'goal_pose', self.goal_cb, 1,
                                                  callback_group=parallel_cb_group)
@@ -423,8 +424,6 @@ class BrneNavRos(Node):
             if self.robot_goal is None:
                 self.cmds = np.zeros((self.plan_steps, 2))
                 self.cmds_traj = np.tile(robot_state, reps=(self.plan_steps,1))
-
-        # self.publish_trajectory(self.brne_traj_pub, self.cmds_traj[:, 0], self.cmds_traj[:, 1])
 
     def publish_trajectory(self, publisher, xs, ys):
         p = Path()

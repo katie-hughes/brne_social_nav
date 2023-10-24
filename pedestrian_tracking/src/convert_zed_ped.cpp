@@ -70,7 +70,7 @@ class ConvertPeds : public rclcpp::Node
         t.transform.translation.z = p.position.at(2);
         // Send the transformation
         tf_broadcaster_->sendTransform(t);
-        // immediately read this tf to get the transform.
+        // immediately read this tf to get the transform. Seems a little janky but works for now.
         geometry_msgs::msg::TransformStamped T_odom_ped;
         try {
           T_odom_ped = tf_buffer_->lookupTransform(

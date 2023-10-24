@@ -21,7 +21,7 @@ class ShowPedestrians : public rclcpp::Node
 {
   public:
     ShowPedestrians()
-    : Node("show_pedestrians")
+    : Node("show_pedestrians"), last_n_pedestrians{0}
     {
 
       pedestrian_sub_ = create_subscription<crowd_nav_interfaces::msg::PedestrianArray>(
@@ -34,11 +34,16 @@ class ShowPedestrians : public rclcpp::Node
     rclcpp::Subscription<crowd_nav_interfaces::msg::PedestrianArray>::SharedPtr pedestrian_sub_;
     rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
 
+    int last_n_pedestrians;
+
     void pedestrians_cb(const crowd_nav_interfaces::msg::PedestrianArray & msg)
     {
+      // issue: if the pedestrian disappears, the marker will stay.
+      // 
       const auto current_time = this->get_clock()->now();
       visualization_msgs::msg::MarkerArray ma;
-      for (int i = 0; i < static_cast<int>(msg.pedestrians.size()); i++){
+      const int n_pedestrians = msg.pedestrians.size();
+      for (int i = 0; i < n_pedestrians; i++){
         const auto ped = msg.pedestrians.at(i);
         visualization_msgs::msg::Marker m;
         m.header.stamp = current_time;
@@ -58,10 +63,12 @@ class ShowPedestrians : public rclcpp::Node
         m.pose.position.x = ped.pose.position.x;
         m.pose.position.y = ped.pose.position.y;
         m.pose.position.z = 0.125;
+        m.lifetime.sec = 1;
         // Add to marker array
         ma.markers.push_back(m);
       }
       marker_pub_->publish(ma);
+      last_n_pedestrians = msg.pedestrians.size();
     }
 };
 

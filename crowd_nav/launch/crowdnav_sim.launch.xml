@@ -1,0 +1,11 @@
+<launch>
+
+  <include file="$(find-pkg-share crowd_nav)/launch/crowdnav.launch.xml">
+      <arg name="sim_ped" value="true"/>
+      <arg name="sim_odom" value="true"/>
+      <arg name="launch_zed" value="false"/>
+      <arg name="onboard" value="false" />
+      <arg name="zed_localize" value="false" />
+    </include>
+
+</launch>

@@ -1,13 +1,15 @@
 <launch>
 
-    <arg name="launch_zed" default="true" description="Start the zed camera. Options: false, true"/>
-    <arg name="zed_location" default="external" description="Location of the zed. Options: external, onboard"/>
-    <arg name="simulate" default="false" description="Simulate a pedestrian. Options: false, true"/>
+    <arg name="launch_zed" default="true" description="Start the ZED camera. Options: true, false"/>
+    <arg name="onboard" default="true" description="Is ZED onboard the Go1? Options: true, false"/>
+    <arg name="localize" default="false" description="Publish odom updates from ZED. Options: true, false"/>
+    <arg name="simulate" default="false" description="Simulate a pedestrian. Options: true, false"/>
 
     <!-- Start streaming from ZED -->
     <include file="$(find-pkg-share pedestrian_tracking)/launch/zed.launch.xml" 
              if="$(eval '\'$(var launch_zed)\' == \'true\'')">
-      <arg name="zed_location" value="$(var zed_location)" />
+      <arg name="onboard" value="$(var onboard)" />
+      <arg name="localize" value="$(var localize)" />
     </include>
 
     <!-- launch simulated pedestrian node -->

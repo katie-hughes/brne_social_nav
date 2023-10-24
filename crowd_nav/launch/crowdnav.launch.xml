@@ -1,13 +1,20 @@
 <launch>
 
-  <arg name="lang" default="PYTHON" description="Choose whether python or C++ BRNE nodes are launched. options: PYTHON, C++"/>
+  <arg name="lang" default="PYTHON" description="Choose whether python or C++ BRNE nodes are launched (Right now, only Python is valid). options: PYTHON, C++"/>
   <arg name="sim_odom" default="true" description="Simulate cmd_vel->odom update"/>
   <arg name="launch_zed" default="false" description="Launch the zed camera node"/>
+  <arg name="onboard" default="true" description="Is ZED onboard the Go1? Options: true, false"/>
   <arg name="sim_ped" default="true" description="Simulate a static pedestrian"/>
   <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
+  <arg name="zed_localize" default="false" description="Update odom using the ZED"/>
 
   <!-- Python algorithm node -->
-  <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\'')" 
+  <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\' and \'$(var zed_localize)\' == \'true\'')" 
+        args="--ros-args --log-level brne_nav:=$(var debug_level)">
+    <param name="odom_topic" value="/zed2i/zed_node/odom"/>
+  </node>
+
+  <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\' and \'$(var zed_localize)\' != \'true\'')" 
         args="--ros-args --log-level brne_nav:=$(var debug_level)">
   </node>
 
@@ -21,6 +28,8 @@
   <include file="$(find-pkg-share pedestrian_tracking)/launch/perception.launch.xml">
       <arg name="launch_zed" value="$(var launch_zed)"/>
       <arg name="simulate" value="$(var sim_ped)"/>
+      <arg name="onboard" value="$(var onboard)" />
+      <arg name="localize" value="$(var zed_localize)" />
     </include>
 
   <!-- simulate cmd_vel to odom updates -->
