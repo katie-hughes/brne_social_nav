@@ -142,10 +142,6 @@ class BrneNavRos(Node):
         test_ts = tlist
         
         self.cov_Lmat, self.cov_mat = brne.get_Lmat_nb(train_ts, test_ts, train_noise, self.kernel_a1, self.kernel_a2)
-        self.get_logger().info(f'train ts: {train_ts.shape} {train_ts}')
-        self.get_logger().info(f'test_ts: {test_ts.shape} {test_ts}')
-        self.get_logger().info(f'cov_lmat {self.cov_Lmat.shape} {self.cov_Lmat}')
-        self.get_logger().info(f'cov mat: {self.cov_mat.shape} {self.cov_mat}')
 
         ### F2F velocity estimation
         self.curr_ped_array = np.array([])
