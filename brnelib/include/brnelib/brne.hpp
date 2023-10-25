@@ -23,7 +23,7 @@ namespace brnelib
 
   // feel ok about types
   arma::mat get_Lmat(arma::vec train_ts, arma::vec test_ts, 
-                     double train_noise, double a1, double a2);
+                     arma::vec train_noise, double a1, double a2);
 
   // feel ok about types
   arma::mat costs_nb(arma::vec trajx, arma::vec trajy, int n_agents, int n_points, int tsteps, 
@@ -40,7 +40,7 @@ namespace brnelib
   arma::vec coll_beck(arma::vec trajy, double ymin, double ymax);
 
   // very unsure of types
-  arma::vec brne_nav(arma::vec xtraj_samples, arma::vec ytraj_samples, 
-                     int n_agents, int tsteps, int n_points, double a1, double a2, double a3, 
-                     double ymin, double ymax);
+  std::vector<arma::vec> brne_nav(std::vector<arma::vec> xtraj_samples, std::vector<arma::vec> ytraj_samples, 
+                                  int n_agents, int tsteps, int n_points, double a1, double a2, double a3, 
+                                  double ymin, double ymax);
 }

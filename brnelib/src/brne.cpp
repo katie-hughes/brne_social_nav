@@ -18,7 +18,7 @@ namespace brnelib
   }
 
   arma::mat get_Lmat(arma::vec train_ts, arma::vec test_ts, 
-                     double train_noise, double a1, double a2){
+                     arma::vec train_noise, double a1, double a2){
     arma::mat res;
     return res;
   }
@@ -47,10 +47,10 @@ namespace brnelib
   }
 
   // very unsure of types
-  arma::vec brne_nav(arma::vec xtraj_samples, arma::vec ytraj_samples, 
+  std::vector<arma::vec> brne_nav(std::vector<arma::vec> xtraj_samples, std::vector<arma::vec> ytraj_samples, 
                      int n_agents, int tsteps, int n_points, double a1, double a2, double a3, 
                      double ymin, double ymax){
-    arma::vec res;
+    std::vector<arma::vec> res;
     return res;
   }
 }

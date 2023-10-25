@@ -72,7 +72,6 @@ class BrneNavRos(Node):
         self.declare_parameter('close_stop_threshold', 0.5)  # threshold for safety mask, leading to estop
         self.declare_parameter('open_space_velocity', 0.6)  # nominal velocity when the robot is in open space
         self.declare_parameter('brne_activate_threshold', 3.5)  # distance threshold from a pedestrian to enable BRNE
-        self.declare_parameter('odom_topic', '/odom')  # odometry topic to subscribe to
         ####################################################################################
         self.num_agents = self.get_parameter('maximum_agents').value
         self.num_samples = self.get_parameter('num_samples').value
@@ -96,7 +95,6 @@ class BrneNavRos(Node):
         self.close_stop_threshold = self.get_parameter('close_stop_threshold').value
         self.open_space_velocity = self.get_parameter('open_space_velocity').value
         self.brne_activate_threshold = self.get_parameter('brne_activate_threshold').value
-        self.odom_topic = self.get_parameter('odom_topic').value
 
         self.params_msg = String()
         param_dict = {}
@@ -111,7 +109,7 @@ class BrneNavRos(Node):
         self.ped_sub = self.create_subscription(PedestrianArray,
                                                 '/pedestrians', self.ped_cb, 1,
                                                 callback_group=parallel_cb_group)
-        self.odom_sub = self.create_subscription(Odometry, self.odom_topic, self.odom_cb, 1,
+        self.odom_sub = self.create_subscription(Odometry, "/odom", self.odom_cb, 1,
                                                  callback_group=parallel_cb_group)
         self.goal_sub = self.create_subscription(PoseStamped, 'goal_pose', self.goal_cb, 1,
                                                  callback_group=parallel_cb_group)
@@ -142,7 +140,12 @@ class BrneNavRos(Node):
         train_ts = np.array([tlist[0]])
         train_noise = np.array([1e-04])
         test_ts = tlist
+        
         self.cov_Lmat, self.cov_mat = brne.get_Lmat_nb(train_ts, test_ts, train_noise, self.kernel_a1, self.kernel_a2)
+        self.get_logger().info(f'train ts: {train_ts.shape} {train_ts}')
+        self.get_logger().info(f'test_ts: {test_ts.shape} {test_ts}')
+        self.get_logger().info(f'cov_lmat {self.cov_Lmat.shape} {self.cov_Lmat}')
+        self.get_logger().info(f'cov mat: {self.cov_mat.shape} {self.cov_mat}')
 
         ### F2F velocity estimation
         self.curr_ped_array = np.array([])
