@@ -22,6 +22,7 @@ setup(
     entry_points={
         'console_scripts': [
             'brne_nav = brne_py.brne_nav:main',
+            'brne_nav_class = brne_py.brne_nav_class:main',
         ]
     },
 )

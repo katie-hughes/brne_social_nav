@@ -7,14 +7,14 @@
   <arg name="sim_ped" default="true" description="Simulate a static pedestrian"/>
   <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
   <arg name="zed_localize" default="false" description="Update odom using the ZED"/>
+  <arg name="use_class" default="true" description="Use class based BRNE python implementation"/>
 
   <!-- Python algorithm node -->
-  <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\' and \'$(var zed_localize)\' == \'true\'')" 
+  <node pkg="brne_py" exec="brne_nav_class" if="$(eval '\'$(var lang)\' == \'PYTHON\' and \'$(var use_class)\' == \'true\'')" 
         args="--ros-args --log-level brne_nav:=$(var debug_level)">
-    <param name="odom_topic" value="/zed2i/zed_node/odom"/>
   </node>
 
-  <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\' and \'$(var zed_localize)\' != \'true\'')" 
+  <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\' and \'$(var use_class)\' != \'true\'')" 
         args="--ros-args --log-level brne_nav:=$(var debug_level)">
   </node>
 

@@ -6,8 +6,6 @@ import numba as nb
 # os.environ['NUMBA_NUM_THREADS'] = '12'
 # nb.config.NUMBA_NUM_THREADS = 4
 
-rng = np.random.default_rng(1)
-
 
 """
 BRNE parameters:
@@ -23,31 +21,13 @@ cost_a3: Control the safety penalty weight, larger the value is, more conservati
 # cost_a2 = 1.0
 # cost_a3 = 20.0
 
-
-@nb.njit  # ('float64[:, :](float64[:, :])')
-def cholesky_numba(A):
-    n = A.shape[0]
-    L = np.zeros_like(A)
-    for i in range(n):
-        for j in range(i + 1):
-            s = 0
-            for k in range(j):
-                s += L[i][k] * L[j][k]
-
-            if (i == j):
-                L[i][j] = (A[i][i] - s) ** 0.5
-            else:
-                L[i][j] = (1.0 / L[j][j] * (A[i][j] - s))
-    return L
-
-
 class BRNE:
     def __init__(self, 
                  kernel_a1, kernel_a2, 
                  cost_a1, cost_a2, cost_a3, 
                  dt, plan_steps, n_samples,
                  max_ang_vel, max_lin_vel, nominal_vel,
-                 ped_sample_scale, ymin, ymax):
+                 ymin, ymax):
         self.kernel_a1 = kernel_a1
         self.kernel_a2 = kernel_a2
         self.cost_a1 = cost_a1
@@ -59,7 +39,6 @@ class BRNE:
         self.max_ang_vel = max_ang_vel
         self.max_lin_vel = max_lin_vel
         self.nominal_vel = nominal_vel
-        self.ped_sample_scale = ped_sample_scale
         self.ymin = ymin
         self.ymax = ymax
 
@@ -82,7 +61,26 @@ class BRNE:
         self.index_table = None
         self.get_index_table()
 
-    @nb.jit(nopython=True, parallel=True)
+        self.rng = np.random.default_rng(1)
+
+        self.xtraj_samples = None
+        self.ytraj_samples = None
+
+    def cholesky_numba(self, A):
+        n = A.shape[0]
+        L = np.zeros_like(A)
+        for i in range(n):
+            for j in range(i + 1):
+                s = 0
+                for k in range(j):
+                    s += L[i][k] * L[j][k]
+
+                if (i == j):
+                    L[i][j] = (A[i][i] - s) ** 0.5
+                else:
+                    L[i][j] = (1.0 / L[j][j] * (A[i][j] - s))
+        return L
+
     def get_kernel_mat(self, t1list, t2list):
         mat = np.zeros((t1list.shape[0], t2list.shape[0]))
         for i in nb.prange(t1list.shape[0]):
@@ -98,15 +96,15 @@ class BRNE:
         covmat_22 = self.get_kernel_mat(self.test_ts, self.test_ts)
         cov_mat = covmat_22 - covmat_12 @ np.linalg.inv(covmat_11) @ covmat_12.T
         cov_mat += np.eye(self.test_ts.shape[0]) * 1e-06
-        self.cov_Lmat = cholesky_numba(cov_mat)
+        self.cov_Lmat = self.cholesky_numba(cov_mat)
         self.cov_mat = cov_mat
 
     def mvn_sample_normal(self):
-        init_samples = rng.standard_normal(size=(self.plan_steps, (self.n_agents - 1)*self.n_samples))
+        init_samples = self.rng.standard_normal(size=(self.plan_steps, (self.n_agents - 1)*self.n_samples))
         new_samples = self.cov_Lmat @ init_samples
         return new_samples.T
     
-    @nb.jit(nopython=True, parallel=True)
+    # @nb.jit(nopython=True, parallel=True)
     def costs_nb(self, trajs_x, trajs_y):
         vals = np.zeros((self.n_agents * self.n_samples, self.n_agents * self.n_samples))
         for i in nb.prange(self.n_samples * self.n_agents):
@@ -122,7 +120,6 @@ class BRNE:
                 vals[i, j] = np.max(traj_costs) * self.cost_a3
         return vals
     
-    @nb.jit(nopython=True, parallel=True)
     def get_index_table(self):
         index_table = np.zeros((self.n_agents, self.n_agents))
         for i in nb.prange(self.n_agents):
@@ -136,7 +133,6 @@ class BRNE:
         self.index_table = index_table.astype(int)
 
     
-    @nb.jit(nopython=True, parallel=True)
     def weights_update_nb(self, all_costs, old_weights):
         all_pt_index = np.arange(self.n_agents * self.n_samples).reshape(self.n_agents, self.n_samples)
         weights = old_weights.copy()
@@ -154,7 +150,6 @@ class BRNE:
             weights[i] /= np.mean(weights[i])
         return weights
     
-    @nb.jit(nopython=True, parallel=True)
     def coll_beck(self, trajs_y):
         lower_mask = trajs_y > self.ymin
         upper_mask = trajs_y < self.ymax
@@ -176,22 +171,52 @@ class BRNE:
         weights[0] = agent_weights.copy()
         return weights
     
+    def get_cmds(self):
+        theta_a = self.state[2]
+        if self.state[2] > 0.0:
+            theta_a -= np.pi/2
+        else:
+            theta_a += np.pi/2
+        axis_vec = np.array([np.cos(theta_a), np.sin(theta_a)])
+        vec_to_goal = self.goal - self.state[:2]
+        dist_to_goal = np.linalg.norm(vec_to_goal)
+        proj_len = (axis_vec @ vec_to_goal) / (vec_to_goal @ vec_to_goal) * dist_to_goal
+        radius = 0.5 * dist_to_goal / proj_len
 
-    def update(self):
+        ut = np.array([self.nominal_vel, 0])
+        if self.state[2] > 0.0:
+            ut[1] -= self.nominal_vel/radius
+        else:
+            ut[1] += self.nominal_vel/radius
+
+        nominal_cmds = np.tile(ut, reps=(self.plan_steps,1))
+        ulist_essemble = self.get_ulist_essemble(nominal_cmds)
+        traj_essemble = self.traj_sim_essemble(np.tile(self.state, 
+                                                       reps=(self.n_samples,1)).T,
+                                               ulist_essemble)
+        self.xtraj_samples[0:self.num_samples] = traj_essemble[:,0,:].T
+        self.ytraj_samples[0:self.num_samples] = traj_essemble[:,1,:].T
+
+    def update_peds(self, peds):
+        self.peds = peds
+        self.n_agents = len(self.peds) + 1
+
+    def update(self, state, peds, goal):
+        self.state = state
+        self.goal = goal
+        self.peds = peds
         self.n_agents = len(self.peds) + 1
         x_pts = self.mvn_sample_normal()
         y_pts = self.mvn_sample_normal()
         print(f"X pts {x_pts.shape}")
         print(f"Y pts {y_pts.shape}")
+        self.xtraj_samples = np.zeros((self.n_agents*self.n_samples, self.plan_steps))
+        self.xtraj_samples = np.zeros((self.n_agents*self.n_samples, self.plan_steps))
+        # update this wrt pedestrians. 
+        self.get_cmds()
+        
 
-
-
-class Dyn:
-    def __init__(self, dt, u1_max, u2_max, n_samples):
-        self.dt = dt
-        self.u1_max = u1_max
-        self.u2_max = u2_max
-        self.n_samples = n_samples
+    # DYNAMICS FUNCTIONS FOR BRNE
     def dyn(self, st, ut):
         sdot = np.array([
             ut[0] * np.cos(st[2]),
@@ -205,13 +230,6 @@ class Dyn:
         k3 = self.dt * self.dyn(st + k2/2.0, ut)
         k4 = self.dt * self.dyn(st + k3, ut)
         return st + (k1 + 2.0 * k2 + 2.0 * k3 + k4) / 6.0
-    def traj_sim(self, st, ulist):
-        tsteps = len(ulist)
-        traj = np.zeros((tsteps, 3))
-        for t in range(tsteps):
-            st = self.dyn_step(st, ulist[t])
-            traj[t] = st.copy()
-        return traj
     def traj_sim_essemble(self, st, ulist,):
         """
         st.shape = (3, num_samples)
@@ -225,7 +243,6 @@ class Dyn:
             st = self.dyn_step(st, ulist[t].T)
             traj[t] = st.copy()
         return traj
-    
     def get_ulist_essemble(self, ulist):
         num_essembles_per_dim = int(np.sqrt(self.n_samples))
         num_essembles_per_dim_u1 = int(num_essembles_per_dim * 2)
@@ -233,11 +250,11 @@ class Dyn:
 
         u1_offset = np.minimum(
             ulist[:,0].min(),
-            self.u1_max-ulist[:,0].max()
+            self.max_lin_vel-ulist[:,0].max()
         )
         u2_offset = np.minimum(
-            self.u2_max+ulist[:,1].min(),
-            self.u2_max-ulist[:,1].max()
+            self.max_ang_vel+ulist[:,1].min(),
+            self.max_ang_vel-ulist[:,1].max()
         )
         u1_perturbs, u2_perturbs = np.meshgrid(
         np.linspace(-u1_offset, u1_offset, num_essembles_per_dim_u1),
