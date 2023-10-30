@@ -116,15 +116,12 @@ weights = brne.brne_nav(xtraj_samples=xtraj_samples,
                         ped_sample_scale=1.0,
                         y_min=-0.5,
                         y_max=0.5)
-print(f"Weights FINAL\n{weights}")
+# print(f"Weights FINAL\n{weights}")
 
-coll_mask = brne.coll_beck(ytraj_samples, -0.5, 0.5).all(axis=1).astype(float).reshape(num_agents, num_samples)
 opt_trajs_x = np.zeros((num_agents, plan_steps))
 opt_trajs_y = np.zeros((num_agents, plan_steps))
 for i in range(num_agents):
-    # agent_weights = weights[i]
-    agent_weights = weights[i] * coll_mask[i]
-    agent_weights /= np.mean(agent_weights)
+    agent_weights = weights[i]
     opt_trajs_x[i] = xmean_list[i] + \
         np.mean(x_pts[(i)*num_samples : (i+1)*num_samples] * agent_weights[:,np.newaxis], axis=0)
     opt_trajs_y[i] = ymean_list[i]  + \

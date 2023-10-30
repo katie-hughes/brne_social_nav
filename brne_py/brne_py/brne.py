@@ -142,21 +142,23 @@ def brne_nav(xtraj_samples, ytraj_samples, num_agents, tsteps, num_pts, cost_a1,
     weights = np.ones((num_agents, num_pts))
 
     all_costs = costs_nb(xtraj_samples, ytraj_samples, num_agents, num_pts, tsteps, cost_a1, cost_a2, cost_a3)
-    print(f"{num_agents} {num_pts} {tsteps} {cost_a1} {cost_a2} {cost_a3}")
-    print(f"input to coll mask {ytraj_samples[0:num_pts].shape}")
-    coll_mask = coll_beck(ytraj_samples[0:num_pts], y_min, y_max).all(axis=1).astype(float)
+    # print(f"{num_agents} {num_pts} {tsteps} {cost_a1} {cost_a2} {cost_a3}")
+    # print(f"input to coll mask {ytraj_samples[0:num_pts].shape}")
+    # coll_mask = coll_beck(ytraj_samples[0:num_pts], y_min, y_max).all(axis=1).astype(float)
+    coll_mask = coll_beck(ytraj_samples, y_min, y_max).all(axis=1).astype(float).reshape(num_agents, num_pts)
 
-    # if we are going out of bounds, coll_mask is all 0s and we will encounter divide by 0 error.
-    if not np.any(coll_mask):
+    # if we are going out of bounds, coll_mask[0] is all 0s and we will encounter divide by 0 error.
+    if not np.any(coll_mask[0]):
         return None
 
     for iter_num in range(11):
-        print(f"\nWeights {iter_num}\n{weights}")
+        # print(f"\nWeights {iter_num}\n{weights}")
         weights = weights_update_nb(all_costs, weights, index_table, all_pt_index, num_agents, num_pts)
 
-    agent_weights = weights[0] * coll_mask
-    agent_weights /= np.mean(agent_weights)
-    weights[0] = agent_weights.copy()
+    for i in range(num_agents):
+        agent_weights = weights[i] * coll_mask[i]
+        agent_weights /= np.mean(agent_weights)
+        weights[i] = agent_weights.copy()
 
     return weights
 
