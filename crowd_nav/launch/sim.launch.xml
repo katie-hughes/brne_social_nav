@@ -1,5 +1,5 @@
 <launch>
-  <arg name="use_class" default="true" description="Use class based BRNE python implementation"/>
+  <arg name="use_class" default="false" description="Use class based BRNE python implementation"/>
 
   <include file="$(find-pkg-share crowd_nav)/launch/crowdnav.launch.xml">
       <arg name="sim_ped" value="true"/>

@@ -7,7 +7,7 @@
   <arg name="sim_ped" default="true" description="Simulate a static pedestrian"/>
   <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
   <arg name="zed_localize" default="false" description="Update odom using the ZED"/>
-  <arg name="use_class" default="true" description="Use class based BRNE python implementation"/>
+  <arg name="use_class" default="false" description="Use class based BRNE python implementation"/>
 
   <!-- Python algorithm node -->
   <node pkg="brne_py" exec="brne_nav_class" if="$(eval '\'$(var lang)\' == \'PYTHON\' and \'$(var use_class)\' == \'true\'')" 
