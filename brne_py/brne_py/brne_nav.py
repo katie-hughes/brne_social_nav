@@ -151,6 +151,8 @@ class BrneNavRos(Node):
 
         self.brne_first_time = True
 
+        self.publish_walls()
+
     def publish_walls(self):
         now = self.get_clock().now().to_msg()
         height = 1.0
@@ -158,44 +160,28 @@ class BrneNavRos(Node):
         thickness = 0.01
         transparency = 0.2
 
-        wall1 = Marker()
-        wall1.header.frame_id = "odom"
-        wall1.header.stamp = now
-        wall1.id = 0
-        wall1.type = 1 # cube
-        wall1.action = 0
-        wall1.pose.position.x = 0.0
-        wall1.pose.position.y = self.corridor_y_min
-        wall1.pose.position.z = 0.5*height
-        wall1.color.a = transparency
-        wall1.color.b = 1.0
-        wall1.scale.x = length
-        wall1.scale.y = thickness
-        wall1.scale.z = height
-
-        wall2 = Marker()
-        wall2.header.frame_id = "odom"
-        wall2.header.stamp = now
-        wall2.id = 1
-        wall2.type = 1 # cube
-        wall2.action = 0
-        wall2.pose.position.x = 0.0
-        wall2.pose.position.y = self.corridor_y_max
-        wall2.pose.position.z = 0.5*height
-        wall2.color.a = transparency
-        wall2.color.b = 1.0
-        wall2.scale.x = length
-        wall2.scale.y = thickness
-        wall2.scale.z = height
-
         ma = MarkerArray()
-        ma.markers.append(wall1)
-        ma.markers.append(wall2)
+        for i in range(2):
+            wall = Marker()
+            wall.header.frame_id = "odom"
+            wall.header.stamp = now
+            wall.id = i
+            wall.type = 1 # cube
+            wall.action = 0
+            wall.pose.position.x = 0.5*length - 1.0
+            wall.pose.position.y = self.corridor_y_min
+            wall.pose.position.z = 0.5*height
+            wall.color.a = transparency
+            wall.color.b = 1.0
+            wall.scale.x = length
+            wall.scale.y = thickness
+            wall.scale.z = height
+            ma.markers.append(wall)
+        ma.markers[0].pose.position.y = self.corridor_y_min
+        ma.markers[1].pose.position.y = self.corridor_y_max
         self.wall_pub.publish(ma)
 
     def brne_cb(self):
-
-        self.publish_walls()
 
         ped_info_list = []
         dists2peds = []
