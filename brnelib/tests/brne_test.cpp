@@ -5,7 +5,7 @@
 #include <sstream>
 
 
-namespace brnelib {
+namespace brne {
 
     TEST_CASE("placeholder", "brne"){
         REQUIRE(0);
