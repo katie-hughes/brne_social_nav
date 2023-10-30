@@ -34,4 +34,39 @@ namespace brne
     std::cout << "y min:\t\t" << dt << std::endl;
     std::cout << "y max:\t\t" << dt << std::endl;
   }
+
+  arma::mat BRNE::compute_kernel_mat(arma::vec t1, arma::vec t2){
+    arma::mat res(t1.size(), t2.size(), arma::fill::zeros);
+    for (auto i=0; i<t1.size(); i++){
+      for (auto j=0; j<t2.size(); j++){
+        res.at(i,j) = kernel_a2 * exp(-kernel_a1 * pow((t1.at(i) - t2.at(j)),2));
+      }
+    }
+    return res;
+  }
+
+  void BRNE::compute_Lmat(){
+    arma::vec tlist(n_steps, arma::fill::zeros);
+    for (auto i=0; i<n_steps; i++){
+      tlist.at(i) = i*dt;
+    }
+    std::cout << "Tlist\n" << tlist << std::endl;
+    arma::vec train_ts(1, arma::fill::value(tlist.at(0)));
+    std::cout << "train ts\n" << train_ts << std::endl;
+    arma::vec train_noise(1, arma::fill::value(1e-3));
+    std::cout << "Train noise\n" << train_noise << std::endl;
+
+    auto cm_11 = compute_kernel_mat(train_ts, train_ts);
+    // std::cout << "1,1\n" << cm_11 << std::endl;
+    cm_11 += train_noise.diag();
+    std::cout << "1,1\n" << cm_11 << std::endl;
+    auto cm_12 = compute_kernel_mat(tlist, train_ts);
+    std::cout << "1 2\n" << cm_12 << std::endl;
+    auto cm_22 = compute_kernel_mat(tlist, tlist);
+    std::cout << "2 2\n" << cm_22 << std::endl;
+    auto cov_mat = cm_22 - cm_12 * cm_11.i() * cm_12.t();
+    std::cout << "Cov mat\n" << cov_mat << std::endl;
+    auto chol_mat = arma::chol(cov_mat, "lower");
+    std::cout << "Chol mat\n" << chol_mat << std::endl;
+  }
 }

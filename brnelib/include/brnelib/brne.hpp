@@ -49,5 +49,7 @@ namespace brne
                     double y_min, double y_max);
       /// @brief Print out the constants of the BRNE class.
       void print_params();
+      arma::mat compute_kernel_mat(arma::vec t1, arma::vec t2);
+      void compute_Lmat();
   };
 }

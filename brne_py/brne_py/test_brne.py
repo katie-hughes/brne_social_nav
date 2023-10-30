@@ -2,11 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import brne as brne
 import time 
-np.set_printoptions(suppress=True)
+np.set_printoptions(suppress=True, linewidth=10000)
 
 dt = 0.1
-num_samples = 200
-plan_steps = 20
+num_samples = 5
+plan_steps = 10
 num_agents = 2
 ped_sample_scale = 1.0
 
@@ -76,7 +76,7 @@ for i in range(num_samples):
     ax.plot(xlist_2 + x_pts_2[i] * width_scale, ylist_2 + y_pts_2[i] * width_scale,
             linestyle='--', color='C1')
 
-plt.show()
+# plt.show()
 plt.close()
 
 fig, ax = plt.subplots(1, 1, dpi=150)
@@ -133,5 +133,5 @@ ax.plot(opt_trajs_x[1], opt_trajs_y[1], linestyle='-', color='C1')
 ax.set_title('New Test')
 
 # plt.savefig('after_corridor_avoidance.png')
-plt.show()
+# plt.show()
 plt.close()
