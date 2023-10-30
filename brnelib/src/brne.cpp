@@ -57,16 +57,19 @@ namespace brne
     std::cout << "Train noise\n" << train_noise << std::endl;
 
     auto cm_11 = compute_kernel_mat(train_ts, train_ts);
-    // std::cout << "1,1\n" << cm_11 << std::endl;
     cm_11 += train_noise.diag();
-    std::cout << "1,1\n" << cm_11 << std::endl;
     auto cm_12 = compute_kernel_mat(tlist, train_ts);
-    std::cout << "1 2\n" << cm_12 << std::endl;
     auto cm_22 = compute_kernel_mat(tlist, tlist);
-    std::cout << "2 2\n" << cm_22 << std::endl;
-    auto cov_mat = cm_22 - cm_12 * cm_11.i() * cm_12.t();
+    cov_mat = cm_22 - cm_12 * cm_11.i() * cm_12.t();
     std::cout << "Cov mat\n" << cov_mat << std::endl;
-    auto chol_mat = arma::chol(cov_mat, "lower");
-    std::cout << "Chol mat\n" << chol_mat << std::endl;
+    cov_Lmat = arma::chol(cov_mat, "lower");
+    std::cout << "Cov Lmat\n" << cov_Lmat << std::endl;
+  }
+
+  arma::mat BRNE::mvn_sample_normal(){
+    // TODO should do error checking to make sure Lmat is set
+    arma::mat res(n_steps, n_samples, arma::fill::randn);
+    std::cout << "Random sample\n" << res << std::endl;
+    return (cov_Lmat * res).t();
   }
 }

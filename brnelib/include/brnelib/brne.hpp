@@ -5,6 +5,7 @@
 #include <iosfwd>
 #include <vector>
 #include <armadillo>
+#include <random>
 
 namespace brne
 {
@@ -23,6 +24,10 @@ namespace brne
       double max_lin_vel;
       double y_min;
       double y_max;
+
+      arma::mat cov_Lmat;
+      arma::mat cov_mat;
+      std::normal_distribution<> gaussian{0,1};
     public:
       /// @brief Construct an instance of the BRNE class
       /// @param kernel_a1 control the "straightness" of trajectory samples. 
@@ -51,5 +56,6 @@ namespace brne
       void print_params();
       arma::mat compute_kernel_mat(arma::vec t1, arma::vec t2);
       void compute_Lmat();
+      arma::mat mvn_sample_normal();
   };
 }

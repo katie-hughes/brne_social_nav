@@ -21,5 +21,8 @@ int main(){
                        y_min, y_max};
   brne_test.print_params();
   brne_test.compute_Lmat();
+
+  auto sample = brne_test.mvn_sample_normal();
+  std::cout << "sample \n" << sample << std::endl;
   return 0;
 }
