@@ -26,8 +26,6 @@ if(BUILD_TESTING)
 endif()
 
 rosidl_generate_interfaces(  ${PROJECT_NAME}
-  "msg/Pixel.msg"
-  "msg/PixelArray.msg"
   "msg/Pedestrian.msg"
   "msg/PedestrianArray.msg"
   "msg/TwistArray.msg"
