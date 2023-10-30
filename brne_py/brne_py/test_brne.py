@@ -5,8 +5,8 @@ import time
 np.set_printoptions(suppress=True)
 
 dt = 0.1
-num_samples = 5
-plan_steps = 10
+num_samples = 200
+plan_steps = 20
 num_agents = 2
 ped_sample_scale = 1.0
 
@@ -79,9 +79,6 @@ for i in range(num_samples):
 plt.show()
 plt.close()
 
-
-# exit()
-
 fig, ax = plt.subplots(1, 1, dpi=150)
 ax.set_xlim(-3, 3)
 ax.set_ylim(-1, 1)
@@ -125,15 +122,17 @@ coll_mask = brne.coll_beck(ytraj_samples, -0.5, 0.5).all(axis=1).astype(float).r
 opt_trajs_x = np.zeros((num_agents, plan_steps))
 opt_trajs_y = np.zeros((num_agents, plan_steps))
 for i in range(num_agents):
-    opt_trajs_x[i] = \
-        np.mean(xtraj_samples[(i)*num_samples : (i+1)*num_samples] * weights[i][:,np.newaxis], axis=0)
-    opt_trajs_y[i] = \
-        np.mean(ytraj_samples[(i)*num_samples : (i+1)*num_samples] * weights[i][:,np.newaxis], axis=0)
-
+    # agent_weights = weights[i]
+    agent_weights = weights[i] * coll_mask[i]
+    agent_weights /= np.mean(agent_weights)
+    opt_trajs_x[i] = xmean_list[i] + \
+        np.mean(x_pts[(i)*num_samples : (i+1)*num_samples] * agent_weights[:,np.newaxis], axis=0)
+    opt_trajs_y[i] = ymean_list[i]  + \
+        np.mean(y_pts[(i)*num_samples : (i+1)*num_samples] * agent_weights[:,np.newaxis], axis=0)
 
 # visualize the final optimal trajectories
 ax.plot(opt_trajs_x[0], opt_trajs_y[0], linestyle='-', color='C0')
-ax.plot(opt_trajs_x[1], opt_trajs_x[1], linestyle='-', color='C1')
+ax.plot(opt_trajs_x[1], opt_trajs_y[1], linestyle='-', color='C1')
 ax.set_title('New Test')
 
 # plt.savefig('after_corridor_avoidance.png')
