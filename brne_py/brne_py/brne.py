@@ -142,7 +142,11 @@ def brne_nav(xtraj_samples, ytraj_samples, num_agents, tsteps, num_pts, cost_a1,
     weights = np.ones((num_agents, num_pts))
 
     all_costs = costs_nb(xtraj_samples, ytraj_samples, num_agents, num_pts, tsteps, cost_a1, cost_a2, cost_a3)
-
+    print(f"Xtraj samples\n{xtraj_samples}")
+    print(f"Ytraj samples\n{ytraj_samples}")
+    print(f"{num_agents} {num_pts} {tsteps} {cost_a1} {cost_a2} {cost_a3}")
+    print(f"all costs\n{all_costs}")
+    print(f"input to coll beck {ytraj_samples[0:num_pts].shape}")
     coll_mask = coll_beck(ytraj_samples[0:num_pts], y_min, y_max).all(axis=1).astype(float)
 
     # if we are going out of bounds, coll_mask is all 0s and we will encounter divide by 0 error.
@@ -150,6 +154,7 @@ def brne_nav(xtraj_samples, ytraj_samples, num_agents, tsteps, num_pts, cost_a1,
         return None
 
     for iter_num in range(11):
+        print(f"\nWeights {iter_num}\n{weights}")
         weights = weights_update_nb(all_costs, weights, index_table, all_pt_index, num_agents, num_pts)
 
     agent_weights = weights[0] * coll_mask
