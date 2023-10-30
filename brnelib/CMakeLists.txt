@@ -12,6 +12,10 @@ target_compile_features(brnelib PUBLIC cxx_std_17)
 # warnings are your friend!
 target_compile_options(brnelib PUBLIC -Wall -Wextra -Wpedantic)
 
+add_executable(frame_main src/frame_main.cpp)
+target_link_libraries(frame_main brnelib)
+
+
 if(NOT CMAKE_CROSSCOMPILING)
 # stuff you don't want to be done when cross compiling
 # CMake also has the ability to generate doxygen documentation
@@ -32,10 +36,11 @@ target_include_directories(brnelib
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
+target_compile_options(frame_main PUBLIC -Wall)
 # install the include directories
 install(DIRECTORY include/brnelib DESTINATION include)
 # Install the targets and create a CMake Exported Target
-install(TARGETS brnelib EXPORT brnelib-targets)
+install(TARGETS frame_main brnelib EXPORT brnelib-targets)
 # The project_name-targets now also needs to be exported.
 install(EXPORT brnelib-targets
         FILE brnelib-config.cmake
