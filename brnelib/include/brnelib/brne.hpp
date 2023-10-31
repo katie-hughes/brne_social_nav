@@ -25,9 +25,17 @@ namespace brne
       double y_min;
       double y_max;
 
+      // these are constant
       arma::mat cov_Lmat;
-      arma::mat cov_mat;
-      std::normal_distribution<> gaussian{0,1};
+      arma::mat cov_mat;      
+      
+      // these change
+      int n_agents = 1;
+      arma::mat index_table;
+      arma::mat costs;
+      arma::mat all_pts_index;
+
+      
     public:
       /// @brief Construct an instance of the BRNE class
       /// @param kernel_a1 control the "straightness" of trajectory samples. 
@@ -58,8 +66,10 @@ namespace brne
       void compute_Lmat();
       arma::mat mvn_sample_normal();
 
-      arma::mat compute_index_table(int n_agents);
+      arma::mat compute_index_table();
       arma::mat compute_costs(arma::mat xtraj, arma::mat ytraj);
+      // arma::mat collision_check(arma::mat ytraj);
+      arma::mat update_weights(arma::mat all_costs, arma::mat weights, arma::mat index_table);
       arma::mat brne_nav(arma::mat xtraj_samples, arma::mat ytraj_samples);
   };
 }

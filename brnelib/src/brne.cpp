@@ -46,6 +46,8 @@ namespace brne
   }
 
   void BRNE::compute_Lmat(){
+    cov_mat.reset();
+    cov_Lmat.reset();
     arma::vec tlist = arma::linspace<arma::vec>(0, (n_steps-1)*dt, n_steps);
     std::cout << "Tlist\n" << tlist << std::endl;
     arma::vec train_ts(1, arma::fill::value(tlist.at(0)));
@@ -76,7 +78,7 @@ namespace brne
     return (cov_Lmat * res).t();
   }
   
-  arma::mat BRNE::compute_index_table(int n_agents){
+  arma::mat BRNE::compute_index_table(){
     arma::mat table(n_agents, n_agents, arma::fill::zeros);
     for (int i=0; i<n_agents; i++){
       table.at(i,0) = i;
@@ -92,7 +94,6 @@ namespace brne
   }
 
   arma::mat BRNE::compute_costs(arma::mat xtraj, arma::mat ytraj){
-    auto n_agents = xtraj.n_rows / n_samples;
     auto size = n_agents*n_samples;
     arma::mat costs(size, size, arma::fill::zeros);
     for (auto i=0; i<size; i++){
@@ -109,15 +110,23 @@ namespace brne
     return costs;
   }
 
+  // arma::mat BRNE::collision_check(arma::mat ytraj){
+    
+  // }
+
   arma::mat BRNE::brne_nav(arma::mat xtraj_samples, arma::mat ytraj_samples){
-    auto n_agents = xtraj_samples.n_rows / n_samples;
+    n_agents = xtraj_samples.n_rows / n_samples;
     std::cout << "N agents: " << n_agents << std::endl;
     // TODO I could cache this for different numbers of agents
-    auto index_table = compute_index_table(n_agents);
+    auto index_table = compute_index_table();
     std::cout << "Index table\n" << index_table << std::endl;
     auto costs = compute_costs(xtraj_samples, ytraj_samples);
     std::cout << "Costs\n" << costs << std::endl;
     arma::mat weights(n_agents, n_samples, arma::fill::zeros);
+    for (int i=0; i<10; i++){
+      std::cout << "weights update #" << i << std::endl;
+      // weights = update_weights(costs, weights, index_table);
+    }
     return weights;
   }
 }
