@@ -24,6 +24,7 @@ xmean_list = np.array([
 ymean_list = np.array([
     ylist_1, ylist_2
 ])
+print(f"Xmean list\n{xmean_list}")
 
 # we visual nominal trajectories and the environment (corridor)
 fig, ax = plt.subplots(1, 1, dpi=150)
