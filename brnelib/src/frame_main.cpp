@@ -5,10 +5,10 @@ int main(){
   double kernel_a2 =    0.2;
   double cost_a1 =      8.0;
   double cost_a2 =      5.0;
-  double cost_a3 =      40.0;
+  double cost_a3 =      20.0;
   double dt =           0.1;
-  int n_steps =         10;
-  int n_samples =       5;
+  int n_steps =         5;
+  int n_samples =       3;
   double max_ang_vel =  1;
   double max_lin_vel =  1;
   double y_min =        -0.5;

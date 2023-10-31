@@ -59,6 +59,7 @@ namespace brne
       arma::mat mvn_sample_normal();
 
       arma::mat compute_index_table(int n_agents);
+      arma::mat compute_costs(arma::mat xtraj, arma::mat ytraj);
       arma::mat brne_nav(arma::mat xtraj_samples, arma::mat ytraj_samples);
   };
 }

@@ -5,8 +5,8 @@ import time
 np.set_printoptions(suppress=True, linewidth=10000, precision=4)
 
 dt = 0.1
-num_samples = 5
-plan_steps = 10
+num_samples = 3
+plan_steps = 5
 num_agents = 2
 ped_sample_scale = 1.0
 

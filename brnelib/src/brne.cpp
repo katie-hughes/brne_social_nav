@@ -91,10 +91,33 @@ namespace brne
     return table;
   }
 
+  arma::mat BRNE::compute_costs(arma::mat xtraj, arma::mat ytraj){
+    auto n_agents = xtraj.n_rows / n_samples;
+    auto size = n_agents*n_samples;
+    arma::mat costs(size, size, arma::fill::zeros);
+    for (auto i=0; i<size; i++){
+      for (auto j=0; j<size; j++){
+        arma::vec traj_costs(n_steps, arma::fill::zeros);
+        for (auto t=0; t<n_steps; t++){
+          auto dst = pow(xtraj.at(i,t) - xtraj.at(j,t), 2) + pow(ytraj.at(i,t) - ytraj.at(j,t), 2);
+          // std::cout << "dist: "<< dst << std::endl;
+          traj_costs.at(t) = 2.0 - 2.0/(1.0 + exp(-cost_a1 *pow(dst, cost_a2)));
+        }
+        costs.at(i,j) = traj_costs.max() * cost_a3;
+      }
+    }
+    return costs;
+  }
+
   arma::mat BRNE::brne_nav(arma::mat xtraj_samples, arma::mat ytraj_samples){
     auto n_agents = xtraj_samples.n_rows / n_samples;
     std::cout << "N agents: " << n_agents << std::endl;
-    arma::mat weights(n_agents*n_samples, n_steps, arma::fill::zeros);
+    // TODO I could cache this for different numbers of agents
+    auto index_table = compute_index_table(n_agents);
+    std::cout << "Index table\n" << index_table << std::endl;
+    auto costs = compute_costs(xtraj_samples, ytraj_samples);
+    std::cout << "Costs\n" << costs << std::endl;
+    arma::mat weights(n_agents, n_samples, arma::fill::zeros);
     return weights;
   }
 }

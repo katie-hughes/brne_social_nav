@@ -108,7 +108,7 @@ for i in range(1, num_agents):
     ytraj_samples[i * num_samples:i * num_samples + num_samples] = ymean_list[i] + y_pts[i * num_samples:i * num_samples + num_samples] * ped_sample_scale
 
 print(f"Test index table\n{brne.get_index_table(5)}")
-exit()
+# exit()
 weights = brne.brne_nav(xtraj_samples=xtraj_samples,
                         ytraj_samples=ytraj_samples,
                         num_agents=num_agents,
