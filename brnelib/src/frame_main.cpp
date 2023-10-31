@@ -7,7 +7,7 @@ int main(){
   double cost_a2 =      5.0;
   double cost_a3 =      40.0;
   double dt =           0.1;
-  int n_steps =         10;
+  int n_steps =         6;
   int n_samples =       5;
   double max_ang_vel =  1;
   double max_lin_vel =  1;
@@ -24,5 +24,23 @@ int main(){
 
   auto sample = brne_test.mvn_sample_normal();
   std::cout << "sample \n" << sample << std::endl;
+
+  // agent 1: x from -2 to 0, y at -0.1
+  const auto x1_start = -2.0;
+  const auto x1_end = 0;
+  arma::rowvec xlist_1 = arma::linspace<arma::rowvec>(-2, 0, n_steps);
+  arma::rowvec ylist_1(n_steps, arma::fill::value(-0.1));
+
+  // agent 2: from 0 to -2, y = -0.3
+  const auto x2_start = 0;
+  const auto x2_end = -2.0;
+  arma::rowvec xlist_2 = arma::linspace<arma::rowvec>(0, -2, n_steps);
+  arma::rowvec ylist_2(n_steps, arma::fill::value(-0.3));
+
+  std::cout << "X1\n" << xlist_1 << std::endl;
+  std::cout << "Y1\n" << ylist_1 << std::endl;
+  std::cout << "X2\n" << xlist_2 << std::endl;
+  std::cout << "Y2\n" << ylist_2 << std::endl;
+
   return 0;
 }

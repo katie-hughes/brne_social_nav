@@ -46,10 +46,11 @@ namespace brne
   }
 
   void BRNE::compute_Lmat(){
-    arma::vec tlist(n_steps, arma::fill::zeros);
-    for (auto i=0; i<n_steps; i++){
-      tlist.at(i) = i*dt;
-    }
+    // arma::vec tlist(n_steps, arma::fill::zeros);
+    // for (auto i=0; i<n_steps; i++){
+    //   tlist.at(i) = i*dt;
+    // }
+    arma::vec tlist = arma::linspace<arma::vec>(0, (n_steps-1)*dt, n_steps);
     std::cout << "Tlist\n" << tlist << std::endl;
     arma::vec train_ts(1, arma::fill::value(tlist.at(0)));
     std::cout << "train ts\n" << train_ts << std::endl;

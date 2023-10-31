@@ -6,7 +6,7 @@ np.set_printoptions(suppress=True, linewidth=10000)
 
 dt = 0.1
 num_samples = 5
-plan_steps = 10
+plan_steps = 6
 num_agents = 2
 ped_sample_scale = 1.0
 
@@ -41,6 +41,7 @@ ax.axhline(-0.5, 0.0, 1.0, linestyle='--', color='k')
 
 # here we define kernel parameter
 tlist = np.arange(plan_steps) * dt 
+print(f"Tlist {tlist}")
 # train_ts = np.array([tlist[0], tlist[-1]])
 # train_noise = np.array([1e-03, 1e-03])
 
@@ -61,8 +62,10 @@ y_pts_2 = brne.mvn_sample_normal(num_samples, plan_steps, cov_Lmat)
 # two-step verification for sampling:
 # (1) write the sampling code in C++, make sure
 # (2) make the C++ code read in the python-generated samples
-
+print(f"X pts 1{x_pts_1}")
+print(f"X pts 2{x_pts_2}")
 x_pts = np.vstack([x_pts_1, x_pts_2])
+print(f"X_pts {x_pts}")
 y_pts = np.vstack([y_pts_1, y_pts_2])
 width_scale = (0.5 + 0.5) / (y_pts.max() - y_pts.min()) 
 print('width_scale: ', width_scale)

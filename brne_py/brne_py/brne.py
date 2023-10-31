@@ -77,7 +77,6 @@ def get_Lmat_nb(train_ts, test_ts, train_noise, kernel_a1, kernel_a2):
     print(f"Cmat 12\n{covmat_12}")
     covmat_22 = get_kernel_mat_nb(test_ts, test_ts, kernel_a1, kernel_a2)
     print(f"Cmat 22\n{covmat_22}")
-    print(f"This part {covmat_12 @ np.linalg.inv(covmat_11) @ covmat_12.T}")
     cov_mat = covmat_22 - covmat_12 @ np.linalg.inv(covmat_11) @ covmat_12.T
     print(f"cov mat\n{cov_mat}")
     cov_mat += np.eye(test_ts.shape[0]) * 1e-06
