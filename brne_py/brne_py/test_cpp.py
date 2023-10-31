@@ -10,32 +10,20 @@ plan_steps = 10
 num_agents = 2
 ped_sample_scale = 1.0
 
-# agent 1 nominal trajectory
-xlist_1 = np.linspace(-2, 0, plan_steps)
-ylist_1 = np.ones_like(xlist_1) * -0.1
-
-# agent 2 nominal trajectory 
-xlist_2 = np.linspace(0, -2, plan_steps)
-ylist_2 = np.ones_like(xlist_2) * -0.3
-
-xmean_list = np.array([
-    xlist_1, xlist_2
-])
-ymean_list = np.array([
-    ylist_1, ylist_2
-])
+# bad practice but ok
+xmean_list = np.genfromtxt("../../brnelib/build/x_nominal.csv", delimiter=",")
+ymean_list = np.genfromtxt("../../brnelib/build/y_nominal.csv", delimiter=",")
 print(f"Xmean list\n{xmean_list}")
-
 # we visual nominal trajectories and the environment (corridor)
 fig, ax = plt.subplots(1, 1, dpi=150)
 ax.set_xlim(-3, 3)
 ax.set_ylim(-1, 1)
 
-ax.plot(xlist_1, ylist_1, linestyle='-', color='C0')
-ax.plot(xlist_1[0], ylist_1[0], marker='o', markersize=15, color='C0')
+ax.plot(xmean_list[0], ymean_list[0], linestyle='-', color='C0')
+ax.plot(xmean_list[0][0], ymean_list[0][0], marker='o', markersize=15, color='C0')
 
-ax.plot(xlist_2, ylist_2, linestyle='-', color='C1')
-ax.plot(xlist_2[0], ylist_2[0], marker='o', markersize=15, color='C1')
+ax.plot(xmean_list[1], ymean_list[1], linestyle='-', color='C1')
+ax.plot(xmean_list[1][0], ymean_list[1][0], marker='o', markersize=15, color='C1')
 
 ax.axhline(0.5, 0.0, 1.0, linestyle='--', color='k')
 ax.axhline(-0.5, 0.0, 1.0, linestyle='--', color='k')
@@ -56,18 +44,12 @@ cov_Lmat, cov_mat = brne.get_Lmat_nb(train_ts, test_ts, train_noise, 0.5, 0.2)
 # print(cov_Lmat)
 
 # samples using the BRNE function
-x_pts_1 = brne.mvn_sample_normal(num_samples, plan_steps, cov_Lmat)
-y_pts_1 = brne.mvn_sample_normal(num_samples, plan_steps, cov_Lmat)
-x_pts_2 = brne.mvn_sample_normal(num_samples, plan_steps, cov_Lmat)
-y_pts_2 = brne.mvn_sample_normal(num_samples, plan_steps, cov_Lmat)
 # two-step verification for sampling:
 # (1) write the sampling code in C++, make sure
 # (2) make the C++ code read in the python-generated samples
-print(f"X pts 1{x_pts_1}")
-print(f"X pts 2{x_pts_2}")
-x_pts = np.vstack([x_pts_1, x_pts_2])
+x_pts = np.genfromtxt("../../brnelib/build/x_samples.csv", delimiter=",")
 print(f"X_pts {x_pts}")
-y_pts = np.vstack([y_pts_1, y_pts_2])
+y_pts = np.genfromtxt("../../brnelib/build/y_samples.csv", delimiter=",")
 width_scale = (0.5 + 0.5) / (y_pts.max() - y_pts.min()) 
 print('width_scale: ', width_scale)
 x_pts *= width_scale
@@ -75,23 +57,24 @@ y_pts *= width_scale
 
 # visualize samples here
 for i in range(num_samples):
-    ax.plot(xlist_1 + x_pts_1[i] * width_scale, ylist_1 + y_pts_1[i] * width_scale,
+    ax.plot(xmean_list[0] + x_pts[i] * width_scale, ymean_list[0] + y_pts[i] * width_scale,
             linestyle='--', color='C0')
-    ax.plot(xlist_2 + x_pts_2[i] * width_scale, ylist_2 + y_pts_2[i] * width_scale,
+    ax.plot(xmean_list[1] + x_pts[num_samples + i] * width_scale, ymean_list[1] + y_pts[num_samples + i] * width_scale,
             linestyle='--', color='C1')
 
 plt.show()
 plt.close()
+# exit()
 
 fig, ax = plt.subplots(1, 1, dpi=150)
 ax.set_xlim(-3, 3)
 ax.set_ylim(-1, 1)
 
-ax.plot(xlist_1, ylist_1, linestyle='--', color='C0')
-ax.plot(xlist_1[0], ylist_1[0], marker='o', markersize=15, color='C0')
+ax.plot(xmean_list[0], ymean_list[0], linestyle='--', color='C0')
+ax.plot(xmean_list[0][0], ymean_list[0][0], marker='o', markersize=15, color='C0')
 
-ax.plot(xlist_2, ylist_2, linestyle='--', color='C1')
-ax.plot(xlist_2[0], ylist_2[0], marker='o', markersize=15, color='C1')
+ax.plot(xmean_list[1], ymean_list[1], linestyle='--', color='C1')
+ax.plot(xmean_list[1][0], ymean_list[1][0], marker='o', markersize=15, color='C1')
 
 ax.axhline(0.5, 0.0, 1.0, linestyle='--', color='k')
 ax.axhline(-0.5, 0.0, 1.0, linestyle='--', color='k')

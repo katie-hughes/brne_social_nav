@@ -7,8 +7,8 @@ int main(){
   double cost_a2 =      5.0;
   double cost_a3 =      40.0;
   double dt =           0.1;
-  int n_steps =         6;
-  int n_samples =       5;
+  int n_steps =         10;
+  int n_samples =       50;
   double max_ang_vel =  1;
   double max_lin_vel =  1;
   double y_min =        -0.5;
@@ -59,6 +59,18 @@ int main(){
   y_samples.submat(0, 0, n_samples-1, n_steps-1) = y0_sample;
   y_samples.submat(n_samples, 0, n_agents*n_samples-1, n_steps-1) = y1_sample;
   std::cout << "Y samples \n" << y_samples << std::endl;
+
+  auto width_scale = 1.0/(y_samples.max() - y_samples.min());
+  std::cout << "width scale" << width_scale << std::endl;
+  x_samples *= width_scale;
+  y_samples *= width_scale;
+
+  // save some stuff to txt file
+  x_nominal.save("x_nominal.csv", arma::csv_ascii);
+  y_nominal.save("y_nominal.csv", arma::csv_ascii);
+
+  x_samples.save("x_samples.csv", arma::csv_ascii);
+  y_samples.save("y_samples.csv", arma::csv_ascii);
 
   return 0;
 }
