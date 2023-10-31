@@ -6,7 +6,7 @@ np.set_printoptions(suppress=True, linewidth=10000)
 
 dt = 0.1
 num_samples = 50
-plan_steps = 10
+plan_steps = 20
 num_agents = 2
 ped_sample_scale = 1.0
 

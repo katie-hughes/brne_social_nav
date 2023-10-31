@@ -7,7 +7,7 @@ int main(){
   double cost_a2 =      5.0;
   double cost_a3 =      40.0;
   double dt =           0.1;
-  int n_steps =         10;
+  int n_steps =         20;
   int n_samples =       50;
   double max_ang_vel =  1;
   double max_lin_vel =  1;
@@ -44,10 +44,10 @@ int main(){
   auto y0_sample = brne_test.mvn_sample_normal();
   auto y1_sample = brne_test.mvn_sample_normal();
 
-  std::cout << "sample x0 \n" << x0_sample << std::endl;
-  std::cout << "sample x1\n" << x1_sample << std::endl;
-  std::cout << "sample y0\n" << y0_sample << std::endl;
-  std::cout << "sample y1\n" << y1_sample << std::endl;
+  // std::cout << "sample x0 \n" << x0_sample << std::endl;
+  // std::cout << "sample x1\n" << x1_sample << std::endl;
+  // std::cout << "sample y0\n" << y0_sample << std::endl;
+  // std::cout << "sample y1\n" << y1_sample << std::endl;
 
   // put the samples into one matrix
   arma::mat x_samples(n_agents*n_samples, n_steps, arma::fill::zeros);

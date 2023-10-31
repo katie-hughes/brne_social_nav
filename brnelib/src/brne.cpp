@@ -59,14 +59,24 @@ namespace brne
     auto cm_22 = compute_kernel_mat(tlist, tlist);
     cov_mat = cm_22 - cm_12 * cm_11.i() * cm_12.t();
     std::cout << "Cov mat\n" << cov_mat << std::endl;
-    cov_Lmat = arma::chol(cov_mat, "lower");
+    cov_mat.save("cov_mat.csv", arma::csv_ascii);
+    std::cout << "Is symmetric? " << cov_mat.is_symmetric() << std::endl;
+    std::cout << "Is symmetric hermitian positive definite? " << cov_mat.is_sympd() << std::endl;
+    std::cout << "Is hermitian? " << cov_mat.is_hermitian() << std::endl;
+    auto success = arma::chol(cov_Lmat, cov_mat, "lower");
+    std::cout << "Success? " << success << std::endl;
+    while (!success){
+      cov_mat += arma::eye(cov_mat.n_rows,cov_mat.n_rows) * 1e-6;
+      success = arma::chol(cov_Lmat, cov_mat, "lower");
+      std::cout << "succ " << success << std::endl;
+    }
     std::cout << "Cov Lmat\n" << cov_Lmat << std::endl;
   }
 
   arma::mat BRNE::mvn_sample_normal(){
     // TODO should do error checking to make sure Lmat is set
     arma::mat res(n_steps, n_samples, arma::fill::randn);
-    std::cout << "Random sample\n" << res << std::endl;
+    // std::cout << "Random sample\n" << res << std::endl;
     return (cov_Lmat * res).t();
   }
 }
