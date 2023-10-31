@@ -57,5 +57,8 @@ namespace brne
       arma::mat compute_kernel_mat(arma::vec t1, arma::vec t2);
       void compute_Lmat();
       arma::mat mvn_sample_normal();
+
+      arma::mat compute_index_table(int n_agents);
+      arma::mat brne_nav(arma::mat xtraj_samples, arma::mat ytraj_samples);
   };
 }

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import brne as brne
 import time 
-np.set_printoptions(suppress=True, linewidth=10000)
+np.set_printoptions(suppress=True, linewidth=10000, precision=4)
 
 dt = 0.1
 num_samples = 5
@@ -28,6 +28,7 @@ print(f"Xmean list\n{xmean_list}")
 
 # we visual nominal trajectories and the environment (corridor)
 fig, (ax1, ax2) = plt.subplots(1,2, sharey=True, figsize=(8,4), dpi=150)
+fig.suptitle('Pure python test')
 ax1.set_xlim(-3, 3)
 ax1.set_ylim(-1, 1)
 
@@ -61,13 +62,13 @@ y_pts_2 = brne.mvn_sample_normal(num_samples, plan_steps, cov_Lmat)
 # two-step verification for sampling:
 # (1) write the sampling code in C++, make sure
 # (2) make the C++ code read in the python-generated samples
-print(f"X pts 1{x_pts_1}")
-print(f"X pts 2{x_pts_2}")
+# print(f"X pts 1{x_pts_1}")
+# print(f"X pts 2{x_pts_2}")
 x_pts = np.vstack([x_pts_1, x_pts_2])
-print(f"X_pts {x_pts}")
+# print(f"X_pts {x_pts}")
 y_pts = np.vstack([y_pts_1, y_pts_2])
 width_scale = (0.5 + 0.5) / (y_pts.max() - y_pts.min()) 
-print('width_scale: ', width_scale)
+# print('width_scale: ', width_scale)
 x_pts *= width_scale
 y_pts *= width_scale
 
@@ -92,14 +93,22 @@ ax2.axhline(-0.5, 0.0, 1.0, linestyle='--', color='k')
 xtraj_samples = np.zeros((num_agents * num_samples, plan_steps))
 ytraj_samples = np.zeros((num_agents * num_samples, plan_steps))
 
+print(f"Xtraj samples\n{xtraj_samples}")
+
 i = 0
 xtraj_samples[i * num_samples:i * num_samples + num_samples] = xmean_list[i] + x_pts[i * num_samples:i * num_samples + num_samples]
 ytraj_samples[i * num_samples:i * num_samples + num_samples] = ymean_list[i] + y_pts[i * num_samples:i * num_samples + num_samples]
 
+print(f"Xmeanlisti\n{xmean_list[i]}")
+print(f"Xpts\n{x_pts[i * num_samples:i * num_samples + num_samples]}")
+
+print(f"Xtraj samples\n{xtraj_samples}")
 for i in range(1, num_agents):
     xtraj_samples[i * num_samples:i * num_samples + num_samples] = xmean_list[i] + x_pts[i * num_samples:i * num_samples + num_samples] * ped_sample_scale
     ytraj_samples[i * num_samples:i * num_samples + num_samples] = ymean_list[i] + y_pts[i * num_samples:i * num_samples + num_samples] * ped_sample_scale
 
+print(f"Test index table\n{brne.get_index_table(5)}")
+exit()
 weights = brne.brne_nav(xtraj_samples=xtraj_samples,
                         ytraj_samples=ytraj_samples,
                         num_agents=num_agents,
@@ -111,7 +120,7 @@ weights = brne.brne_nav(xtraj_samples=xtraj_samples,
                         ped_sample_scale=1.0,
                         y_min=-0.5,
                         y_max=0.5)
-# print(f"Weights FINAL\n{weights}")
+print(f"Weights FINAL\n{weights}")
 
 opt_trajs_x = np.zeros((num_agents, plan_steps))
 opt_trajs_y = np.zeros((num_agents, plan_steps))
@@ -126,6 +135,7 @@ for i in range(num_agents):
 ax2.plot(opt_trajs_x[0], opt_trajs_y[0], linestyle='-', color='C0')
 ax2.plot(opt_trajs_x[1], opt_trajs_y[1], linestyle='-', color='C1')
 ax2.set_title('Optimal trajectories with Python')
+
 
 # plt.savefig('after_corridor_avoidance.png')
 plt.show()

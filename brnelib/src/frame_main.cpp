@@ -53,15 +53,15 @@ int main(){
   arma::mat x_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
   x_samples.submat(0, 0, n_samples-1, n_steps-1) = x0_sample;
   x_samples.submat(n_samples, 0, n_agents*n_samples-1, n_steps-1) = x1_sample;
-  std::cout << "X samples \n" << x_samples << std::endl;
+  // std::cout << "X samples \n" << x_samples << std::endl;
 
   arma::mat y_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
   y_samples.submat(0, 0, n_samples-1, n_steps-1) = y0_sample;
   y_samples.submat(n_samples, 0, n_agents*n_samples-1, n_steps-1) = y1_sample;
-  std::cout << "Y samples \n" << y_samples << std::endl;
+  // std::cout << "Y samples \n" << y_samples << std::endl;
 
   auto width_scale = 1.0/(y_samples.max() - y_samples.min());
-  std::cout << "width scale" << width_scale << std::endl;
+  // std::cout << "width scale" << width_scale << std::endl;
   x_samples *= width_scale;
   y_samples *= width_scale;
 
@@ -71,6 +71,30 @@ int main(){
 
   x_samples.save("x_samples.csv", arma::csv_ascii);
   y_samples.save("y_samples.csv", arma::csv_ascii);
+
+  arma::mat xtraj_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
+  arma::mat ytraj_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
+
+  // setting submatrix
+  // xtraj_samples.submat(n_samples, 0, n_agents*n_samples-1, n_steps-1) = x1_sample;
+  for (auto i=0; i<n_samples; i++){
+    xtraj_samples.row(i) = x_nominal.row(0) + x_samples.row(i);
+    ytraj_samples.row(i) = y_nominal.row(0) + y_samples.row(i);
+  }
+
+  auto ped_sample_scale = 1.0;
+  for (auto a=1; a<n_agents; a++){
+    for (auto i=0; i<n_samples; i++){
+      xtraj_samples.row(a*n_samples + i) = x_nominal.row(a) + x_samples.row(a*n_samples + i) * ped_sample_scale;
+      ytraj_samples.row(a*n_samples + i) = y_nominal.row(a) + y_samples.row(a*n_samples + i) * ped_sample_scale;
+    }
+  }
+
+  std::cout << "Xtraj samples \n" << xtraj_samples << std::endl;
+  std::cout << "Ytraj samples \n" << ytraj_samples << std::endl;
+
+  auto weights = brne_test.brne_nav(xtraj_samples, ytraj_samples);
+  std::cout << "weights\n" << weights << std::endl;
 
   return 0;
 }

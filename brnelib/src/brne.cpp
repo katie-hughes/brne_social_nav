@@ -58,19 +58,15 @@ namespace brne
     auto cm_12 = compute_kernel_mat(tlist, train_ts);
     auto cm_22 = compute_kernel_mat(tlist, tlist);
     cov_mat = cm_22 - cm_12 * cm_11.i() * cm_12.t();
-    std::cout << "Cov mat\n" << cov_mat << std::endl;
-    cov_mat.save("cov_mat.csv", arma::csv_ascii);
-    std::cout << "Is symmetric? " << cov_mat.is_symmetric() << std::endl;
-    std::cout << "Is symmetric hermitian positive definite? " << cov_mat.is_sympd() << std::endl;
-    std::cout << "Is hermitian? " << cov_mat.is_hermitian() << std::endl;
+    // std::cout << "Cov mat\n" << cov_mat << std::endl;
     auto success = arma::chol(cov_Lmat, cov_mat, "lower");
-    std::cout << "Success? " << success << std::endl;
+    std::cout << "Cholesky success? " << success << std::endl;
     while (!success){
       cov_mat += arma::eye(cov_mat.n_rows,cov_mat.n_rows) * 1e-6;
       success = arma::chol(cov_Lmat, cov_mat, "lower");
-      std::cout << "succ " << success << std::endl;
+      std::cout << "Cholesky success? " << success << std::endl;
     }
-    std::cout << "Cov Lmat\n" << cov_Lmat << std::endl;
+    // std::cout << "Cov Lmat\n" << cov_Lmat << std::endl;
   }
 
   arma::mat BRNE::mvn_sample_normal(){
@@ -78,5 +74,27 @@ namespace brne
     arma::mat res(n_steps, n_samples, arma::fill::randn);
     // std::cout << "Random sample\n" << res << std::endl;
     return (cov_Lmat * res).t();
+  }
+  
+  arma::mat BRNE::compute_index_table(int n_agents){
+    arma::mat table(n_agents, n_agents, arma::fill::zeros);
+    for (int i=0; i<n_agents; i++){
+      table.at(i,0) = i;
+      auto idx = 1;
+      for (int j=0; j<n_agents; j++){
+        if (i != j){
+          table.at(i,idx) = j;
+          idx++;
+        }
+      }
+    }
+    return table;
+  }
+
+  arma::mat BRNE::brne_nav(arma::mat xtraj_samples, arma::mat ytraj_samples){
+    auto n_agents = xtraj_samples.n_rows / n_samples;
+    std::cout << "N agents: " << n_agents << std::endl;
+    arma::mat weights(n_agents*n_samples, n_steps, arma::fill::zeros);
+    return weights;
   }
 }

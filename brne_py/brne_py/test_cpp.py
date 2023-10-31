@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import brne as brne
 import time 
-np.set_printoptions(suppress=True, linewidth=10000)
+np.set_printoptions(suppress=True, linewidth=10000, precision=4)
 
 dt = 0.1
 num_samples = 5
@@ -16,6 +16,7 @@ ymean_list = np.genfromtxt("../../brnelib/build/y_nominal.csv", delimiter=",")
 print(f"Xmean list\n{xmean_list}")
 # we visual nominal trajectories and the environment (corridor)
 fig, (ax1, ax2) = plt.subplots(1,2, sharey=True, figsize=(8,4), dpi=150)
+fig.suptitle('C++ sampling test')
 
 ax1.set_xlim(-3, 3)
 ax1.set_ylim(-1, 1)
@@ -61,7 +62,7 @@ for i in range(num_samples):
     ax1.plot(xmean_list[1] + x_pts[num_samples + i] * width_scale, ymean_list[1] + y_pts[num_samples + i] * width_scale,
             linestyle='--', color='C1')
 
-ax1.set_title('Sampling from C++ code')
+ax1.set_title('C++ sampling')
 
 # exit()
 
@@ -113,7 +114,7 @@ for i in range(num_agents):
 # visualize the final optimal trajectories
 ax2.plot(opt_trajs_x[0], opt_trajs_y[0], linestyle='-', color='C0')
 ax2.plot(opt_trajs_x[1], opt_trajs_y[1], linestyle='-', color='C1')
-ax2.set_title('Optimal Trajectory from brne.py')
+ax2.set_title('Optimal trajectories with Python')
 
 # plt.savefig('after_corridor_avoidance.png')
 plt.show()

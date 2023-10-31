@@ -72,16 +72,16 @@ def cholesky_numba(A):
 def get_Lmat_nb(train_ts, test_ts, train_noise, kernel_a1, kernel_a2):
     covmat_11 = get_kernel_mat_nb(train_ts, train_ts, kernel_a1, kernel_a2)
     covmat_11 += np.diag(train_noise)
-    print(f"Cmat 11\n{covmat_11}")
+    # print(f"Cmat 11\n{covmat_11}")
     covmat_12 = get_kernel_mat_nb(test_ts, train_ts, kernel_a1, kernel_a2).T
-    print(f"Cmat 12\n{covmat_12}")
+    # print(f"Cmat 12\n{covmat_12}")
     covmat_22 = get_kernel_mat_nb(test_ts, test_ts, kernel_a1, kernel_a2)
-    print(f"Cmat 22\n{covmat_22}")
+    # print(f"Cmat 22\n{covmat_22}")
     cov_mat = covmat_22 - covmat_12 @ np.linalg.inv(covmat_11) @ covmat_12.T
-    print(f"cov mat\n{cov_mat}")
+    # print(f"cov mat\n{cov_mat}")
     cov_mat += np.eye(test_ts.shape[0]) * 1e-06
-    print(f"cov mat\n{cov_mat}")
-    print(f"chol mat\n{cholesky_numba(cov_mat)}")
+    # print(f"cov mat\n{cov_mat}")
+    # print(f"chol mat\n{cholesky_numba(cov_mat)}")
     return cholesky_numba(cov_mat), cov_mat
 
 
@@ -143,6 +143,7 @@ def coll_beck(trajs_y, y_min, y_max):
 
 def brne_nav(xtraj_samples, ytraj_samples, num_agents, tsteps, num_pts, cost_a1, cost_a2, cost_a3, ped_sample_scale, y_min, y_max):
     index_table = get_index_table(num_agents).astype(int)
+    print(f"Index table\n{index_table}")
     all_pt_index = np.arange(num_agents * num_pts).reshape(num_agents, num_pts)
 
     weights = np.ones((num_agents, num_pts))
