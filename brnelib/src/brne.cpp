@@ -116,25 +116,20 @@ namespace brne
     // only keep where y_min < y_traj < y_max
     coll_mask.reset();
     std::cout << "ytraj\n" << ytraj << std::endl;
-    // coll_mask = arma::mat(ytraj.n_rows, ytraj.n_cols, arma::fill::ones);
-    // std::cout << "mask\n" << coll_mask << std::endl;
     arma::vec valid(ytraj.n_rows);
     for (int r=0; r<ytraj.n_rows; r++){
       int is_valid = 1;
       for (int c=0; c<ytraj.n_cols; c++){
         if ((ytraj.at(r,c) < y_min) || (ytraj.at(r,c) > y_max)){
-          // coll_mask.at(r,c) = 0;
           is_valid = 0;
           break;
         }
       }
       valid.at(r) = is_valid;
     }
-    std::cout << "valid\n" << valid << std::endl;
     coll_mask = arma::conv_to<arma::mat>::from(valid);
     coll_mask.reshape(n_samples, n_agents);
     coll_mask = coll_mask.t();
-    std::cout << "coll mask\n" << coll_mask << std::endl;
   }
 
   void BRNE::update_weights(){
@@ -183,8 +178,14 @@ namespace brne
 
     for (int a=0; a<n_agents; a++){
       // element wise multiplication
-      std::cout << "agent" << a << std::endl;
+      std::cout << "agent " << a << std::endl;
+      auto agent_weights = arma::conv_to<arma::rowvec>::from(weights.row(a));
+      auto agent_mask = arma::conv_to<arma::rowvec>::from(coll_mask.row(a));
+      auto masked_weights = agent_weights % agent_mask;
+      weights.row(a) = masked_weights / arma::mean(masked_weights);
     }
+
+    std::cout << "Final FINAL weights\n" << weights << std::endl;
     return weights;
   }
 }

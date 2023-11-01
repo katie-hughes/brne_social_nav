@@ -171,6 +171,7 @@ def brne_nav(xtraj_samples, ytraj_samples, num_agents, tsteps, num_pts, cost_a1,
         agent_weights /= np.mean(agent_weights)
         weights[i] = agent_weights.copy()
 
+    print(f"\nFinal FINAL Weights\n{weights}")
     return weights
 
 # @nb.jit(nopython=True)
