@@ -31,7 +31,6 @@ ax1.axhline(-0.5, 0.0, 1.0, linestyle='--', color='k')
 
 # here we define kernel parameter
 tlist = np.arange(plan_steps) * dt 
-print(f"Tlist {tlist}")
 # train_ts = np.array([tlist[0], tlist[-1]])
 # train_noise = np.array([1e-03, 1e-03])
 
@@ -51,7 +50,7 @@ cov_Lmat, cov_mat = brne.get_Lmat_nb(train_ts, test_ts, train_noise, 0.5, 0.2)
 x_pts = np.genfromtxt("../../brnelib/build/x_samples.csv", delimiter=",")
 y_pts = np.genfromtxt("../../brnelib/build/y_samples.csv", delimiter=",")
 width_scale = (0.5 + 0.5) / (y_pts.max() - y_pts.min()) 
-print('width_scale: ', width_scale)
+# print('width_scale: ', width_scale)
 x_pts *= width_scale
 y_pts *= width_scale
 
@@ -108,15 +107,11 @@ for i in range(num_agents):
     agent_weights = weights[i]
     opt_trajs_x[i] = xmean_list[i] + \
         np.mean(x_pts[(i)*num_samples : (i+1)*num_samples] * agent_weights[:,np.newaxis], axis=0)
-    print(f"\nFirst\n{x_pts[(i)*num_samples : (i+1)*num_samples]}")
-    print(f"Second\n{agent_weights[:,np.newaxis]}")
-    print(f"Product\n{x_pts[(i)*num_samples : (i+1)*num_samples] * agent_weights[:,np.newaxis]}")
-    print(f"Mean\n{np.mean(x_pts[(i)*num_samples : (i+1)*num_samples] * agent_weights[:,np.newaxis], axis=0)}")
     opt_trajs_y[i] = ymean_list[i]  + \
         np.mean(y_pts[(i)*num_samples : (i+1)*num_samples] * agent_weights[:,np.newaxis], axis=0)
 
-print(f"Opt traj x {opt_trajs_x}")
-print(f"Opt traj y {opt_trajs_y}")
+print(f"\n\nOpt traj x\n{opt_trajs_x}")
+print(f"Opt traj y\n{opt_trajs_y}")
 
 # visualize the final optimal trajectories
 ax2.plot(opt_trajs_x[0], opt_trajs_y[0], linestyle='-', color='C0')

@@ -95,8 +95,8 @@ int main(){
   std::cout << "Ytraj samples \n" << ytraj_samples << std::endl;
 
   auto weights = brne_test.brne_nav(xtraj_samples, ytraj_samples);
-  std::cout << "weights\n" << weights << std::endl;
 
+  // turn the weights into a trajectory
   arma::mat x_opt_traj(n_agents, n_steps, arma::fill::zeros);
   arma::mat y_opt_traj(n_agents, n_steps, arma::fill::zeros);
 
@@ -114,8 +114,6 @@ int main(){
   }
   std::cout << "X OPT TRAJ\n" << x_opt_traj << std::endl;
   std::cout << "Y OPT TRAJ\n" << y_opt_traj << std::endl;
-
-
 
   return 0;
 }

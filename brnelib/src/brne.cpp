@@ -49,32 +49,26 @@ namespace brne
     cov_mat.reset();
     cov_Lmat.reset();
     arma::vec tlist = arma::linspace<arma::vec>(0, (n_steps-1)*dt, n_steps);
-    std::cout << "Tlist\n" << tlist << std::endl;
     arma::vec train_ts(1, arma::fill::value(tlist.at(0)));
-    std::cout << "train ts\n" << train_ts << std::endl;
     arma::vec train_noise(1, arma::fill::value(1e-3));
-    std::cout << "Train noise\n" << train_noise << std::endl;
 
     auto cm_11 = compute_kernel_mat(train_ts, train_ts);
     cm_11 += train_noise.diag();
     auto cm_12 = compute_kernel_mat(tlist, train_ts);
     auto cm_22 = compute_kernel_mat(tlist, tlist);
     cov_mat = cm_22 - cm_12 * cm_11.i() * cm_12.t();
-    // std::cout << "Cov mat\n" << cov_mat << std::endl;
     auto success = arma::chol(cov_Lmat, cov_mat, "lower");
     std::cout << "Cholesky success? " << success << std::endl;
     while (!success){
       cov_mat += arma::eye(cov_mat.n_rows,cov_mat.n_rows) * 1e-6;
       success = arma::chol(cov_Lmat, cov_mat, "lower");
-      std::cout << "Cholesky success? " << success << std::endl;
+      std::cout << "Cholesky retry success? " << success << std::endl;
     }
-    // std::cout << "Cov Lmat\n" << cov_Lmat << std::endl;
   }
 
   arma::mat BRNE::mvn_sample_normal(){
     // TODO should do error checking to make sure Lmat is set
     arma::mat res(n_steps, n_samples, arma::fill::randn);
-    // std::cout << "Random sample\n" << res << std::endl;
     return (cov_Lmat * res).t();
   }
   
@@ -103,7 +97,6 @@ namespace brne
         arma::vec traj_costs(n_steps, arma::fill::zeros);
         for (auto t=0; t<n_steps; t++){
           auto dst = pow(xtraj.at(i,t) - xtraj.at(j,t), 2) + pow(ytraj.at(i,t) - ytraj.at(j,t), 2);
-          // std::cout << "dist: "<< dst << std::endl;
           traj_costs.at(t) = 2.0 - 2.0/(1.0 + exp(-cost_a1 *pow(dst, cost_a2)));
         }
         new_costs.at(i,j) = traj_costs.max() * cost_a3;
