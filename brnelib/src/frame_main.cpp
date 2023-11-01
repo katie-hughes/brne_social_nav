@@ -1,14 +1,15 @@
 #include "brnelib/brne.hpp"
 
 int main(){
+  int n_steps =         5;
+  int n_samples =       3;
+
   double kernel_a1 =    0.5;
   double kernel_a2 =    0.2;
   double cost_a1 =      8.0;
   double cost_a2 =      5.0;
   double cost_a3 =      20.0;
   double dt =           0.1;
-  int n_steps =         5;
-  int n_samples =       3;
   double max_ang_vel =  1;
   double max_lin_vel =  1;
   double y_min =        -0.5;
@@ -96,7 +97,7 @@ int main(){
   auto weights = brne_test.brne_nav(xtraj_samples, ytraj_samples);
   // std::cout << "weights\n" << weights << std::endl;
 
-  
+
 
   return 0;
 }

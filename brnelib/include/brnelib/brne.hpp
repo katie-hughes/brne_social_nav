@@ -35,6 +35,7 @@ namespace brne
       arma::mat costs;
       arma::mat all_pts;
       arma::mat weights;
+      arma::mat coll_mask;
 
     public:
       /// @brief Construct an instance of the BRNE class
@@ -68,7 +69,7 @@ namespace brne
 
       void compute_index_table();
       void compute_costs(arma::mat xtraj, arma::mat ytraj);
-      // arma::mat collision_check(arma::mat ytraj);
+      void collision_check(arma::mat ytraj);
       void update_weights();
       arma::mat brne_nav(arma::mat xtraj_samples, arma::mat ytraj_samples);
   };

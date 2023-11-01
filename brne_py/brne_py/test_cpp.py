@@ -4,9 +4,10 @@ import brne as brne
 import time 
 np.set_printoptions(suppress=True, linewidth=10000, precision=4)
 
-dt = 0.1
-num_samples = 3
 plan_steps = 5
+num_samples = 3
+
+dt = 0.1
 num_agents = 2
 ped_sample_scale = 1.0
 
@@ -117,5 +118,5 @@ ax2.plot(opt_trajs_x[1], opt_trajs_y[1], linestyle='-', color='C1')
 ax2.set_title('Optimal trajectories with Python')
 
 # plt.savefig('after_corridor_avoidance.png')
-# plt.show()
+plt.show()
 plt.close()

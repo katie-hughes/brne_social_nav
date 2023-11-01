@@ -112,14 +112,34 @@ namespace brne
     costs = new_costs;
   }
 
-  // arma::mat BRNE::collision_check(arma::mat ytraj){
-    
-  // }
+  void BRNE::collision_check(arma::mat ytraj){
+    // only keep where y_min < y_traj < y_max
+    coll_mask.reset();
+    std::cout << "ytraj\n" << ytraj << std::endl;
+    // coll_mask = arma::mat(ytraj.n_rows, ytraj.n_cols, arma::fill::ones);
+    // std::cout << "mask\n" << coll_mask << std::endl;
+    arma::vec valid(ytraj.n_rows);
+    for (int r=0; r<ytraj.n_rows; r++){
+      int is_valid = 1;
+      for (int c=0; c<ytraj.n_cols; c++){
+        if ((ytraj.at(r,c) < y_min) || (ytraj.at(r,c) > y_max)){
+          // coll_mask.at(r,c) = 0;
+          is_valid = 0;
+          break;
+        }
+      }
+      valid.at(r) = is_valid;
+    }
+    std::cout << "valid\n" << valid << std::endl;
+    coll_mask = arma::conv_to<arma::mat>::from(valid);
+    coll_mask.reshape(n_samples, n_agents);
+    coll_mask = coll_mask.t();
+    std::cout << "coll mask\n" << coll_mask << std::endl;
+  }
 
   void BRNE::update_weights(){
     for (int i=0; i<n_agents; i++){
       auto row = arma::conv_to<arma::rowvec>::from(index_table.row(i));
-      std::cout << "Row\n" << row << std::endl;
       for (int j=0; j<n_samples; j++){
         auto c = 0.0;
         auto idx1 = all_pts.at(row.at(0), j);
@@ -127,20 +147,12 @@ namespace brne
           for (int l=0; l<n_samples; l++){
             auto idx2 = all_pts.at(row.at(k+1), l);
             c += costs.at(idx1, idx2) * weights.at(row.at(k+1), l);
-            std::cout << "i: " << i << " j: " << j << " k: " << k << " l: " << l << " cost: " << c << std::endl;
           }
         }
         c /= ((n_agents - 1) * n_samples);
-        std::cout << "C " << c << std::endl;
         weights.at(i,j) = exp(-1.0 * c);
-        std::cout << "weights at " << i << " " << j << "\n" << weights << std::endl;
       }
-      // auto avg = arma::mean(weights.row(i));
-      // std::cout << "Average" << avg << std::endl;
-      // auto weights_i = weights.at(i);
-      // std::cout << "Row before\n" << weights_i << std::endl;
       weights.row(i) /= arma::mean(weights.row(i));
-      std::cout << "normalize\n" << weights << std::endl;
     }
   }
 
@@ -154,20 +166,25 @@ namespace brne
     all_pts = arma::conv_to<arma::mat>::from(arma::linspace<arma::rowvec>(0, n_agents*n_samples-1, n_agents*n_samples));
     all_pts.reshape(n_samples, n_agents);
     all_pts = all_pts.t();
-    std::cout << "all_pts\n" << all_pts << std::endl;
     // TODO I could cache this for different numbers of agents
     compute_index_table();
-    std::cout << "Index table\n" << index_table << std::endl;
     // get the costs
     compute_costs(xtraj_samples, ytraj_samples);
-    std::cout << "Costs\n" << costs << std::endl;
     weights = arma::mat(n_agents, n_samples, arma::fill::ones);
-    for (int i=0; i<1; i++){
+    for (int i=0; i<10; i++){
       std::cout << "weights update #" << i << std::endl;
       std::cout << "weights\n" << weights << std::endl;
       update_weights();
     }
     std::cout << "Final weights\n" << weights << std::endl;
+
+    collision_check(ytraj_samples);
+    // TODO: add a check to make sure that at least some of these are true for agent.
+
+    for (int a=0; a<n_agents; a++){
+      // element wise multiplication
+      std::cout << "agent" << a << std::endl;
+    }
     return weights;
   }
 }

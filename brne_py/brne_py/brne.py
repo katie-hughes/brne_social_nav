@@ -68,7 +68,7 @@ def cholesky_numba(A):
     return L
 
 
-# @nb.jit(nopython=True)
+@nb.jit(nopython=True)
 def get_Lmat_nb(train_ts, test_ts, train_noise, kernel_a1, kernel_a2):
     covmat_11 = get_kernel_mat_nb(train_ts, train_ts, kernel_a1, kernel_a2)
     covmat_11 += np.diag(train_noise)
@@ -102,12 +102,11 @@ def costs_nb(trajs_x, trajs_y, num_agents, num_pts, tsteps, cost_a1, cost_a2, co
     return vals
 
 
-# @nb.jit(nopython=True, parallel=True)
+@nb.jit(nopython=True, parallel=True)
 def weights_update_nb(all_costs, old_weights, index_table, all_pt_index, num_agents, num_pts):
     weights = old_weights.copy()
     for i in range(num_agents):
         row = index_table[i]
-        print(f"Row i: {row}")
         # other_pt_index = all_pt_index[row[1:], :].ravel()
         for j in nb.prange(num_pts):
             cost1 = 0.0
@@ -116,14 +115,9 @@ def weights_update_nb(all_costs, old_weights, index_table, all_pt_index, num_age
                 for l in range(num_pts):
                     idx2 = all_pt_index[row[k + 1], l]
                     cost1 += all_costs[idx1, idx2] * weights[row[k + 1], l]
-                    print(f"i:{i} j:{j} k:{k} l:{l} cost1:{cost1}")
             cost1 /= (num_agents - 1) * num_pts
-            print(f"cost1 {cost1}")
             weights[i, j] = np.exp(-1.0 * cost1)
-            print(f"Weights update {i} {j}\n{weights}")
-        print(f"Mean {np.mean(weights[i])}")
         weights[i] /= np.mean(weights[i])
-        print(f"After normalization\n{weights}")
     return weights
 
 
@@ -140,7 +134,7 @@ def get_index_table(num_agents):
             idx += 1
     return index_table
 
-@nb.jit(nopython=True, parallel=True)
+# @nb.jit(nopython=True, parallel=True)
 def coll_beck(trajs_y, y_min, y_max):
     lower_mask = trajs_y > y_min
     upper_mask = trajs_y < y_max
@@ -148,31 +142,32 @@ def coll_beck(trajs_y, y_min, y_max):
 
 def brne_nav(xtraj_samples, ytraj_samples, num_agents, tsteps, num_pts, cost_a1, cost_a2, cost_a3, ped_sample_scale, y_min, y_max):
     index_table = get_index_table(num_agents).astype(int)
-    print(f"Index table\n{index_table}")
     all_pt_index = np.arange(num_agents * num_pts).reshape(num_agents, num_pts)
-    print(f"All pt index\n{all_pt_index}")
-
     weights = np.ones((num_agents, num_pts))
-
     all_costs = costs_nb(xtraj_samples, ytraj_samples, num_agents, num_pts, tsteps, cost_a1, cost_a2, cost_a3)
-    print(f"All costs\n{all_costs}")
     # print(f"{num_agents} {num_pts} {tsteps} {cost_a1} {cost_a2} {cost_a3}")
     # print(f"input to coll mask {ytraj_samples[0:num_pts].shape}")
     # coll_mask = coll_beck(ytraj_samples[0:num_pts], y_min, y_max).all(axis=1).astype(float)
+    print(f"coll beck raw {coll_beck(ytraj_samples, y_min, y_max)}")
+    print(f"coll all {coll_beck(ytraj_samples, y_min, y_max).all(axis=1)}")
     coll_mask = coll_beck(ytraj_samples, y_min, y_max).all(axis=1).astype(float).reshape(num_agents, num_pts)
 
     # if we are going out of bounds, coll_mask[0] is all 0s and we will encounter divide by 0 error.
     if not np.any(coll_mask[0]):
         return None
 
-    for iter_num in range(1):
+    for iter_num in range(10):
         print(f"\nWeights {iter_num}\n{weights}")
         weights = weights_update_nb(all_costs, weights, index_table, all_pt_index, num_agents, num_pts)
 
     print(f"\nFinal Weights\n{weights}")
 
+    print(f"Coll mask\n{coll_mask}")
     for i in range(num_agents):
         agent_weights = weights[i] * coll_mask[i]
+        print(f"agent weights {agent_weights}")
+        print(f"weights i {weights[i]}")
+        print(f"coll mask i {coll_mask[i]}")
         agent_weights /= np.mean(agent_weights)
         weights[i] = agent_weights.copy()
 
