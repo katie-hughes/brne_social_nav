@@ -102,23 +102,28 @@ def costs_nb(trajs_x, trajs_y, num_agents, num_pts, tsteps, cost_a1, cost_a2, co
     return vals
 
 
-@nb.jit(nopython=True, parallel=True)
+# @nb.jit(nopython=True, parallel=True)
 def weights_update_nb(all_costs, old_weights, index_table, all_pt_index, num_agents, num_pts):
     weights = old_weights.copy()
     for i in range(num_agents):
         row = index_table[i]
+        print(f"Row i: {row}")
         # other_pt_index = all_pt_index[row[1:], :].ravel()
-
-        for j1 in nb.prange(num_pts):
+        for j in nb.prange(num_pts):
             cost1 = 0.0
-            idx1 = all_pt_index[row[0], j1]
-            for i2 in nb.prange(num_agents - 1):
-                for j2 in range(num_pts):
-                    idx2 = all_pt_index[row[i2 + 1], j2]
-                    cost1 += all_costs[idx1, idx2] * weights[row[i2 + 1], j2]
+            idx1 = all_pt_index[row[0], j]
+            for k in nb.prange(num_agents - 1):
+                for l in range(num_pts):
+                    idx2 = all_pt_index[row[k + 1], l]
+                    cost1 += all_costs[idx1, idx2] * weights[row[k + 1], l]
+                    print(f"i:{i} j:{j} k:{k} l:{l} cost1:{cost1}")
             cost1 /= (num_agents - 1) * num_pts
-            weights[i, j1] = np.exp(-1.0 * cost1)
+            print(f"cost1 {cost1}")
+            weights[i, j] = np.exp(-1.0 * cost1)
+            print(f"Weights update {i} {j}\n{weights}")
+        print(f"Mean {np.mean(weights[i])}")
         weights[i] /= np.mean(weights[i])
+        print(f"After normalization\n{weights}")
     return weights
 
 
@@ -160,7 +165,7 @@ def brne_nav(xtraj_samples, ytraj_samples, num_agents, tsteps, num_pts, cost_a1,
     if not np.any(coll_mask[0]):
         return None
 
-    for iter_num in range(2):
+    for iter_num in range(1):
         print(f"\nWeights {iter_num}\n{weights}")
         weights = weights_update_nb(all_costs, weights, index_table, all_pt_index, num_agents, num_pts)
 

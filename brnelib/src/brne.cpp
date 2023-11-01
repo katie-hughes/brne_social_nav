@@ -119,7 +119,7 @@ namespace brne
   void BRNE::update_weights(){
     for (int i=0; i<n_agents; i++){
       auto row = arma::conv_to<arma::rowvec>::from(index_table.row(i));
-      // std::cout << "Row\n" << row << std::endl;
+      std::cout << "Row\n" << row << std::endl;
       for (int j=0; j<n_samples; j++){
         auto c = 0.0;
         auto idx1 = all_pts.at(row.at(0), j);
@@ -127,12 +127,20 @@ namespace brne
           for (int l=0; l<n_samples; l++){
             auto idx2 = all_pts.at(row.at(k+1), l);
             c += costs.at(idx1, idx2) * weights.at(row.at(k+1), l);
+            std::cout << "i: " << i << " j: " << j << " k: " << k << " l: " << l << " cost: " << c << std::endl;
           }
         }
         c /= ((n_agents - 1) * n_samples);
+        std::cout << "C " << c << std::endl;
         weights.at(i,j) = exp(-1.0 * c);
+        std::cout << "weights at " << i << " " << j << "\n" << weights << std::endl;
       }
-      weights.at(i) /= arma::mean(weights.at(i));
+      // auto avg = arma::mean(weights.row(i));
+      // std::cout << "Average" << avg << std::endl;
+      // auto weights_i = weights.at(i);
+      // std::cout << "Row before\n" << weights_i << std::endl;
+      weights.row(i) /= arma::mean(weights.row(i));
+      std::cout << "normalize\n" << weights << std::endl;
     }
   }
 
@@ -154,7 +162,7 @@ namespace brne
     compute_costs(xtraj_samples, ytraj_samples);
     std::cout << "Costs\n" << costs << std::endl;
     weights = arma::mat(n_agents, n_samples, arma::fill::ones);
-    for (int i=0; i<2; i++){
+    for (int i=0; i<1; i++){
       std::cout << "weights update #" << i << std::endl;
       std::cout << "weights\n" << weights << std::endl;
       update_weights();

@@ -117,5 +117,5 @@ ax2.plot(opt_trajs_x[1], opt_trajs_y[1], linestyle='-', color='C1')
 ax2.set_title('Optimal trajectories with Python')
 
 # plt.savefig('after_corridor_avoidance.png')
-plt.show()
+# plt.show()
 plt.close()
