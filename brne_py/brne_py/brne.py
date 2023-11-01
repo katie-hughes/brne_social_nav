@@ -145,6 +145,7 @@ def brne_nav(xtraj_samples, ytraj_samples, num_agents, tsteps, num_pts, cost_a1,
     index_table = get_index_table(num_agents).astype(int)
     print(f"Index table\n{index_table}")
     all_pt_index = np.arange(num_agents * num_pts).reshape(num_agents, num_pts)
+    print(f"All pt index\n{all_pt_index}")
 
     weights = np.ones((num_agents, num_pts))
 
@@ -159,9 +160,11 @@ def brne_nav(xtraj_samples, ytraj_samples, num_agents, tsteps, num_pts, cost_a1,
     if not np.any(coll_mask[0]):
         return None
 
-    for iter_num in range(11):
-        # print(f"\nWeights {iter_num}\n{weights}")
+    for iter_num in range(2):
+        print(f"\nWeights {iter_num}\n{weights}")
         weights = weights_update_nb(all_costs, weights, index_table, all_pt_index, num_agents, num_pts)
+
+    print(f"\nFinal Weights\n{weights}")
 
     for i in range(num_agents):
         agent_weights = weights[i] * coll_mask[i]

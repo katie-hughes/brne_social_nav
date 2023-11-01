@@ -78,7 +78,8 @@ namespace brne
     return (cov_Lmat * res).t();
   }
   
-  arma::mat BRNE::compute_index_table(){
+  void BRNE::compute_index_table(){
+    index_table.reset();
     arma::mat table(n_agents, n_agents, arma::fill::zeros);
     for (int i=0; i<n_agents; i++){
       table.at(i,0) = i;
@@ -90,12 +91,13 @@ namespace brne
         }
       }
     }
-    return table;
+    index_table = table;
   }
 
-  arma::mat BRNE::compute_costs(arma::mat xtraj, arma::mat ytraj){
+  void BRNE::compute_costs(arma::mat xtraj, arma::mat ytraj){
+    costs.reset();
     auto size = n_agents*n_samples;
-    arma::mat costs(size, size, arma::fill::zeros);
+    arma::mat new_costs(size, size, arma::fill::zeros);
     for (auto i=0; i<size; i++){
       for (auto j=0; j<size; j++){
         arma::vec traj_costs(n_steps, arma::fill::zeros);
@@ -104,29 +106,60 @@ namespace brne
           // std::cout << "dist: "<< dst << std::endl;
           traj_costs.at(t) = 2.0 - 2.0/(1.0 + exp(-cost_a1 *pow(dst, cost_a2)));
         }
-        costs.at(i,j) = traj_costs.max() * cost_a3;
+        new_costs.at(i,j) = traj_costs.max() * cost_a3;
       }
     }
-    return costs;
+    costs = new_costs;
   }
 
   // arma::mat BRNE::collision_check(arma::mat ytraj){
     
   // }
 
+  void BRNE::update_weights(){
+    for (int i=0; i<n_agents; i++){
+      auto row = arma::conv_to<arma::rowvec>::from(index_table.row(i));
+      // std::cout << "Row\n" << row << std::endl;
+      for (int j=0; j<n_samples; j++){
+        auto c = 0.0;
+        auto idx1 = all_pts.at(row.at(0), j);
+        for (int k=0; k<n_agents-1; k++){
+          for (int l=0; l<n_samples; l++){
+            auto idx2 = all_pts.at(row.at(k+1), l);
+            c += costs.at(idx1, idx2) * weights.at(row.at(k+1), l);
+          }
+        }
+        c /= ((n_agents - 1) * n_samples);
+        weights.at(i,j) = exp(-1.0 * c);
+      }
+      weights.at(i) /= arma::mean(weights.at(i));
+    }
+  }
+
   arma::mat BRNE::brne_nav(arma::mat xtraj_samples, arma::mat ytraj_samples){
+    weights.reset();
+    all_pts.reset();
+    // compute number of agents
     n_agents = xtraj_samples.n_rows / n_samples;
     std::cout << "N agents: " << n_agents << std::endl;
+    // compute all points index
+    all_pts = arma::conv_to<arma::mat>::from(arma::linspace<arma::rowvec>(0, n_agents*n_samples-1, n_agents*n_samples));
+    all_pts.reshape(n_samples, n_agents);
+    all_pts = all_pts.t();
+    std::cout << "all_pts\n" << all_pts << std::endl;
     // TODO I could cache this for different numbers of agents
-    auto index_table = compute_index_table();
+    compute_index_table();
     std::cout << "Index table\n" << index_table << std::endl;
-    auto costs = compute_costs(xtraj_samples, ytraj_samples);
+    // get the costs
+    compute_costs(xtraj_samples, ytraj_samples);
     std::cout << "Costs\n" << costs << std::endl;
-    arma::mat weights(n_agents, n_samples, arma::fill::zeros);
-    for (int i=0; i<10; i++){
+    weights = arma::mat(n_agents, n_samples, arma::fill::ones);
+    for (int i=0; i<2; i++){
       std::cout << "weights update #" << i << std::endl;
-      // weights = update_weights(costs, weights, index_table);
+      std::cout << "weights\n" << weights << std::endl;
+      update_weights();
     }
+    std::cout << "Final weights\n" << weights << std::endl;
     return weights;
   }
 }

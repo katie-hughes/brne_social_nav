@@ -94,7 +94,7 @@ int main(){
   std::cout << "Ytraj samples \n" << ytraj_samples << std::endl;
 
   auto weights = brne_test.brne_nav(xtraj_samples, ytraj_samples);
-  std::cout << "weights\n" << weights << std::endl;
+  // std::cout << "weights\n" << weights << std::endl;
 
   return 0;
 }
