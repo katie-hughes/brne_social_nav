@@ -115,7 +115,6 @@ namespace brne
   void BRNE::collision_check(arma::mat ytraj){
     // only keep where y_min < y_traj < y_max
     coll_mask.reset();
-    std::cout << "ytraj\n" << ytraj << std::endl;
     arma::vec valid(ytraj.n_rows);
     for (int r=0; r<ytraj.n_rows; r++){
       int is_valid = 1;
@@ -178,14 +177,13 @@ namespace brne
 
     for (int a=0; a<n_agents; a++){
       // element wise multiplication
-      std::cout << "agent " << a << std::endl;
       auto agent_weights = arma::conv_to<arma::rowvec>::from(weights.row(a));
       auto agent_mask = arma::conv_to<arma::rowvec>::from(coll_mask.row(a));
       auto masked_weights = agent_weights % agent_mask;
       weights.row(a) = masked_weights / arma::mean(masked_weights);
     }
 
-    std::cout << "Final FINAL weights\n" << weights << std::endl;
+    std::cout << "Weights after masking\n" << weights << std::endl;
     return weights;
   }
 }

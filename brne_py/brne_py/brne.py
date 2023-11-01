@@ -148,8 +148,6 @@ def brne_nav(xtraj_samples, ytraj_samples, num_agents, tsteps, num_pts, cost_a1,
     # print(f"{num_agents} {num_pts} {tsteps} {cost_a1} {cost_a2} {cost_a3}")
     # print(f"input to coll mask {ytraj_samples[0:num_pts].shape}")
     # coll_mask = coll_beck(ytraj_samples[0:num_pts], y_min, y_max).all(axis=1).astype(float)
-    print(f"coll beck raw {coll_beck(ytraj_samples, y_min, y_max)}")
-    print(f"coll all {coll_beck(ytraj_samples, y_min, y_max).all(axis=1)}")
     coll_mask = coll_beck(ytraj_samples, y_min, y_max).all(axis=1).astype(float).reshape(num_agents, num_pts)
 
     # if we are going out of bounds, coll_mask[0] is all 0s and we will encounter divide by 0 error.
@@ -162,16 +160,12 @@ def brne_nav(xtraj_samples, ytraj_samples, num_agents, tsteps, num_pts, cost_a1,
 
     print(f"\nFinal Weights\n{weights}")
 
-    print(f"Coll mask\n{coll_mask}")
     for i in range(num_agents):
         agent_weights = weights[i] * coll_mask[i]
-        print(f"agent weights {agent_weights}")
-        print(f"weights i {weights[i]}")
-        print(f"coll mask i {coll_mask[i]}")
         agent_weights /= np.mean(agent_weights)
         weights[i] = agent_weights.copy()
 
-    print(f"\nFinal FINAL Weights\n{weights}")
+    print(f"\nWeights after masking\n{weights}")
     return weights
 
 # @nb.jit(nopython=True)

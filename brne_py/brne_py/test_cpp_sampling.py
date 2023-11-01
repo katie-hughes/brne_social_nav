@@ -49,7 +49,6 @@ cov_Lmat, cov_mat = brne.get_Lmat_nb(train_ts, test_ts, train_noise, 0.5, 0.2)
 # (1) write the sampling code in C++, make sure
 # (2) make the C++ code read in the python-generated samples
 x_pts = np.genfromtxt("../../brnelib/build/x_samples.csv", delimiter=",")
-print(f"X_pts {x_pts}")
 y_pts = np.genfromtxt("../../brnelib/build/y_samples.csv", delimiter=",")
 width_scale = (0.5 + 0.5) / (y_pts.max() - y_pts.min()) 
 print('width_scale: ', width_scale)
@@ -109,8 +108,15 @@ for i in range(num_agents):
     agent_weights = weights[i]
     opt_trajs_x[i] = xmean_list[i] + \
         np.mean(x_pts[(i)*num_samples : (i+1)*num_samples] * agent_weights[:,np.newaxis], axis=0)
+    print(f"\nFirst\n{x_pts[(i)*num_samples : (i+1)*num_samples]}")
+    print(f"Second\n{agent_weights[:,np.newaxis]}")
+    print(f"Product\n{x_pts[(i)*num_samples : (i+1)*num_samples] * agent_weights[:,np.newaxis]}")
+    print(f"Mean\n{np.mean(x_pts[(i)*num_samples : (i+1)*num_samples] * agent_weights[:,np.newaxis], axis=0)}")
     opt_trajs_y[i] = ymean_list[i]  + \
         np.mean(y_pts[(i)*num_samples : (i+1)*num_samples] * agent_weights[:,np.newaxis], axis=0)
+
+print(f"Opt traj x {opt_trajs_x}")
+print(f"Opt traj y {opt_trajs_y}")
 
 # visualize the final optimal trajectories
 ax2.plot(opt_trajs_x[0], opt_trajs_y[0], linestyle='-', color='C0')

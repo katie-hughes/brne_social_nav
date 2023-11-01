@@ -95,7 +95,25 @@ int main(){
   std::cout << "Ytraj samples \n" << ytraj_samples << std::endl;
 
   auto weights = brne_test.brne_nav(xtraj_samples, ytraj_samples);
-  // std::cout << "weights\n" << weights << std::endl;
+  std::cout << "weights\n" << weights << std::endl;
+
+  arma::mat x_opt_traj(n_agents, n_steps, arma::fill::zeros);
+  arma::mat y_opt_traj(n_agents, n_steps, arma::fill::zeros);
+
+  for (int a=0; a<n_agents; a++){
+    auto agent_weights = arma::conv_to<arma::vec>::from(weights.row(a));
+    auto agent_x_samples = arma::conv_to<arma::mat>::from(x_samples.submat(a*n_samples, 0, (a+1)*n_samples-1, n_steps-1));
+    auto agent_y_samples = arma::conv_to<arma::mat>::from(y_samples.submat(a*n_samples, 0, (a+1)*n_samples-1, n_steps-1));
+    for (int i=0; i<n_samples; i++){
+      agent_x_samples.row(i) *= agent_weights.at(i);
+      agent_y_samples.row(i) *= agent_weights.at(i);
+    }
+    // std::cout << "new agent samples\n" << agent_x_samples << std::endl;
+    x_opt_traj.row(a) = x_nominal.row(a) + arma::mean(agent_x_samples,0);
+    y_opt_traj.row(a) = y_nominal.row(a) + arma::mean(agent_y_samples,0);
+  }
+  std::cout << "X OPT TRAJ\n" << x_opt_traj << std::endl;
+  std::cout << "Y OPT TRAJ\n" << y_opt_traj << std::endl;
 
 
 
