@@ -115,5 +115,21 @@ int main(){
   std::cout << "X OPT TRAJ\n" << x_opt_traj << std::endl;
   std::cout << "Y OPT TRAJ\n" << y_opt_traj << std::endl;
 
+  auto trajs = brne_test.compute_optimal_trajectory(x_nominal, y_nominal, x_samples, y_samples);
+  for (int i = 0; i<n_agents; i++){
+    std::cout << "Agent" << i << std::endl;
+    auto t = trajs.at(i);
+    std::cout << "X traj" << std::endl;
+    for (double i:t.x){
+      std::cout << i << " ";
+    }
+    std::cout << std::endl;
+    std::cout << "Y traj" << std::endl;
+    for (double i:t.y){
+      std::cout << i << " ";
+    }
+    std::cout << std::endl;
+  }
+
   return 0;
 }

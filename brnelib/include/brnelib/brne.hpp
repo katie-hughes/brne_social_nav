@@ -9,6 +9,10 @@
 
 namespace brne
 {
+  struct traj{
+    std::vector<double> x;
+    std::vector<double> y;
+  };
   /// @brief Class for Bayes Rule Nash Equilibrium calculations
   class BRNE{
     private:
@@ -85,10 +89,16 @@ namespace brne
       /// @brief sample the multivariate normal distribution
       /// @return sample of size n_steps x n_samples
       arma::mat mvn_sample_normal();
-      /// @brief Compute the optimal trajectory using BRNE updates
+      /// @brief Compute BRNE weights for optimal trajectory
       /// @param xtraj_samples x trajectory samples, size (n_agents*n_samples) x n_steps
       /// @param ytraj_samples y trajectory samples, size (n_agents*n_samples) x n_steps
       /// @return optimal weights of size n_agents x n_samples
       arma::mat brne_nav(arma::mat xtraj_samples, arma::mat ytraj_samples);
+      /// @brief compute optimal trajectory from BRNE weights
+      /// @param xtraj_samples x trajectory samples, size (n_agents*n_samples) x n_steps
+      /// @param ytraj_samples y trajectory samples, size (n_agents*n_samples) x n_steps
+      /// @return optimal trajectory of x, y
+      std::vector<traj> compute_optimal_trajectory(arma::mat x_nominal, arma::mat y_nominal,
+                                                   arma::mat x_samples, arma::mat y_samples);
   };
 }

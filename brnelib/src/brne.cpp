@@ -192,4 +192,26 @@ namespace brne
     std::cout << "Weights after masking\n" << weights << std::endl;
     return weights;
   }
+
+  std::vector<traj> BRNE::compute_optimal_trajectory(arma::mat x_nominal, arma::mat y_nominal,
+                                                     arma::mat x_samples, arma::mat y_samples){
+    std::vector<traj> res;
+    for (int a=0; a<n_agents; a++){
+      auto agent_weights = arma::conv_to<arma::vec>::from(weights.row(a));
+      auto agent_x_samples = arma::conv_to<arma::mat>::from(x_samples.submat(a*n_samples, 0, (a+1)*n_samples-1, n_steps-1));
+      auto agent_y_samples = arma::conv_to<arma::mat>::from(y_samples.submat(a*n_samples, 0, (a+1)*n_samples-1, n_steps-1));
+      for (int i=0; i<n_samples; i++){
+        agent_x_samples.row(i) *= agent_weights.at(i);
+        agent_y_samples.row(i) *= agent_weights.at(i);
+      }
+      traj agent_traj;
+      // std::cout << "new agent samples\n" << agent_x_samples << std::endl;
+      // auto test = x_nominal.row(a) + arma::mean(agent_x_samples,0);
+      agent_traj.x = arma::conv_to<std::vector<double>>::from(x_nominal.row(a) + arma::mean(agent_x_samples,0));
+      agent_traj.y = arma::conv_to<std::vector<double>>::from(y_nominal.row(a) + arma::mean(agent_y_samples,0));
+      res.push_back(agent_traj);
+    }
+    return res;
+  }
+
 }
