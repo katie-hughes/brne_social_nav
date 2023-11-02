@@ -42,8 +42,8 @@ namespace brne
     // smallest eigtenvalue of the matrix is??
     // largest / smallest
     arma::mat res(t1.size(), t2.size(), arma::fill::zeros);
-    for (auto i=0; i<t1.size(); i++){
-      for (auto j=0; j<t2.size(); j++){
+    for (auto i=0; i<static_cast<int>(t1.size()); i++){
+      for (auto j=0; j<static_cast<int>(t2.size()); j++){
         res.at(i,j) = kernel_a2 * exp(-kernel_a1 * pow((t1.at(i) - t2.at(j)),2));
       }
     }
@@ -122,9 +122,9 @@ namespace brne
     // only keep where y_min < y_traj < y_max
     coll_mask.reset();
     arma::vec valid(ytraj.n_rows);
-    for (int r=0; r<ytraj.n_rows; r++){
+    for (int r=0; r<static_cast<int>(ytraj.n_rows); r++){
       int is_valid = 1;
-      for (int c=0; c<ytraj.n_cols; c++){
+      for (int c=0; c<static_cast<int>(ytraj.n_cols); c++){
         if ((ytraj.at(r,c) < y_min) || (ytraj.at(r,c) > y_max)){
           is_valid = 0;
           break;

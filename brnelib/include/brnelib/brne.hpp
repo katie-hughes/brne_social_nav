@@ -25,11 +25,11 @@ namespace brne
       double y_min;
       double y_max;
 
-      // these are constant
+      // these are constant for a single instance of this class
       arma::mat cov_Lmat;
       arma::mat cov_mat;      
 
-      // these change
+      // these change depending on iteration
       int n_agents = 1;
       arma::mat index_table;
       arma::mat costs;
@@ -37,11 +37,21 @@ namespace brne
       arma::mat weights;
       arma::mat coll_mask;
 
-
+      /// @brief Compute the kernel matrix
+      /// @param t1 vector 1
+      /// @param t2 vector 2
+      /// @return kernel matrix
       arma::mat compute_kernel_mat(arma::vec t1, arma::vec t2);
+      /// @brief compute the index table, as a function of the number of agents
       void compute_index_table();
+      /// @brief Compute the cost matrix of a set of trajectories
+      /// @param xtraj x trajectory samples
+      /// @param ytraj y trajectory samples
       void compute_costs(arma::mat xtraj, arma::mat ytraj);
+      /// @brief perform a collision check with the walls of the corridor
+      /// @param ytraj y trajectory samples
       void collision_check(arma::mat ytraj);
+      /// @brief Perform one iteration of bayesian updates on the weights matrix
       void update_weights();
 
     public:
@@ -70,8 +80,15 @@ namespace brne
                     double y_min, double y_max);
       /// @brief Print out the constants of the BRNE class.
       void print_params();
+      /// @brief Compute the covariance matrix
       void compute_Lmat();
+      /// @brief sample the multivariate normal distribution
+      /// @return sample of size n_steps x n_samples
       arma::mat mvn_sample_normal();
+      /// @brief Compute the optimal trajectory using BRNE updates
+      /// @param xtraj_samples x trajectory samples, size (n_agents*n_samples) x n_steps
+      /// @param ytraj_samples y trajectory samples, size (n_agents*n_samples) x n_steps
+      /// @return optimal weights of size n_agents x n_samples
       arma::mat brne_nav(arma::mat xtraj_samples, arma::mat ytraj_samples);
   };
 }
