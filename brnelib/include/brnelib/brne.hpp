@@ -9,8 +9,11 @@
 
 namespace brne
 {
+  /// @brief Describes a trajectory in 2D space.
   struct traj{
+    /// @brief points forming the x trajectory
     std::vector<double> x;
+    /// @brief points forming the y trajectory
     std::vector<double> y;
   };
   /// @brief Class for Bayes Rule Nash Equilibrium calculations
@@ -24,8 +27,6 @@ namespace brne
       double dt;
       int n_steps;
       int n_samples;
-      double max_ang_vel;
-      double max_lin_vel;
       double y_min;
       double y_max;
 
@@ -59,6 +60,8 @@ namespace brne
       void update_weights();
 
     public:
+      /// @brief empty constructor. Not actually useful, but might need for ros node.
+      explicit BRNE();
       /// @brief Construct an instance of the BRNE class
       /// @param kernel_a1 control the "straightness" of trajectory samples. 
       /// The larger the value is, the less straight the trajectory sample will be.
@@ -73,14 +76,11 @@ namespace brne
       /// @param dt time between ticks (seconds)
       /// @param n_steps number of timesteps in the planning horizon
       /// @param n_samples number of samples each agent generates
-      /// @param max_ang_vel maximum angular velocity of the robot
-      /// @param max_lin_vel maximum linear velocity of the robot
       /// @param y_min minimum coordinate of the corridor
       /// @param y_max maximum coordinate of the corridor
       explicit BRNE(double kernel_a1, double kernel_a2,
                     double cost_a1, double cost_a2, double cost_a3,
                     double dt, int n_steps, int n_samples,
-                    double max_ang_vel, double max_lin_vel,
                     double y_min, double y_max);
       /// @brief Print out the constants of the BRNE class.
       void print_params();
@@ -94,10 +94,12 @@ namespace brne
       /// @param ytraj_samples y trajectory samples, size (n_agents*n_samples) x n_steps
       /// @return optimal weights of size n_agents x n_samples
       arma::mat brne_nav(arma::mat xtraj_samples, arma::mat ytraj_samples);
-      /// @brief compute optimal trajectory from BRNE weights
-      /// @param xtraj_samples x trajectory samples, size (n_agents*n_samples) x n_steps
-      /// @param ytraj_samples y trajectory samples, size (n_agents*n_samples) x n_steps
-      /// @return optimal trajectory of x, y
+      /// @brief Compute optimal trajectories from the BRNE weights
+      /// @param x_nominal nominal x trajectory
+      /// @param y_nominal nominal y trajectory
+      /// @param x_samples samples of x trajectories
+      /// @param y_samples samples of y trajectories
+      /// @return list of optimal trajectories, length is the number of agents.
       std::vector<traj> compute_optimal_trajectory(arma::mat x_nominal, arma::mat y_nominal,
                                                    arma::mat x_samples, arma::mat y_samples);
   };

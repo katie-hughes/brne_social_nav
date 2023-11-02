@@ -15,8 +15,10 @@
 
   <!-- C++ algorithm nodes -->
   <node pkg="crowd_nav" exec="path_plan" if="$(eval '\'$(var lang)\' == \'C++\'')">
+    <param from="$(find-pkg-share crowd_nav)/config/brne.yaml"/>
   </node>
   <node pkg="crowd_nav" exec="controller" if="$(eval '\'$(var lang)\' == \'C++\'')">
+    <param from="$(find-pkg-share crowd_nav)/config/brne.yaml"/>
   </node>
 
   <!-- perception nodes -->

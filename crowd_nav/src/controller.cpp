@@ -44,6 +44,7 @@ class Controller : public rclcpp::Node
 
   private:
     double rate_hz;
+    crowd_nav_interfaces::msg::TwistArray cmd_buff;
     rclcpp::TimerBase::SharedPtr timer_;
 
     rclcpp::Subscription<crowd_nav_interfaces::msg::TwistArray>::SharedPtr cmd_buf_sub_;
@@ -52,7 +53,8 @@ class Controller : public rclcpp::Node
 
     void cmd_buf_cb(const crowd_nav_interfaces::msg::TwistArray & msg)
     {
-      RCLCPP_INFO_STREAM(get_logger(), "Received buffer. Size="<<msg.twists.size());
+      // RCLCPP_INFO_STREAM(get_logger(), "Received buffer. Size="<<msg.twists.size());
+      cmd_buff = msg;
     }
 
     void timer_callback()

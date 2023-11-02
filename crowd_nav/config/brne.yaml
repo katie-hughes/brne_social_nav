@@ -1,0 +1,27 @@
+/**:
+  ros__parameters:
+    replan_freq: 10.0  # unit: Hz
+    dt: 0.1
+    maximum_agents: 5  # maximum number of agents BRNE will consider (including the robot)
+    n_samples: 196  # number of samples assigned to each agent
+    n_steps: 25  # time steps of the planning horizon
+    max_lin_vel: 0.6  # 0.6,0.8 maximum linear velocity allowed on the robot
+    max_ang_vel: 1.0  # 1.0,1.2 maximum angular velocity allowed on the robot
+    nominal_vel: 0.4  #0.4,0.5 nomimal (linear) velocity when plannig the initial trajectory
+    kernel_a1: 0.2  # control the "straightness" of trajectory samples. Larger the value is, less straight the trajectory sample will be.
+    kernel_a2: 0.2  # control the "width/spreadness" of trajectory samples. Larger the value is, more spread the trajectory samples are.
+    cost_a1: 4.0  # control the safety zone, smaller the value is, more conversative the robot will be.
+    cost_a2: 1.0  # control the safety zone, larger the value is, more conservative the robot will be.
+    cost_a3: 80.0  #  control the safety penalty weight, larger the value is, more conservative the robot will be.
+    ped_sample_scale: 0.1  # pedestrian's willingness for cooperation, default value is 1.0, the smaller it is, the less the robot would expect the pedestrians to make space for it
+    ad: -5.0  # "aggressiveness" of the optimal controller, the more negative ad is, the more aggressive the robot will be on chasing the way points (might leads to jerky or aggressive behavior)
+    R_lin: 1.0  # control penalty weight on linear velocity, the larger it is, the smoother the linear motion will be, but way point tracking accuracy might be compromised
+    R_ang: 2.0  # control penalty weight on angular velocity, the larger it is, the smoother the rotation motion will be, but way point tracking accuracy might be compromised
+    people_timeout: 5.0  # unit: seconds
+    y_min: -0.75  # lower bound of y coordinate (one side of corridor)
+    y_max: 0.75  # upper bound of y coordinate (the other side of corridor)
+    staircase_truncation: false  # saturate F2F velocity in a staircase manner
+    people_timeout_off: true
+    close_stop_threshold: 0.5  # threshold for safety mask, leading to estop
+    open_space_velocity: 0.6  # nominal velocity when the robot is in open space
+    brne_activate_threshold: 3.5  # distance threshold from a pedestrian to enable BRNE

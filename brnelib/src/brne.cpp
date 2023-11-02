@@ -2,10 +2,10 @@
 
 namespace brne
 {
+  BRNE::BRNE(){};
   BRNE::BRNE(double kernel_a1, double kernel_a2,
              double cost_a1, double cost_a2, double cost_a3,
              double dt, int n_steps, int n_samples,
-             double max_ang_vel, double max_lin_vel,
              double y_min, double y_max):
     kernel_a1{kernel_a1},
     kernel_a2{kernel_a2},
@@ -15,8 +15,6 @@ namespace brne
     dt{dt},
     n_steps{n_steps},
     n_samples{n_samples},
-    max_ang_vel{max_ang_vel},
-    max_lin_vel{max_lin_vel},
     y_min{y_min},
     y_max{y_max}
     {
@@ -34,8 +32,6 @@ namespace brne
     std::cout << "dt:\t\t" << dt << std::endl;
     std::cout << "n steps:\t" << n_steps << std::endl;
     std::cout << "n samples:\t" << n_samples << std::endl;
-    std::cout << "max ang vel:\t" << max_ang_vel << std::endl;
-    std::cout << "max lin vel:\t" << max_lin_vel << std::endl;
     std::cout << "y min:\t\t" << y_min << std::endl;
     std::cout << "y max:\t\t" << y_max << std::endl;
     std::cout << "covariance matrix\n" << cov_mat << std::endl;
