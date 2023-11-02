@@ -82,8 +82,10 @@ namespace brne
                     double cost_a1, double cost_a2, double cost_a3,
                     double dt, int n_steps, int n_samples,
                     double y_min, double y_max);
-      /// @brief Print out the constants of the BRNE class.
+      /// @brief Print out the constants of the BRNE class to cout
       void print_params();
+      /// @brief Return parameters as a string
+      std::string param_string();
       /// @brief Compute the covariance matrix
       void compute_Lmat();
       /// @brief sample the multivariate normal distribution

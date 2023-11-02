@@ -75,10 +75,13 @@ class PathPlan : public rclcpp::Node
       y_max = get_parameter("y_max").as_double();
       RCLCPP_INFO_STREAM(get_logger(), "Hallway: " << y_min << "->" << y_max);
 
-      brne::BRNE brne_tmp{kernel_a1, kernel_a2,
-                          cost_a1, cost_a2, cost_a3,
-                          dt, n_steps, n_samples,
-                          y_min, y_max};
+      
+      brne = brne::BRNE{kernel_a1, kernel_a2,
+                        cost_a1, cost_a2, cost_a3,
+                        dt, n_steps, n_samples,
+                        y_min, y_max};
+
+      RCLCPP_INFO_STREAM(get_logger(), brne.param_string());
 
       pedestrian_sub_ = create_subscription<crowd_nav_interfaces::msg::PedestrianArray>(
         "pedestrians", 10, std::bind(&PathPlan::pedestrians_cb, this, std::placeholders::_1));

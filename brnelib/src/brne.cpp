@@ -39,6 +39,25 @@ namespace brne
     std::cout << line << std::endl;
   }
 
+  std::string BRNE::param_string(){
+    std::string res;
+    std::string line = "-----------------------------------------------\n";
+    res = "\n\t\tBRNE PARAMETERS\n" + 
+          line + 
+          "kernel_a1:\t" + std::to_string(kernel_a1) + "\n" +
+          "kernel_a2:\t" + std::to_string(kernel_a2) + "\n" +
+          "cost_a1:\t" + std::to_string(cost_a1) + "\n" +
+          "cost_a2:\t" + std::to_string(cost_a2) + "\n" +
+          "cost_a3:\t" + std::to_string(cost_a3) + "\n" +
+          "dt:\t\t" + std::to_string(dt) + "\n" +
+          "n_steps:\t" + std::to_string(n_steps) + "\n" +
+          "n_samples:\t" + std::to_string(n_samples) + "\n" +
+          "y_min:\t\t" + std::to_string(y_min) + "\n" +
+          "y_max:\t\t" + std::to_string(y_max) + "\n" +
+          line; 
+    return res;
+  }
+
   arma::mat BRNE::compute_kernel_mat(arma::vec t1, arma::vec t2){
     // here I should only be doing the diagonal or something like this
     // to enforce symmetry

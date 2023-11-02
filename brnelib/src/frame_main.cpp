@@ -108,5 +108,7 @@ int main(){
     std::cout << std::endl;
   }
 
+  std::cout << brne_test.param_string() << std::endl;
+
   return 0;
 }
