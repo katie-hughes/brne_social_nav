@@ -37,6 +37,13 @@ namespace brne
       arma::mat weights;
       arma::mat coll_mask;
 
+
+      arma::mat compute_kernel_mat(arma::vec t1, arma::vec t2);
+      void compute_index_table();
+      void compute_costs(arma::mat xtraj, arma::mat ytraj);
+      void collision_check(arma::mat ytraj);
+      void update_weights();
+
     public:
       /// @brief Construct an instance of the BRNE class
       /// @param kernel_a1 control the "straightness" of trajectory samples. 
@@ -63,14 +70,8 @@ namespace brne
                     double y_min, double y_max);
       /// @brief Print out the constants of the BRNE class.
       void print_params();
-      arma::mat compute_kernel_mat(arma::vec t1, arma::vec t2);
       void compute_Lmat();
       arma::mat mvn_sample_normal();
-
-      void compute_index_table();
-      void compute_costs(arma::mat xtraj, arma::mat ytraj);
-      void collision_check(arma::mat ytraj);
-      void update_weights();
       arma::mat brne_nav(arma::mat xtraj_samples, arma::mat ytraj_samples);
   };
 }

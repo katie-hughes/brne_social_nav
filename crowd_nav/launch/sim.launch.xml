@@ -1,5 +1,4 @@
 <launch>
-  <arg name="use_class" default="false" description="Use class based BRNE python implementation"/>
 
   <include file="$(find-pkg-share crowd_nav)/launch/crowdnav.launch.xml">
       <arg name="sim_ped" value="true"/>
@@ -7,7 +6,6 @@
       <arg name="launch_zed" value="false"/>
       <arg name="onboard" value="false" />
       <arg name="zed_localize" value="false" />
-      <arg name="use_class" value="$(var use_class)" />
     </include>
 
 </launch>

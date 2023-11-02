@@ -36,6 +36,11 @@ namespace brne
   }
 
   arma::mat BRNE::compute_kernel_mat(arma::vec t1, arma::vec t2){
+    // here I should only be doing the diagonal or something like this
+    // to enforce symmetry
+    // t1.at(i) and t2.at(i) are the same
+    // smallest eigtenvalue of the matrix is??
+    // largest / smallest
     arma::mat res(t1.size(), t2.size(), arma::fill::zeros);
     for (auto i=0; i<t1.size(); i++){
       for (auto j=0; j<t2.size(); j++){
@@ -56,7 +61,15 @@ namespace brne
     cm_11 += train_noise.diag();
     auto cm_12 = compute_kernel_mat(tlist, train_ts);
     auto cm_22 = compute_kernel_mat(tlist, tlist);
+    // use left division to do the inverse
+    // do this with solve instead. arma::solve
+    std::cout << "covariance matrix 11\n" << cm_11 << std::endl;
     cov_mat = cm_22 - cm_12 * cm_11.i() * cm_12.t();
+    // smallest eigenvalue
+    std::cout << "covariance matrix\n" << cov_mat << std::endl;
+    const auto eigenvalue = arma::eig_sym(cov_mat);
+    std::cout << "eig sym" << eigenvalue << std::endl;
+    cov_mat += arma::eye(cov_mat.n_rows,cov_mat.n_rows) * 1e-6;
     auto success = arma::chol(cov_Lmat, cov_mat, "lower");
     std::cout << "Cholesky success? " << success << std::endl;
     while (!success){
