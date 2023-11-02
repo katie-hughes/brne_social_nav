@@ -19,8 +19,13 @@ namespace brne
     max_lin_vel{max_lin_vel},
     y_min{y_min},
     y_max{y_max}
-    {}
+    {
+      compute_Lmat();
+    }
   void BRNE::print_params(){
+    auto line = "-----------------------------------------------";
+    std::cout << "\n\t\tBRNE PARAMETERS" << std::endl;
+    std::cout << line << std::endl;
     std::cout << "kernel a1:\t" << kernel_a1 << std::endl;
     std::cout << "kernel a2:\t" << kernel_a2 << std::endl;
     std::cout << "cost a1:\t" << cost_a1 << std::endl;
@@ -30,9 +35,12 @@ namespace brne
     std::cout << "n steps:\t" << n_steps << std::endl;
     std::cout << "n samples:\t" << n_samples << std::endl;
     std::cout << "max ang vel:\t" << max_ang_vel << std::endl;
-    std::cout << "max lin vel:\t" << dt << std::endl;
-    std::cout << "y min:\t\t" << dt << std::endl;
-    std::cout << "y max:\t\t" << dt << std::endl;
+    std::cout << "max lin vel:\t" << max_lin_vel << std::endl;
+    std::cout << "y min:\t\t" << y_min << std::endl;
+    std::cout << "y max:\t\t" << y_max << std::endl;
+    std::cout << "covariance matrix\n" << cov_mat << std::endl;
+    std::cout << "covariance Lmat:\n" << cov_Lmat << std::endl;
+    std::cout << line << std::endl;
   }
 
   arma::mat BRNE::compute_kernel_mat(arma::vec t1, arma::vec t2){
@@ -63,19 +71,16 @@ namespace brne
     auto cm_22 = compute_kernel_mat(tlist, tlist);
     // use left division to do the inverse
     // do this with solve instead. arma::solve
-    std::cout << "covariance matrix 11\n" << cm_11 << std::endl;
     cov_mat = cm_22 - cm_12 * cm_11.i() * cm_12.t();
     // smallest eigenvalue
-    std::cout << "covariance matrix\n" << cov_mat << std::endl;
     const auto eigenvalue = arma::eig_sym(cov_mat);
-    std::cout << "eig sym" << eigenvalue << std::endl;
     cov_mat += arma::eye(cov_mat.n_rows,cov_mat.n_rows) * 1e-6;
     auto success = arma::chol(cov_Lmat, cov_mat, "lower");
-    std::cout << "Cholesky success? " << success << std::endl;
+    // std::cout << "Cholesky success? " << success << std::endl;
     while (!success){
       cov_mat += arma::eye(cov_mat.n_rows,cov_mat.n_rows) * 1e-6;
       success = arma::chol(cov_Lmat, cov_mat, "lower");
-      std::cout << "Cholesky retry success? " << success << std::endl;
+      // std::cout << "Cholesky retry success? " << success << std::endl;
     }
   }
 
