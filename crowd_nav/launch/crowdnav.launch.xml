@@ -7,6 +7,7 @@
   <arg name="sim_ped" default="true" description="Simulate a static pedestrian"/>
   <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
   <arg name="zed_localize" default="false" description="Update odom using the ZED"/>
+  <arg name="use_rviz" default="true" description="Launch rviz"/>
 
   <!-- Python algorithm node -->
   <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\'')" 
@@ -43,6 +44,8 @@
   </node>
 
   <!-- launch visualizations -->
-  <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share crowd_nav)/config/crowdnav.rviz"/>
+  <include file="$(find-pkg-share crowd_nav)/launch/visualizations.launch.xml" 
+           if="$(eval '\'$(var use_rviz)\' == \'true\'')"> 
+    </include>
 
 </launch>

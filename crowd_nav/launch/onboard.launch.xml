@@ -1,4 +1,5 @@
 <launch>
+  <arg name="use_rviz" default="true" description="Launch rviz"/>
 
   <include file="$(find-pkg-share crowd_nav)/launch/crowdnav.launch.xml">
       <arg name="sim_ped" value="false"/>
@@ -6,6 +7,7 @@
       <arg name="launch_zed" value="true"/>
       <arg name="onboard" value="true" />
       <arg name="zed_localize" value="true" />
+      <arg name="use_rviz" value="$(var use_rviz)" />
     </include>
 
 </launch>
