@@ -2,6 +2,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <armadillo>
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
@@ -86,11 +87,16 @@ class PathPlan : public rclcpp::Node
            max_ang_vel, max_lin_vel;
     int maximum_agents, n_samples, n_steps;
 
+    int n_peds = 0;
+    int n_prev_peds = 0;
+
     brne::BRNE brne{};
 
     rclcpp::TimerBase::SharedPtr timer_;
 
-    crowd_nav_interfaces::msg::PedestrianArray ped_buffer;
+    arma::mat prev_ped_array;
+    arma::mat ped_array;
+    // crowd_nav_interfaces::msg::PedestrianArray ped_buffer;
 
     rclcpp::Subscription<crowd_nav_interfaces::msg::PedestrianArray>::SharedPtr pedestrian_sub_;
 
@@ -98,7 +104,38 @@ class PathPlan : public rclcpp::Node
 
     void pedestrians_cb(const crowd_nav_interfaces::msg::PedestrianArray & msg)
     {
-      ped_buffer = msg;
+      // save values from previous iteration
+      prev_ped_array = ped_array;
+      n_prev_peds = n_peds;
+      // start reading in message data
+      n_peds = msg.pedestrians.size();
+      ped_array = arma::mat(n_peds, 2, arma::fill::zeros);
+      // iterate through pedestrians
+      arma::mat for_compare(n_prev_peds, 2, arma::fill::zeros);
+      for (int p=0; p<n_peds; p++){
+        auto ped = msg.pedestrians.at(p);
+        RCLCPP_INFO_STREAM(get_logger(), "Ped: " << ped.pose.position.x << "," << ped.pose.position.y);
+        ped_array.at(p,0) = ped.pose.position.x;
+        ped_array.at(p,1) = ped.pose.position.y;
+        // make a matrix that looks like
+        // x y
+        // x y
+        // ... number of rows = number of pedestrians.
+        arma::rowvec f2f_vel(2, arma::fill::zeros);
+        if (n_prev_peds > 0){
+          arma::vec xs(n_prev_peds, arma::fill::value(ped.pose.position.x));
+          arma::vec ys(n_prev_peds, arma::fill::value(ped.pose.position.y));
+          for_compare.col(0) = xs;
+          for_compare.col(1) = ys;
+          arma::mat difference = prev_ped_array - for_compare;
+          auto norm = arma::vecnorm(difference, 2, 1);
+          f2f_vel = ped_array.row(p) - prev_ped_array.row(norm.index_min());
+          RCLCPP_INFO_STREAM(get_logger(), "f2f vel: " << f2f_vel);
+        }
+        // msg.pedestrians.at(p).velocity.linear.x = f2f_vel.at(0);
+        // msg.pedestrians.at(p).velocity.linear.y = f2f_vel.at(0);
+      }
+      RCLCPP_INFO_STREAM(get_logger(), "ped array\n" << ped_array);
       // RCLCPP_INFO_STREAM(get_logger(), "Received pedestrians, number="<<msg.pedestrians.size());
     }
 

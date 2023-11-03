@@ -110,5 +110,9 @@ int main(){
 
   std::cout << brne_test.param_string() << std::endl;
 
+
+  arma::arma_version ver;
+  std::cout << "ARMA version: "<< ver.as_string() << std::endl;
+
   return 0;
 }

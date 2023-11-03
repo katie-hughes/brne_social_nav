@@ -498,11 +498,17 @@ class BrneNavRos(Node):
             # self.curr_ped_array[i] = ped_position.copy()
             self.curr_ped_array.append(ped_position.copy())
 
+            self.get_logger().info(f'Curr ped array {self.curr_ped_array}')
+
             if num_prev_peds > 0:
+                self.get_logger().info(f'prev ped array\n{self.prev_ped_array}')
+                self.get_logger().info(f'ped position\n{ped_position}')
+                self.get_logger().info(f'difference\n{self.prev_ped_array - ped_position}')
                 dists2prev = np.linalg.norm(self.prev_ped_array - ped_position, axis=1)
+                self.get_logger().info(f'norm\n{dists2prev}')
                 f2f_vel = ped_position - self.prev_ped_array[np.argmin(dists2prev)]
                 f2f_vel /= 0.034  # assuming pedestrian information is published at 33 hz
-
+                self.get_logger().info(f"F2f vel {f2f_vel}")
                 if self.staircase_truncation:
                     f2f_vel = self.staircase_velocity(f2f_vel)
 

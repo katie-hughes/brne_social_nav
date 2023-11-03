@@ -24,7 +24,9 @@ find_package(image_geometry REQUIRED)
 
 find_package(crowd_nav_interfaces REQUIRED)
 find_package(brnelib REQUIRED)
+find_package(Armadillo REQUIRED)
 
+include_directories(${ARMADILLO_INCLUDE_DIRS})
 
 add_executable(path_plan src/path_plan.cpp)
 
@@ -41,7 +43,7 @@ ament_target_dependencies(path_plan
   image_geometry
   crowd_nav_interfaces)
 
-target_link_libraries(path_plan brnelib::brnelib "${cpp_typesupport_target}")
+target_link_libraries(path_plan brnelib::brnelib  ${ARMADILLO_LIBRARIES} "${cpp_typesupport_target}")
 
 add_executable(controller src/controller.cpp)
 
