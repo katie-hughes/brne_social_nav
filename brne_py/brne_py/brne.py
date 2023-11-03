@@ -160,10 +160,13 @@ def brne_nav(xtraj_samples, ytraj_samples, num_agents, tsteps, num_pts, cost_a1,
 
     print(f"\nFinal Weights\n{weights}")
 
-    for i in range(num_agents):
-        agent_weights = weights[i] * coll_mask[i]
-        agent_weights /= np.mean(agent_weights)
-        weights[i] = agent_weights.copy()
+    # for i in range(num_agents):
+    #     agent_weights = weights[i] * coll_mask[i]
+    #     agent_weights /= np.mean(agent_weights)
+    #     weights[i] = agent_weights.copy()
+    agent_weights = weights[0] * coll_mask[0]
+    agent_weights /= np.mean(agent_weights)
+    weights[0] = agent_weights.copy()
 
     print(f"\nWeights after masking\n{weights}")
     return weights

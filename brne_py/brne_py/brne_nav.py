@@ -144,8 +144,8 @@ class BrneNavRos(Node):
         self.cov_Lmat, self.cov_mat = brne.get_Lmat_nb(train_ts, test_ts, train_noise, self.kernel_a1, self.kernel_a2)
 
         ### F2F velocity estimation
-        self.curr_ped_array = np.array([])
-        self.prev_ped_array = np.array([])
+        self.curr_ped_array = []
+        self.prev_ped_array = []
 
         self.close_stop_flag = False
 
@@ -472,7 +472,7 @@ class BrneNavRos(Node):
         """
 
         # there should be an initialization flag, but in practice it does not really matter
-        self.prev_ped_array = self.curr_ped_array.copy()
+        self.prev_ped_array = [ped for ped in self.curr_ped_array]  #  self.curr_ped_array.copy()
         # self.curr_ped_array = np.zeros((num_peds, 2))
         self.curr_ped_array = []
 
@@ -518,7 +518,7 @@ class BrneNavRos(Node):
             # self.ped_msg_buffer.append(new_ped_msg)
             self.ped_msg_buffer[ped.id] = ped, stamp
 
-        self.curr_ped_array = np.array(self.curr_ped_array)
+        # self.curr_ped_array = np.array(self.curr_ped_array)
 
     def goal_cb(self, msg):
         position = msg.pose.position
