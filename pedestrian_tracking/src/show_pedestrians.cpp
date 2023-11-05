@@ -20,7 +20,7 @@ class ShowPedestrians : public rclcpp::Node
 {
   public:
     ShowPedestrians()
-    : Node("show_pedestrians"), last_n_pedestrians{0}
+    : Node("show_pedestrians")
     {
 
       pedestrian_sub_ = create_subscription<crowd_nav_interfaces::msg::PedestrianArray>(
@@ -33,7 +33,6 @@ class ShowPedestrians : public rclcpp::Node
     rclcpp::Subscription<crowd_nav_interfaces::msg::PedestrianArray>::SharedPtr pedestrian_sub_;
     rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
     visualization_msgs::msg::MarkerArray ma;
-    int last_n_pedestrians;
 
     void pedestrians_cb(const crowd_nav_interfaces::msg::PedestrianArray & msg)
     {
@@ -68,7 +67,6 @@ class ShowPedestrians : public rclcpp::Node
         ma.markers.push_back(m);
       }
       marker_pub_->publish(ma);
-      last_n_pedestrians = msg.pedestrians.size();
     }
 };
 
