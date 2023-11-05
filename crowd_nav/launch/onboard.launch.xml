@@ -1,5 +1,5 @@
 <launch>
-  <arg name="use_rviz" default="true" description="Launch rviz"/>
+  <arg name="use_rviz" default="false" description="Launch rviz"/>
 
   <include file="$(find-pkg-share crowd_nav)/launch/crowdnav.launch.xml">
       <arg name="sim_ped" value="false"/>

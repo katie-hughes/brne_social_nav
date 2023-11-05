@@ -484,7 +484,7 @@ class BrneNavRos(Node):
             self.ped_msg_buffer[key][0].velocity.x = 0.0
             self.ped_msg_buffer[key][0].velocity.y = 0.0
 
-        stamp = Time.from_msg(msg.header.stamp)
+        # stamp = Time.from_msg(msg.header.stamp)
         for ped in msg.pedestrians:
             ped_pose = ped.pose.position
             if np.isnan(ped_pose.x) or np.isnan(ped_pose.y):
@@ -498,24 +498,26 @@ class BrneNavRos(Node):
             # self.curr_ped_array[i] = ped_position.copy()
             self.curr_ped_array.append(ped_position.copy())
 
-            self.get_logger().info(f'Curr ped array {self.curr_ped_array}')
+            # self.get_logger().info(f'Curr ped array {self.curr_ped_array}')
 
             if num_prev_peds > 0:
-                self.get_logger().info(f'prev ped array\n{self.prev_ped_array}')
-                self.get_logger().info(f'ped position\n{ped_position}')
-                self.get_logger().info(f'difference\n{self.prev_ped_array - ped_position}')
+                # self.get_logger().info(f'prev ped array\n{self.prev_ped_array}')
+                # self.get_logger().info(f'ped position\n{ped_position}')
+                # self.get_logger().info(f'difference\n{self.prev_ped_array - ped_position}')
                 # dists2prev = np.linalg.norm(self.prev_ped_array - ped_position, axis=1)
                 dists2prev = [np.linalg.norm(ped_position - prev_ped_position) for prev_ped_position in self.prev_ped_array]
-                self.get_logger().info(f'dists2prev\n{dists2prev}')
-                self.get_logger().info(f'argmin\n{np.argmin(dists2prev)}')
+                # self.get_logger().info(f'dists2prev\n{dists2prev}')
+                # self.get_logger().info(f'argmin\n{np.argmin(dists2prev)}')
                 f2f_vel = ped_position - self.prev_ped_array[np.argmin(dists2prev)]
                 f2f_vel /= 0.034  # assuming pedestrian information is published at 33 hz
-                self.get_logger().info(f"F2f vel {f2f_vel}")
+                # self.get_logger().info(f"F2f vel {f2f_vel}")
                 if self.staircase_truncation:
                     f2f_vel = self.staircase_velocity(f2f_vel)
 
             ped.velocity.linear.x = f2f_vel[0]
             ped.velocity.linear.y = f2f_vel[1]
+
+            stamp = Time.from_msg(ped.header.stamp)
 
             # self.ped_msg_buffer.append(new_ped_msg)
             self.ped_msg_buffer[ped.id] = ped, stamp
