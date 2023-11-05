@@ -26,6 +26,10 @@ struct RobotPose{
   double theta;
 };
 
+double dist(double x1, double y1, double x2, double y2){
+  return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+}
+
 class PathPlan : public rclcpp::Node
 {
   public:
@@ -47,6 +51,8 @@ class PathPlan : public rclcpp::Node
       declare_parameter("y_max", 1.0);
       declare_parameter("max_ang_vel", 1.0);
       declare_parameter("people_timeout", 1.0);
+      declare_parameter("goal_threshold", 1.0);
+      declare_parameter("brne_activate_threshold", 1.0);
 
       // get parameters
       replan_freq = get_parameter("replan_freq").as_double();
@@ -62,6 +68,8 @@ class PathPlan : public rclcpp::Node
       y_min = get_parameter("y_min").as_double();
       y_max = get_parameter("y_max").as_double();
       people_timeout = get_parameter("people_timeout").as_double();
+      goal_threshold = get_parameter("goal_threshold").as_double();
+      brne_activate_threshold = get_parameter("brne_activate_threshold").as_double();
 
       // print out parameters
       RCLCPP_INFO_STREAM(get_logger(), "Replan frequency: " << replan_freq << " Hz");
@@ -73,6 +81,8 @@ class PathPlan : public rclcpp::Node
       RCLCPP_INFO_STREAM(get_logger(), "Kernels: " << kernel_a1 << " " << kernel_a2);
       RCLCPP_INFO_STREAM(get_logger(), "Hallway: " << y_min << "->" << y_max);
       RCLCPP_INFO_STREAM(get_logger(), "People timeout after " << people_timeout << "s");
+      RCLCPP_INFO_STREAM(get_logger(), "Goal Threshold " << goal_threshold << "m");
+      RCLCPP_INFO_STREAM(get_logger(), "Brne Activate Threshold " << brne_activate_threshold << "m");
 
       brne = brne::BRNE{kernel_a1, kernel_a2,
                         cost_a1, cost_a2, cost_a3,
@@ -99,7 +109,7 @@ class PathPlan : public rclcpp::Node
 
   private:
     double replan_freq, kernel_a1, kernel_a2, cost_a1, cost_a2, cost_a3, y_min, y_max, dt, 
-           max_ang_vel, max_lin_vel, people_timeout;
+           max_ang_vel, max_lin_vel, people_timeout, goal_threshold, brne_activate_threshold;
     int maximum_agents, n_samples, n_steps;
 
     int n_peds = 0;
@@ -113,6 +123,7 @@ class PathPlan : public rclcpp::Node
     arma::mat ped_array;
 
     crowd_nav_interfaces::msg::PedestrianArray ped_buffer;
+    crowd_nav_interfaces::msg::PedestrianArray selected_peds;
 
     RobotPose robot_pose;
 
@@ -130,6 +141,7 @@ class PathPlan : public rclcpp::Node
       RCLCPP_INFO_STREAM(get_logger(), "Goal Received: " << msg.pose.position.x << ", " << msg.pose.position.y);
       goal_set = true;
       goal = msg;
+      check_goal();
     }
 
     void odom_cb(const nav_msgs::msg::Odometry & msg)
@@ -143,6 +155,18 @@ class PathPlan : public rclcpp::Node
       robot_pose.x = msg.pose.pose.position.x;
       robot_pose.y = msg.pose.pose.position.y;
       robot_pose.theta = yaw;
+      if (goal_set){
+        check_goal();
+      }
+    }
+
+    void check_goal(){
+      auto dist_to_goal = dist(robot_pose.x, robot_pose.y, goal.pose.position.x, goal.pose.position.y);
+      RCLCPP_INFO_STREAM(get_logger(), "Dist to goal" << dist_to_goal);
+      if (dist_to_goal < goal_threshold){
+        RCLCPP_INFO_STREAM(get_logger(), "Goal Reached!");
+        goal_set = false;
+      }
     }
 
     void pedestrians_cb(const crowd_nav_interfaces::msg::PedestrianArray & msg)
@@ -203,6 +227,9 @@ class PathPlan : public rclcpp::Node
       current_timestamp = this->get_clock()->now();
       auto current_time = current_timestamp.sec + 1e-9 * current_timestamp.nanosec;
       RCLCPP_INFO_STREAM(get_logger(), "Current time: " << current_timestamp.sec << "s " << current_timestamp.nanosec << "ns ");
+
+      selected_peds.pedestrians.clear();
+      std::vector<double> dists_to_peds;
       for(auto p:ped_buffer.pedestrians){
         auto ped_time = p.header.stamp.sec + 1e-9 * p.header.stamp.nanosec;
         auto dt = current_time - ped_time;
@@ -216,6 +243,15 @@ class PathPlan : public rclcpp::Node
                                           "\n\tVelocity: " << p.velocity.linear.x << " " << p.velocity.linear.y <<
                                           "\nTimestamp: " << p.header.stamp.sec  << "s " << p.header.stamp.nanosec << " ns");
         RCLCPP_INFO_STREAM(get_logger(), "Time Difference " << dt);
+
+        // compute distance to the pedestrian from the robot
+        auto dist_to_ped = dist(robot_pose.x, robot_pose.y, p.pose.position.x, p.pose.position.y);
+        if (dist_to_ped > brne_activate_threshold){
+          RCLCPP_INFO_STREAM(get_logger(), "Pedestrian " << p.id << " too far away");
+          continue;
+        }
+        dists_to_peds.push_back(dist_to_ped);
+        selected_peds.pedestrians.push_back(p);
       }
 
       crowd_nav_interfaces::msg::TwistArray buf;

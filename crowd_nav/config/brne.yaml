@@ -25,3 +25,4 @@
     close_stop_threshold: 0.5  # threshold for safety mask, leading to estop
     open_space_velocity: 0.6  # nominal velocity when the robot is in open space
     brne_activate_threshold: 3.5  # distance threshold from a pedestrian to enable BRNE
+    goal_threshold: 0.5 # threshold for reaching the goal position (m)
