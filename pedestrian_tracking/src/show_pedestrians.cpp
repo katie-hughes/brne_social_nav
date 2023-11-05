@@ -32,7 +32,7 @@ class ShowPedestrians : public rclcpp::Node
 
     rclcpp::Subscription<crowd_nav_interfaces::msg::PedestrianArray>::SharedPtr pedestrian_sub_;
     rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
-
+    visualization_msgs::msg::MarkerArray ma;
     int last_n_pedestrians;
 
     void pedestrians_cb(const crowd_nav_interfaces::msg::PedestrianArray & msg)
@@ -40,7 +40,8 @@ class ShowPedestrians : public rclcpp::Node
       // issue: if the pedestrian disappears, the marker will stay. 
       // This is solved by making the lifetime small.
       const auto current_time = this->get_clock()->now();
-      visualization_msgs::msg::MarkerArray ma;
+      // clear previous marker array
+      ma.markers.clear();
       const int n_pedestrians = msg.pedestrians.size();
       for (int i = 0; i < n_pedestrians; i++){
         const auto ped = msg.pedestrians.at(i);

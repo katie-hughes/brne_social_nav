@@ -96,7 +96,8 @@ class PathPlan : public rclcpp::Node
 
     arma::mat prev_ped_array;
     arma::mat ped_array;
-    // crowd_nav_interfaces::msg::PedestrianArray ped_buffer;
+
+    crowd_nav_interfaces::msg::PedestrianArray ped_buffer;
 
     rclcpp::Subscription<crowd_nav_interfaces::msg::PedestrianArray>::SharedPtr pedestrian_sub_;
 
@@ -107,14 +108,16 @@ class PathPlan : public rclcpp::Node
       // save values from previous iteration
       prev_ped_array = ped_array;
       n_prev_peds = n_peds;
+      // make a copy of the message
+      crowd_nav_interfaces::msg::PedestrianArray peds = msg;
       // start reading in message data
-      n_peds = msg.pedestrians.size();
+      n_peds = peds.pedestrians.size();
       ped_array = arma::mat(n_peds, 2, arma::fill::zeros);
       // iterate through pedestrians
       arma::mat for_compare(n_prev_peds, 2, arma::fill::zeros);
       for (int p=0; p<n_peds; p++){
-        auto ped = msg.pedestrians.at(p);
-        RCLCPP_INFO_STREAM(get_logger(), "Ped: " << ped.pose.position.x << "," << ped.pose.position.y);
+        auto ped = peds.pedestrians.at(p);
+        // RCLCPP_INFO_STREAM(get_logger(), "Ped: " << ped.pose.position.x << "," << ped.pose.position.y);
         ped_array.at(p,0) = ped.pose.position.x;
         ped_array.at(p,1) = ped.pose.position.y;
         // make a matrix that looks like
@@ -130,18 +133,37 @@ class PathPlan : public rclcpp::Node
           arma::mat difference = prev_ped_array - for_compare;
           auto norm = arma::vecnorm(difference, 2, 1);
           f2f_vel = ped_array.row(p) - prev_ped_array.row(norm.index_min());
-          RCLCPP_INFO_STREAM(get_logger(), "f2f vel: " << f2f_vel);
+          // RCLCPP_INFO_STREAM(get_logger(), "f2f vel: " << f2f_vel);
         }
-        // msg.pedestrians.at(p).velocity.linear.x = f2f_vel.at(0);
-        // msg.pedestrians.at(p).velocity.linear.y = f2f_vel.at(0);
+        peds.pedestrians.at(p).velocity.linear.x = f2f_vel.at(0);
+        peds.pedestrians.at(p).velocity.linear.y = f2f_vel.at(0);
+        // add to pedestrian buffer
+        // first have to do some error checking to make sure the index is in bounds
+        // initially length is 0 and I want to append pedestrian 0
+        // while(0<1)go through
+        // while(1<1)BREAK
+        while (ped_buffer.pedestrians.size() < ped.id+1){
+          crowd_nav_interfaces::msg::Pedestrian blank_ped;
+          blank_ped.id = ped_buffer.pedestrians.size();
+          ped_buffer.pedestrians.push_back(blank_ped);
+        }
+        ped_buffer.pedestrians.at(ped.id) = peds.pedestrians.at(p);
       }
-      RCLCPP_INFO_STREAM(get_logger(), "ped array\n" << ped_array);
-      // RCLCPP_INFO_STREAM(get_logger(), "Received pedestrians, number="<<msg.pedestrians.size());
+      // RCLCPP_INFO_STREAM(get_logger(), "ped array\n" << ped_array);
     }
 
     void timer_callback()
     {
-      // RCLCPP_INFO_STREAM(get_logger(), "Timer tick");
+      RCLCPP_INFO_STREAM(get_logger(), "Timer tick");
+      // read in pedestrian buffer
+      for(auto p:ped_buffer.pedestrians){
+        auto timestamp = p.header.stamp.sec + 1e-9 * p.header.stamp.nanosec;
+        RCLCPP_INFO_STREAM(get_logger(), "pedestrian ID: " << p.id <<
+                                          "\n\tPosition: " << p.pose.position.x << " " << p.pose.position.y <<
+                                          "\n\tVelocity: " << p.velocity.linear.x << " " << p.velocity.linear.y <<
+                                          "\nTimestamp: " << p.header.stamp.sec  << "s " << p.header.stamp.nanosec << " ns");
+      }
+
       crowd_nav_interfaces::msg::TwistArray buf;
       cmd_buf_pub_->publish(buf);
     }
