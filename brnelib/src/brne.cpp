@@ -234,4 +234,14 @@ namespace brne
     return res;
   }
 
+
+  TrajGen::TrajGen(){}
+
+  TrajGen::TrajGen(double max_lin_vel, double max_ang_vel, int n_samples, double dt):
+    max_lin_vel{max_lin_vel},
+    max_ang_vel{max_ang_vel},
+    n_samples{n_samples},
+    dt{dt}
+  {}
+
 }

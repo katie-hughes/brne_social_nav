@@ -105,4 +105,22 @@ namespace brne
       std::vector<traj> compute_optimal_trajectory(arma::mat x_nominal, arma::mat y_nominal,
                                                    arma::mat x_samples, arma::mat y_samples);
   };
+
+  /// @brief Class for generating commands for a diff drive
+  class TrajGen{
+    private:
+      double max_lin_vel;
+      double max_ang_vel;
+      int n_samples;
+      double dt;
+    public:
+      /// @brief empty constructor. Not actually useful, but might need for ros node.
+      explicit TrajGen();
+      /// @brief Construct a Trajectory Generator object
+      /// @param max_lin_vel maximum linear velocity in m/s
+      /// @param max_ang_vel maximum angular velocity in rad/s
+      /// @param n_samples number of samplesin the trajectory
+      /// @param dt time between ticks (s)
+      explicit TrajGen(double max_lin_vel, double max_ang_vel, int n_samples, double dt);
+  };
 }

@@ -49,10 +49,12 @@ class PathPlan : public rclcpp::Node
       declare_parameter("kernel_a2", 1.0);
       declare_parameter("y_min", -1.0);
       declare_parameter("y_max", 1.0);
-      declare_parameter("max_ang_vel", 1.0);
       declare_parameter("people_timeout", 1.0);
       declare_parameter("goal_threshold", 1.0);
       declare_parameter("brne_activate_threshold", 1.0);
+      declare_parameter("max_lin_vel", 1.0);
+      declare_parameter("nominal_lin_vel", 1.0);
+      declare_parameter("max_ang_vel", 1.0);
 
       // get parameters
       replan_freq = get_parameter("replan_freq").as_double();
@@ -70,6 +72,9 @@ class PathPlan : public rclcpp::Node
       people_timeout = get_parameter("people_timeout").as_double();
       goal_threshold = get_parameter("goal_threshold").as_double();
       brne_activate_threshold = get_parameter("brne_activate_threshold").as_double();
+      max_ang_vel = get_parameter("max_ang_vel").as_double();
+      max_lin_vel = get_parameter("max_lin_vel").as_double();
+      nominal_lin_vel = get_parameter("nominal_lin_vel").as_double();
 
       // print out parameters
       RCLCPP_INFO_STREAM(get_logger(), "Replan frequency: " << replan_freq << " Hz");
@@ -83,6 +88,7 @@ class PathPlan : public rclcpp::Node
       RCLCPP_INFO_STREAM(get_logger(), "People timeout after " << people_timeout << "s");
       RCLCPP_INFO_STREAM(get_logger(), "Goal Threshold " << goal_threshold << "m");
       RCLCPP_INFO_STREAM(get_logger(), "Brne Activate Threshold " << brne_activate_threshold << "m");
+      RCLCPP_INFO_STREAM(get_logger(), "Max Lin: " << max_lin_vel << " nominal lin: " << nominal_lin_vel << " max ang: " << max_ang_vel);
 
       brne = brne::BRNE{kernel_a1, kernel_a2,
                         cost_a1, cost_a2, cost_a3,
@@ -109,7 +115,8 @@ class PathPlan : public rclcpp::Node
 
   private:
     double replan_freq, kernel_a1, kernel_a2, cost_a1, cost_a2, cost_a3, y_min, y_max, dt, 
-           max_ang_vel, max_lin_vel, people_timeout, goal_threshold, brne_activate_threshold;
+           max_ang_vel, max_lin_vel, people_timeout, goal_threshold, brne_activate_threshold,
+           nominal_lin_vel;
     int maximum_agents, n_samples, n_steps;
 
     int n_peds = 0;
@@ -288,6 +295,18 @@ class PathPlan : public rclcpp::Node
       RCLCPP_INFO_STREAM(get_logger(), "Proj len: " << proj_len);
       auto radius = 0.5 * dist_to_goal / proj_len;
       RCLCPP_INFO_STREAM(get_logger(), "radius: " << radius);
+      // the nominal commands are a matrix
+      arma::vec lin_vel_vec(n_steps, arma::fill::value(nominal_lin_vel));
+      arma::vec ang_vel_vec;
+      if (robot_pose.theta > 0.0){
+        ang_vel_vec = arma::vec(n_steps, arma::fill::value(-nominal_lin_vel/radius));
+      } else {
+        ang_vel_vec = arma::vec(n_steps, arma::fill::value( nominal_lin_vel/radius));
+      }
+      arma::mat nominal_commands(n_steps, 2, arma::fill::zeros);
+      nominal_commands.col(0) = lin_vel_vec;
+      nominal_commands.col(1) = ang_vel_vec;
+      RCLCPP_INFO_STREAM(get_logger(), "nominal cmds\n" << nominal_commands);
 
 
 
