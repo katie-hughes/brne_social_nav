@@ -162,7 +162,7 @@ class PathPlan : public rclcpp::Node
 
     void check_goal(){
       auto dist_to_goal = dist(robot_pose.x, robot_pose.y, goal.pose.position.x, goal.pose.position.y);
-      RCLCPP_INFO_STREAM(get_logger(), "Dist to goal" << dist_to_goal);
+      // RCLCPP_INFO_STREAM(get_logger(), "Dist to goal" << dist_to_goal);
       if (dist_to_goal < goal_threshold){
         RCLCPP_INFO_STREAM(get_logger(), "Goal Reached!");
         goal_set = false;
@@ -254,6 +254,58 @@ class PathPlan : public rclcpp::Node
         selected_peds.pedestrians.push_back(p);
       }
 
+      auto n_peds = static_cast<int>(selected_peds.pedestrians.size());
+      auto n_agents = std::min(maximum_agents, n_peds + 1);
+
+      RCLCPP_INFO_STREAM(get_logger(), "Agents: " << n_agents);
+
+      arma::rowvec goal_vec(2, arma::fill::zeros);
+      if (goal_set){
+        goal_vec.at(0) = goal.pose.position.x;
+        goal_vec.at(1) = goal.pose.position.y;
+      } else {
+        goal_vec.at(0) = 6.0;
+        goal_vec.at(1) = 0.0;
+      }
+
+      RCLCPP_INFO_STREAM(get_logger(), "Goal Vec\n" << goal_vec);
+
+      // get the controls to go to the goal
+
+      auto theta_a = robot_pose.theta;
+      if (robot_pose.theta > 0.0){
+        theta_a -= M_PI_2;
+      } else {
+        theta_a += M_PI_2;
+      }
+
+      arma::rowvec axis_vec(std::vector<double>{cos(theta_a), sin(theta_a)});
+      arma::rowvec pose_vec(std::vector<double>{robot_pose.x, robot_pose.y});
+      arma::rowvec vec_to_goal = goal_vec - pose_vec;
+      auto dist_to_goal = arma::norm(vec_to_goal);
+      RCLCPP_INFO_STREAM(get_logger(), "Dist to goal: " << dist_to_goal);
+      auto proj_len = arma::dot(axis_vec, vec_to_goal) / arma::dot(vec_to_goal, vec_to_goal) * dist_to_goal;
+      RCLCPP_INFO_STREAM(get_logger(), "Proj len: " << proj_len);
+      auto radius = 0.5 * dist_to_goal / proj_len;
+      RCLCPP_INFO_STREAM(get_logger(), "radius: " << radius);
+
+
+
+      if (n_agents > 1){
+        // pick only the closest pedestrians to interact with
+
+      } else {
+        // go straight to the goal
+      }
+
+
+
+
+
+
+
+
+      // publish controls
       crowd_nav_interfaces::msg::TwistArray buf;
       cmd_buf_pub_->publish(buf);
     }
