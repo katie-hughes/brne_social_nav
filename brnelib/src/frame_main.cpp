@@ -2,7 +2,7 @@
 
 int main(){
   int n_steps =         5;
-  int n_samples =       3;
+  int n_samples =       16;
 
   double kernel_a1 =    0.5;
   double kernel_a2 =    0.2;
@@ -113,6 +113,21 @@ int main(){
 
   arma::arma_version ver;
   std::cout << "ARMA version: "<< ver.as_string() << std::endl;
+
+
+  double max_lin_vel = 0.6;
+  double max_ang_vel = 1.0;
+  double nominal_lin_vel = 0.4;
+
+  arma::vec lin_vel_vec(n_steps, arma::fill::value(nominal_lin_vel));
+  arma::vec ang_vel_vec(n_steps, arma::fill::value(0.1));
+  arma::mat nominal_commands(n_steps, 2, arma::fill::zeros);
+  nominal_commands.col(0) = lin_vel_vec;
+  nominal_commands.col(1) = ang_vel_vec;
+
+  brne::TrajGen tg{max_lin_vel, max_ang_vel, n_samples, dt};
+  tg.perturb_ulist(nominal_commands);
+
 
   return 0;
 }

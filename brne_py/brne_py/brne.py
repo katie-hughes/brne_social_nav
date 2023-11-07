@@ -227,7 +227,9 @@ def traj_sim_essemble(st, ulist, dt):
     return traj
 
 def get_ulist_essemble(ulist, u1_max, u2_max, num_samples):
+    # square root should be an even number. this is for meshgrid
     num_essembles_per_dim = int(np.sqrt(num_samples))
+    # empirically, it is more important to have more resolution in linear vs angular
     num_essembles_per_dim_u1 = int(num_essembles_per_dim * 2)
     num_essembles_per_dim_u2 = int(num_essembles_per_dim / 2)
 
@@ -237,6 +239,8 @@ def get_ulist_essemble(ulist, u1_max, u2_max, num_samples):
         ulist[:,0].min(),
         u1_max-ulist[:,0].max()
     )
+
+    print(f"Ulist :,0 {ulist[:,0]} :,1 {ulist[:,1]}")
     
     u2_offset = np.minimum(
         u2_max+ulist[:,1].min(),

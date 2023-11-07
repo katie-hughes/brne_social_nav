@@ -244,4 +244,20 @@ namespace brne
     dt{dt}
   {}
 
+  void TrajGen::perturb_ulist(arma::mat cmds){
+    std::cout << "Commands\n" << cmds << std::endl;
+    auto n_per_dim = static_cast<int>(sqrt(n_samples));
+    auto n_per_lin = static_cast<int>(n_per_dim*2);
+    auto n_per_ang = static_cast<int>(n_per_dim/2);
+    std::cout << "N per dim: " << n_per_dim << " per lin " << n_per_lin << " per ang " << n_per_ang << std::endl;
+
+    auto lin_vec = arma::conv_to<arma::vec>::from(cmds.col(0));
+    auto ang_vec = arma::conv_to<arma::vec>::from(cmds.col(1));
+
+    auto lin_offset = std::min(lin_vec.min(), max_lin_vel-lin_vec.max());
+    auto ang_offset = std::min(max_ang_vel + ang_vec.min(), max_ang_vel-ang_vec.max());
+
+    std::cout << "Lin offset " << lin_offset << " ang offset " << ang_offset << std::endl;
+  }
+
 }

@@ -124,6 +124,6 @@ namespace brne
       /// @param dt time between ticks (s)
       explicit TrajGen(double max_lin_vel, double max_ang_vel, int n_samples, double dt);
 
-      void get_ulist(arma::vec cmds);
+      void perturb_ulist(arma::mat cmds);
   };
 }

@@ -5,8 +5,8 @@ import time
 np.set_printoptions(suppress=True, linewidth=10000, precision=4)
 
 dt = 0.1
-num_samples = 5
-plan_steps = 10
+num_samples = 16
+plan_steps = 5
 num_agents = 2
 ped_sample_scale = 1.0
 
@@ -141,11 +141,13 @@ ax2.set_title('Optimal trajectories with Python')
 # plt.show()
 plt.close()
 
+print('\n\n\n')
 
-test_nsamples = 100
+
+test_nsamples = num_samples
 test_nsteps = 5
 
-ut = np.array([0.4, 0.0])
+ut = np.array([0.4, 0.1])
 nominal_cmds = np.tile(ut, reps=(test_nsteps,1))
 ulist = brne.get_ulist_essemble(nominal_cmds, 0.6, 1.0, test_nsamples)
 print(f"Ulist {ulist.shape}")
@@ -153,10 +155,12 @@ iteration = 0
 for i in ulist:
     print(f'iteration {iteration}')
     print(i.shape)
-    print(i)
+    print(i.T)
     iteration += 1
 
 print('\n\n')
+
+exit()
 
 robot_state = np.array([20, 100, 0])
 
