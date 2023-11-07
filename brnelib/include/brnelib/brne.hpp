@@ -113,6 +113,7 @@ namespace brne
       double max_ang_vel;
       int n_samples;
       double dt;
+      std::vector<arma::mat> ulist;
     public:
       /// @brief empty constructor. Not actually useful, but might need for ros node.
       explicit TrajGen();
@@ -122,5 +123,7 @@ namespace brne
       /// @param n_samples number of samplesin the trajectory
       /// @param dt time between ticks (s)
       explicit TrajGen(double max_lin_vel, double max_ang_vel, int n_samples, double dt);
+
+      void get_ulist(arma::vec cmds);
   };
 }

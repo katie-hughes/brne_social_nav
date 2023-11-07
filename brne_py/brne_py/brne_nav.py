@@ -284,11 +284,14 @@ class BrneNavRos(Node):
                 nominal_cmds, self.max_lin_vel, self.max_ang_vel, self.num_samples
             )
             self.get_logger().info(f"ulist {ulist_essemble.shape}\n{ulist_essemble}")
+            tiles = np.tile(robot_state, reps=(self.num_samples,1)).T
+            self.get_logger().info(f"Tiles {tiles.shape}\n{tiles}")
             traj_essemble = brne.traj_sim_essemble(
                 np.tile(robot_state, reps=(self.num_samples,1)).T,
                 ulist_essemble,
                 self.dt
             )
+            self.get_logger().info(f"traj {traj_essemble.shape}\n{traj_essemble}")
             xtraj_samples[0:self.num_samples] = traj_essemble[:,0,:].T
             ytraj_samples[0:self.num_samples] = traj_essemble[:,1,:].T
 

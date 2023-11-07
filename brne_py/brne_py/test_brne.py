@@ -138,5 +138,35 @@ ax2.set_title('Optimal trajectories with Python')
 
 
 # plt.savefig('after_corridor_avoidance.png')
-plt.show()
+# plt.show()
 plt.close()
+
+
+test_nsamples = 100
+test_nsteps = 5
+
+ut = np.array([0.4, 0.0])
+nominal_cmds = np.tile(ut, reps=(test_nsteps,1))
+ulist = brne.get_ulist_essemble(nominal_cmds, 0.6, 1.0, test_nsamples)
+print(f"Ulist {ulist.shape}")
+iteration = 0
+for i in ulist:
+    print(f'iteration {iteration}')
+    print(i.shape)
+    print(i)
+    iteration += 1
+
+print('\n\n')
+
+robot_state = np.array([20, 100, 0])
+
+tiles = np.tile(robot_state, reps=(test_nsamples,1)).T
+print(f"tiles {tiles.shape}\n{tiles}")
+traj = brne.traj_sim_essemble(tiles, ulist,dt)
+print(f"traj {traj.shape}")
+iteration = 0
+for i in traj:
+    print(f'\n\n{iteration}')
+    print(i.shape)
+    print(i)
+    iteration += 1
