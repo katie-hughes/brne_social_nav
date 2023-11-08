@@ -162,7 +162,7 @@ print('\n\n')
 
 # exit()
 
-robot_state = np.array([20, 100, 0])
+robot_state = np.array([1, 2, 3])
 
 tiles = np.tile(robot_state, reps=(test_nsamples,1)).T
 print(f"tiles {tiles.shape}\n{tiles}")

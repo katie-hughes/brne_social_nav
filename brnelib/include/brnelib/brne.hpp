@@ -115,6 +115,9 @@ namespace brne
       int n_steps;
       double dt;
       std::vector<arma::mat> ulist;
+
+      arma::mat dyn(arma::mat state, arma::mat controls);
+      arma::mat dyn_step(arma::mat state, arma::mat controls);
     public:
       /// @brief empty constructor. Not actually useful, but might need for ros node.
       explicit TrajGen();
@@ -128,6 +131,7 @@ namespace brne
       /// @brief Create a list of controls perturbed from nominal controls
       /// @param lin_vel nominal linear velocity
       /// @param ang_vel nominal angular velocity
-      void perturb_ulist(double lin_vel, double ang_vel);
+      /// @param state vector of [x,y,theta] of the robot's position
+      void perturb_ulist(double lin_vel, double ang_vel, arma::rowvec state);
   };
 }

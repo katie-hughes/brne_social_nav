@@ -186,11 +186,14 @@ def get_min_dist(x_trajs, y_trajs):
 
 ##########################################################################################################
 def dyn(st, ut):
+    print(f"st\n{st.T}")
+    print(f"ut\n{ut.T}")
     sdot = np.array([
         ut[0] * np.cos(st[2]),
         ut[0] * np.sin(st[2]),
         ut[1]
     ])
+    print(f"Sdot\n{sdot.T}")
     return sdot
 
 def dyn_step(st, ut, dt):
@@ -221,8 +224,11 @@ def traj_sim_essemble(st, ulist, dt):
     traj = np.zeros((tsteps, 3, num_samples))
 
     for t in range(tsteps):
+        print(f"Ulist t {ulist[t]}")
         st = dyn_step(st, ulist[t].T, dt)
+        print(f"St {st.T}")
         traj[t] = st.copy()
+        exit()
 
     return traj
 
@@ -279,6 +285,8 @@ def get_ulist_essemble(ulist, u1_max, u2_max, num_samples):
     print(f"U perturbs\n{u_perturbs}")
 
     # print(f"Ulist newaxis {ulist[:,np.newaxis]}")
+
+    print(f"Ulist\n{ulist}")
 
     ulist_essemeble = ulist[:,np.newaxis] + u_perturbs
     # ulist_essemeble[:,:,0] = np.clip(ulist_essemeble[:,:,0], 0.0, u1_max)

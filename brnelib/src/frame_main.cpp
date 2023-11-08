@@ -120,8 +120,10 @@ int main(){
   double nominal_lin_vel = 0.4;
   double nominal_ang_vel = 0.1;
 
+  arma::rowvec robot_state(std::vector<double>{1.0, 2.0, 3.0});
+
   brne::TrajGen tg{max_lin_vel, max_ang_vel, n_samples, n_steps, dt};
-  tg.perturb_ulist(nominal_lin_vel, nominal_ang_vel);
+  tg.perturb_ulist(nominal_lin_vel, nominal_ang_vel, robot_state);
 
   return 0;
 }

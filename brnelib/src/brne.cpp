@@ -245,7 +245,7 @@ namespace brne
     dt{dt}
   {}
 
-  void TrajGen::perturb_ulist(double lin_vel, double ang_vel){
+  void TrajGen::perturb_ulist(double lin_vel, double ang_vel, arma::rowvec state){
     arma::vec lin_vel_vec(n_steps, arma::fill::value(lin_vel));
     arma::vec ang_vel_vec(n_steps, arma::fill::value(ang_vel));
     arma::mat nominal_commands(n_steps, 2, arma::fill::zeros);
@@ -284,7 +284,34 @@ namespace brne
     u_perturbs.col(1) = ang_col;
     std::cout << "u perturbs\n" << u_perturbs << std::endl;
 
+    arma::mat ulist = u_perturbs;
+    ulist.col(0) += lin_vel;
+    ulist.col(1) += ang_vel;
+    std::cout << "ulist\n" << ulist << std::endl;
 
+    // next I need to make arrays of states
+
+    arma::mat states(n_samples, 3, arma::fill::zeros);
+    states.each_row() = state;
+
+    arma::mat sdot = dyn(states, ulist);
+
+  }
+
+
+  arma::mat TrajGen::dyn(arma::mat state, arma::mat controls){
+    // lin vel is controls.col(0)
+    // ang vel is controls.col(1)
+    // angles is state.col(2), x is col(0), y is col(1)
+    std::cout << "state\n" << state.col(2) << std::endl;
+    std::cout << "lin vel\n" << controls.col(0) << std::endl;
+    arma::mat sdot(n_samples, 3, arma::fill::zeros);
+    // % is element wise multiplication
+    sdot.col(0) = controls.col(0) % arma::cos(state.col(2));
+    sdot.col(1) = controls.col(0) % arma::sin(state.col(2));
+    sdot.col(2) = controls.col(1);
+    std::cout << "Sdot\n" << sdot << std::endl;
+    return sdot;
   }
 
 }
