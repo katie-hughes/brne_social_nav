@@ -155,12 +155,12 @@ iteration = 0
 for i in ulist:
     print(f'iteration {iteration}')
     print(i.shape)
-    print(i.T)
+    print(i)
     iteration += 1
 
 print('\n\n')
 
-exit()
+# exit()
 
 robot_state = np.array([20, 100, 0])
 
@@ -172,5 +172,5 @@ iteration = 0
 for i in traj:
     print(f'\n\n{iteration}')
     print(i.shape)
-    print(i)
+    print(i.T)
     iteration += 1

@@ -112,6 +112,7 @@ namespace brne
       double max_lin_vel;
       double max_ang_vel;
       int n_samples;
+      int n_steps;
       double dt;
       std::vector<arma::mat> ulist;
     public:
@@ -122,8 +123,11 @@ namespace brne
       /// @param max_ang_vel maximum angular velocity in rad/s
       /// @param n_samples number of samplesin the trajectory
       /// @param dt time between ticks (s)
-      explicit TrajGen(double max_lin_vel, double max_ang_vel, int n_samples, double dt);
+      explicit TrajGen(double max_lin_vel, double max_ang_vel, int n_samples, int n_steps, double dt);
 
-      void perturb_ulist(arma::mat cmds);
+      /// @brief Create a list of controls perturbed from nominal controls
+      /// @param lin_vel nominal linear velocity
+      /// @param ang_vel nominal angular velocity
+      void perturb_ulist(double lin_vel, double ang_vel);
   };
 }

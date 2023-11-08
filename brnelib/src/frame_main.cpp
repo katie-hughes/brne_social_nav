@@ -118,16 +118,10 @@ int main(){
   double max_lin_vel = 0.6;
   double max_ang_vel = 1.0;
   double nominal_lin_vel = 0.4;
+  double nominal_ang_vel = 0.1;
 
-  arma::vec lin_vel_vec(n_steps, arma::fill::value(nominal_lin_vel));
-  arma::vec ang_vel_vec(n_steps, arma::fill::value(0.1));
-  arma::mat nominal_commands(n_steps, 2, arma::fill::zeros);
-  nominal_commands.col(0) = lin_vel_vec;
-  nominal_commands.col(1) = ang_vel_vec;
-
-  brne::TrajGen tg{max_lin_vel, max_ang_vel, n_samples, dt};
-  tg.perturb_ulist(nominal_commands);
-
+  brne::TrajGen tg{max_lin_vel, max_ang_vel, n_samples, n_steps, dt};
+  tg.perturb_ulist(nominal_lin_vel, nominal_ang_vel);
 
   return 0;
 }

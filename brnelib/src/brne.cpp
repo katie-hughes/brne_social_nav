@@ -237,27 +237,54 @@ namespace brne
 
   TrajGen::TrajGen(){}
 
-  TrajGen::TrajGen(double max_lin_vel, double max_ang_vel, int n_samples, double dt):
+  TrajGen::TrajGen(double max_lin_vel, double max_ang_vel, int n_samples, int n_steps, double dt):
     max_lin_vel{max_lin_vel},
     max_ang_vel{max_ang_vel},
     n_samples{n_samples},
+    n_steps{n_steps},
     dt{dt}
   {}
 
-  void TrajGen::perturb_ulist(arma::mat cmds){
-    std::cout << "Commands\n" << cmds << std::endl;
+  void TrajGen::perturb_ulist(double lin_vel, double ang_vel){
+    arma::vec lin_vel_vec(n_steps, arma::fill::value(lin_vel));
+    arma::vec ang_vel_vec(n_steps, arma::fill::value(ang_vel));
+    arma::mat nominal_commands(n_steps, 2, arma::fill::zeros);
+    nominal_commands.col(0) = lin_vel_vec;
+    nominal_commands.col(1) = ang_vel_vec;
+
+    std::cout << "Commands\n" << nominal_commands << std::endl;
     auto n_per_dim = static_cast<int>(sqrt(n_samples));
     auto n_per_lin = static_cast<int>(n_per_dim*2);
     auto n_per_ang = static_cast<int>(n_per_dim/2);
     std::cout << "N per dim: " << n_per_dim << " per lin " << n_per_lin << " per ang " << n_per_ang << std::endl;
 
-    auto lin_vec = arma::conv_to<arma::vec>::from(cmds.col(0));
-    auto ang_vec = arma::conv_to<arma::vec>::from(cmds.col(1));
 
-    auto lin_offset = std::min(lin_vec.min(), max_lin_vel-lin_vec.max());
-    auto ang_offset = std::min(max_ang_vel + ang_vec.min(), max_ang_vel-ang_vec.max());
+    auto lin_offset = std::min(lin_vel_vec.min(), max_lin_vel-lin_vel_vec.max());
+    auto ang_offset = std::min(max_ang_vel + ang_vel_vec.min(), max_ang_vel-ang_vel_vec.max());
 
     std::cout << "Lin offset " << lin_offset << " ang offset " << ang_offset << std::endl;
+
+
+    auto lin_ls = arma::linspace<arma::vec>(-lin_offset, lin_offset, n_per_lin);
+    auto ang_ls = arma::linspace<arma::vec>(-ang_offset, ang_offset, n_per_ang);
+
+    std::cout << "Lin linspace\n" << lin_ls << std::endl;
+    std::cout << "Ang linspace\n" << ang_ls << std::endl;
+
+    // want to get the combination of every single pair of lin/ang in these vectors
+
+    arma::mat u_perturbs(n_samples, 2, arma::fill::zeros);
+    arma::vec lin_col(n_samples, arma::fill::zeros);
+    arma::vec ang_col(n_samples, arma::fill::zeros);
+    for (int i=0; i<n_per_ang; i++){
+      lin_col.subvec(i*n_per_lin, (i+1)*n_per_lin-1) = lin_ls;
+      ang_col.subvec(i*n_per_lin, (i+1)*n_per_lin-1) = arma::vec(n_per_lin, arma::fill::value(ang_ls.at(i)));
+    }
+    u_perturbs.col(0) = lin_col;
+    u_perturbs.col(1) = ang_col;
+    std::cout << "u perturbs\n" << u_perturbs << std::endl;
+
+
   }
 
 }
