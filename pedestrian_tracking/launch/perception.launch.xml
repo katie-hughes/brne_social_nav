@@ -2,7 +2,7 @@
 
     <arg name="launch_zed" default="true" description="Start the ZED camera. Options: true, false"/>
     <arg name="onboard" default="true" description="Is ZED onboard the Go1? Options: true, false"/>
-    <arg name="localize" default="false" description="Publish odom updates from ZED. Options: true, false"/>
+    <arg name="localize" default="true" description="Publish odom updates from ZED. Options: true, false"/>
     <arg name="simulate" default="false" description="Simulate a pedestrian. Options: true, false"/>
 
     <!-- Start streaming from ZED -->

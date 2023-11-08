@@ -11,7 +11,7 @@
       <arg name="config_path" value="$(find-pkg-share pedestrian_tracking)/config/zed_config.yaml"/>
     </include>
 
-    <!-- convert zed object message to a type that is easier to work with -->
+    <!-- convert zed object message to pedestrian type & transform frames -->
     <node pkg="pedestrian_tracking" exec="convert_zed_ped">
     </node>
 
@@ -40,10 +40,6 @@
               --pitch 0
               --yaw 0" 
         if="$(eval '\'$(var onboard)\' == \'true\'')">
-    </node>
-
-    <!-- "remap" zed odom topic to regular odom topic -->
-    <node pkg="pedestrian_tracking" exec="odom_passthrough" if="$(eval '\'$(var localize)\' == \'true\'')">
     </node>
 
 </launch>

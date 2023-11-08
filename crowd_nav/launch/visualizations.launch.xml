@@ -1,3 +1,5 @@
 <launch>
-  <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share crowd_nav)/config/crowdnav.rviz"/>
+  <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share crowd_nav)/config/crowdnav.rviz">
+    <remap from="/odom" to="/zed/zed_node/odom"/>
+  </node>
 </launch>

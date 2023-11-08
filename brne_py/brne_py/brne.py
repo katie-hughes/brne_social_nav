@@ -80,7 +80,7 @@ def get_Lmat_nb(train_ts, test_ts, train_noise, kernel_a1, kernel_a2):
     cov_mat = covmat_22 - covmat_12 @ np.linalg.inv(covmat_11) @ covmat_12.T
     # print(f"cov mat\n{cov_mat}")
     cov_mat += np.eye(test_ts.shape[0]) * 1e-06
-    print(f"cov mat\n{cov_mat}")
+    # print(f"cov mat\n{cov_mat}")
     # print(f"chol mat\n{cholesky_numba(cov_mat)}")
     return cholesky_numba(cov_mat), cov_mat
 
@@ -155,10 +155,10 @@ def brne_nav(xtraj_samples, ytraj_samples, num_agents, tsteps, num_pts, cost_a1,
         return None
 
     for iter_num in range(10):
-        print(f"\nWeights {iter_num}\n{weights}")
+        # print(f"\nWeights {iter_num}\n{weights}")
         weights = weights_update_nb(all_costs, weights, index_table, all_pt_index, num_agents, num_pts)
 
-    print(f"\nFinal Weights\n{weights}")
+    # print(f"\nFinal Weights\n{weights}")
 
     # for i in range(num_agents):
     #     agent_weights = weights[i] * coll_mask[i]
@@ -168,7 +168,7 @@ def brne_nav(xtraj_samples, ytraj_samples, num_agents, tsteps, num_pts, cost_a1,
     agent_weights /= np.mean(agent_weights)
     weights[0] = agent_weights.copy()
 
-    print(f"\nWeights after masking\n{weights}")
+    # print(f"\nWeights after masking\n{weights}")
     return weights
 
 # @nb.jit(nopython=True)
@@ -233,22 +233,22 @@ def get_ulist_essemble(ulist, u1_max, u2_max, num_samples):
     num_essembles_per_dim_u1 = int(num_essembles_per_dim * 2)
     num_essembles_per_dim_u2 = int(num_essembles_per_dim / 2)
 
-    print(f"N per u1 {num_essembles_per_dim_u1} per u2 {num_essembles_per_dim_u2}")
+    # print(f"N per u1 {num_essembles_per_dim_u1} per u2 {num_essembles_per_dim_u2}")
 
     u1_offset = np.minimum(
         ulist[:,0].min(),
         u1_max-ulist[:,0].max()
     )
 
-    print(f"Ulist :,0 {ulist[:,0]} :,1 {ulist[:,1]}")
+    # print(f"Ulist :,0 {ulist[:,0]} :,1 {ulist[:,1]}")
     
     u2_offset = np.minimum(
         u2_max+ulist[:,1].min(),
         u2_max-ulist[:,1].max()
     )
 
-    print(f"U1 offset {u1_offset}")
-    print(f"U2 offset {u2_offset}")
+    # print(f"U1 offset {u1_offset}")
+    # print(f"U2 offset {u2_offset}")
     # print('u offsets: ', u1_offset, u2_offset)
 
     # u1_offset = np.minimum(ulist[0][0], 0.2)
@@ -260,11 +260,11 @@ def get_ulist_essemble(ulist, u1_max, u2_max, num_samples):
        np.linspace(-u2_offset, u2_offset, num_essembles_per_dim_u2)
     )
 
-    print(f"Linspace u1 {np.linspace(-u1_offset, u1_offset, num_essembles_per_dim_u1)}")
-    print(f"Linspace u2 {np.linspace(-u2_offset, u2_offset, num_essembles_per_dim_u2)}")
+    # print(f"Linspace u1 {np.linspace(-u1_offset, u1_offset, num_essembles_per_dim_u1)}")
+    # print(f"Linspace u2 {np.linspace(-u2_offset, u2_offset, num_essembles_per_dim_u2)}")
 
-    print(f"U1 perturbs {u1_perturbs}")
-    print(f"U2 perturbs {u2_perturbs}")
+    # print(f"U1 perturbs {u1_perturbs}")
+    # print(f"U2 perturbs {u2_perturbs}")
 
     ### gaussian sampling
     # u1_perturbs = np.random.normal(size=(num_samples,))
@@ -276,9 +276,9 @@ def get_ulist_essemble(ulist, u1_max, u2_max, num_samples):
         u1_perturbs.ravel(), u2_perturbs.ravel()
     ]).T
 
-    print(f"U perturbs {u_perturbs}")
+    # print(f"U perturbs {u_perturbs}")
 
-    print(f"Ulist newaxis {ulist[:,np.newaxis]}")
+    # print(f"Ulist newaxis {ulist[:,np.newaxis]}")
 
     ulist_essemeble = ulist[:,np.newaxis] + u_perturbs
     # ulist_essemeble[:,:,0] = np.clip(ulist_essemeble[:,:,0], 0.0, u1_max)
