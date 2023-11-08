@@ -16,7 +16,7 @@ class OdomPassthrough : public rclcpp::Node
     {
 
       odom_sub_ = create_subscription<nav_msgs::msg::Odometry>(
-        "/zed2i/zed_node/odom", 10, std::bind(&OdomPassthrough::odom_cb, this, std::placeholders::_1));
+        "/zed/zed_node/odom", 10, std::bind(&OdomPassthrough::odom_cb, this, std::placeholders::_1));
       odom_pub_ = create_publisher<nav_msgs::msg::Odometry>("/odom", 10);
     }
 

@@ -27,7 +27,7 @@ class ConvertPeds : public rclcpp::Node
     : Node("convert_peds")
     {
       zed_sub_ = create_subscription<zed_interfaces::msg::ObjectsStamped>(
-        "zed2i/zed_node/obj_det/objects", 10, std::bind(&ConvertPeds::zed_cb, this, std::placeholders::_1));
+        "zed/zed_node/obj_det/objects", 10, std::bind(&ConvertPeds::zed_cb, this, std::placeholders::_1));
       pedestrian_pub_ = create_publisher<crowd_nav_interfaces::msg::PedestrianArray>("pedestrians", 10);
 
       // From: https://docs.ros.org/en/humble/Tutorials/Intermediate/Tf2/
