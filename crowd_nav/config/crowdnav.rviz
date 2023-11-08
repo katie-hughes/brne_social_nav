@@ -183,7 +183,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /zed2i/zed_node/rgb/image_rect_color
+        Value: /zed/zed_node/rgb/image_rect_color
       Value: true
   Enabled: true
   Global Options:

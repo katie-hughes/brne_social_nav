@@ -58,11 +58,11 @@ class ConvertPeds : public rclcpp::Node
       for (int i = 0; i < n_peds; i++){
         const auto p = msg.objects.at(i);
         // These positions are in zed frame. Need to be converted into odom frame.
-        // frame id is always zed2i_left_camera_frame
+        // frame id is always zed_left_camera_frame
         const std::string ped_name = "ped_"+std::to_string(p.label_id);
         geometry_msgs::msg::TransformStamped t;
         t.header.stamp = msg.header.stamp;
-        t.header.frame_id = "zed2i_left_camera_frame";
+        t.header.frame_id = "zed_left_camera_frame";
         t.child_frame_id = ped_name;
         t.transform.translation.x = p.position.at(0);
         t.transform.translation.y = p.position.at(1);
@@ -96,7 +96,7 @@ class ConvertPeds : public rclcpp::Node
         // geometry_msgs::msg::TransformStamped t;
         // try {
         //   t = tf_buffer_->lookupTransform(
-        //     "odom", "zed2i_left_camera_frame",
+        //     "odom", "zed_left_camera_frame",
         //     tf2::TimePointZero);
         //   tf2::Transform T_odom_camera;
         //   T_odom_camera.setOrigin(tf2::Vector3(t.transform.translation.x,
