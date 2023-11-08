@@ -19,7 +19,7 @@
     <!-- TODO there must be a better way to pass in this config -->
     <node pkg="tf2_ros" exec="static_transform_publisher" 
         args="--frame-id map
-              --child-frame-id zed_link
+              --child-frame-id zed_camera_link
               --x 0
               --y 0
               --z 0
@@ -32,7 +32,7 @@
     <!-- connect zed frame to odom frame if onboard -->
     <node pkg="tf2_ros" exec="static_transform_publisher" 
         args="--frame-id odom
-              --child-frame-id zed_link
+              --child-frame-id zed_camera_link
               --x 0
               --y 0
               --z 0
