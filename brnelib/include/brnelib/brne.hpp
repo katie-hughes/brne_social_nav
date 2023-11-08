@@ -114,7 +114,6 @@ namespace brne
       int n_samples;
       int n_steps;
       double dt;
-      std::vector<arma::mat> ulist;
 
       arma::mat dyn(arma::mat state, arma::mat controls);
       arma::mat dyn_step(arma::mat state, arma::mat controls);
@@ -132,6 +131,6 @@ namespace brne
       /// @param lin_vel nominal linear velocity
       /// @param ang_vel nominal angular velocity
       /// @param state vector of [x,y,theta] of the robot's position
-      void perturb_ulist(double lin_vel, double ang_vel, arma::rowvec state);
+      std::vector<arma::mat> traj_sample(double lin_vel, double ang_vel, arma::rowvec state);
   };
 }

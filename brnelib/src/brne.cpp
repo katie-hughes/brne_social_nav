@@ -245,7 +245,7 @@ namespace brne
     dt{dt}
   {}
 
-  void TrajGen::perturb_ulist(double lin_vel, double ang_vel, arma::rowvec state){
+  std::vector<arma::mat> TrajGen::traj_sample(double lin_vel, double ang_vel, arma::rowvec state){
     arma::vec lin_vel_vec(n_steps, arma::fill::value(lin_vel));
     arma::vec ang_vel_vec(n_steps, arma::fill::value(ang_vel));
     arma::mat nominal_commands(n_steps, 2, arma::fill::zeros);
@@ -294,8 +294,16 @@ namespace brne
     arma::mat states(n_samples, 3, arma::fill::zeros);
     states.each_row() = state;
 
-    arma::mat sdot = dyn(states, ulist);
+    // arma::mat sdot = dyn(states, ulist);
 
+    std::vector<arma::mat> traj;
+
+    for (int t=0; t<n_steps; t++){
+      states = dyn_step(states, ulist);
+      traj.push_back(arma::mat(states));
+      std::cout << "State\n" << states << std::endl;
+    }
+    return traj;
   }
 
 
@@ -303,15 +311,22 @@ namespace brne
     // lin vel is controls.col(0)
     // ang vel is controls.col(1)
     // angles is state.col(2), x is col(0), y is col(1)
-    std::cout << "state\n" << state.col(2) << std::endl;
-    std::cout << "lin vel\n" << controls.col(0) << std::endl;
     arma::mat sdot(n_samples, 3, arma::fill::zeros);
     // % is element wise multiplication
     sdot.col(0) = controls.col(0) % arma::cos(state.col(2));
     sdot.col(1) = controls.col(0) % arma::sin(state.col(2));
     sdot.col(2) = controls.col(1);
-    std::cout << "Sdot\n" << sdot << std::endl;
+    // std::cout << "Sdot\n" << sdot << std::endl;
     return sdot;
+  }
+
+  arma::mat TrajGen::dyn_step(arma::mat state, arma::mat controls){
+    arma::mat k1 = dt * dyn(state, controls);
+    arma::mat k2 = dt * dyn(state + 0.5*k1, controls);
+    arma::mat k3 = dt * dyn(state + 0.5*k2, controls);
+    arma::mat k4 = dt * dyn(state + k3, controls);
+
+    return state + (k1 + 2.0*k2 + 2.0*k3 + k4)/6.0;
   }
 
 }

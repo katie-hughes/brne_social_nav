@@ -186,14 +186,14 @@ def get_min_dist(x_trajs, y_trajs):
 
 ##########################################################################################################
 def dyn(st, ut):
-    print(f"st\n{st.T}")
-    print(f"ut\n{ut.T}")
+    # print(f"st\n{st.T}")
+    # print(f"ut\n{ut.T}")
     sdot = np.array([
         ut[0] * np.cos(st[2]),
         ut[0] * np.sin(st[2]),
         ut[1]
     ])
-    print(f"Sdot\n{sdot.T}")
+    # print(f"Sdot\n{sdot.T}")
     return sdot
 
 def dyn_step(st, ut, dt):
@@ -224,11 +224,9 @@ def traj_sim_essemble(st, ulist, dt):
     traj = np.zeros((tsteps, 3, num_samples))
 
     for t in range(tsteps):
-        print(f"Ulist t {ulist[t]}")
         st = dyn_step(st, ulist[t].T, dt)
-        print(f"St {st.T}")
+        # print(f"Updated state\n{st.T}")
         traj[t] = st.copy()
-        exit()
 
     return traj
 
@@ -239,7 +237,7 @@ def get_ulist_essemble(ulist, u1_max, u2_max, num_samples):
     num_essembles_per_dim_u1 = int(num_essembles_per_dim * 2)
     num_essembles_per_dim_u2 = int(num_essembles_per_dim / 2)
 
-    print(f"N per u1 {num_essembles_per_dim_u1} per u2 {num_essembles_per_dim_u2}")
+    # print(f"N per u1 {num_essembles_per_dim_u1} per u2 {num_essembles_per_dim_u2}")
 
     u1_offset = np.minimum(
         ulist[:,0].min(),
@@ -253,12 +251,8 @@ def get_ulist_essemble(ulist, u1_max, u2_max, num_samples):
         u2_max-ulist[:,1].max()
     )
 
-    print(f"U1 offset {u1_offset}")
-    print(f"U2 offset {u2_offset}")
-    # print('u offsets: ', u1_offset, u2_offset)
-
-    # u1_offset = np.minimum(ulist[0][0], 0.2)
-    # u2_offset = 1.2
+    # print(f"U1 offset {u1_offset}")
+    # print(f"U2 offset {u2_offset}")
 
     # ### grid approach
     u1_perturbs, u2_perturbs = np.meshgrid(
@@ -266,11 +260,11 @@ def get_ulist_essemble(ulist, u1_max, u2_max, num_samples):
        np.linspace(-u2_offset, u2_offset, num_essembles_per_dim_u2)
     )
 
-    print(f"Linspace u1\n{np.linspace(-u1_offset, u1_offset, num_essembles_per_dim_u1)}")
-    print(f"Linspace u2\n{np.linspace(-u2_offset, u2_offset, num_essembles_per_dim_u2)}")
+    # print(f"Linspace u1\n{np.linspace(-u1_offset, u1_offset, num_essembles_per_dim_u1)}")
+    # print(f"Linspace u2\n{np.linspace(-u2_offset, u2_offset, num_essembles_per_dim_u2)}")
 
-    print(f"U1 perturbs\n{u1_perturbs}")
-    print(f"U2 perturbs\n{u2_perturbs}")
+    # print(f"U1 perturbs\n{u1_perturbs}")
+    # print(f"U2 perturbs\n{u2_perturbs}")
 
     ### gaussian sampling
     # u1_perturbs = np.random.normal(size=(num_samples,))
@@ -282,11 +276,11 @@ def get_ulist_essemble(ulist, u1_max, u2_max, num_samples):
         u1_perturbs.ravel(), u2_perturbs.ravel()
     ]).T
 
-    print(f"U perturbs\n{u_perturbs}")
+    # print(f"U perturbs\n{u_perturbs}")
 
     # print(f"Ulist newaxis {ulist[:,np.newaxis]}")
 
-    print(f"Ulist\n{ulist}")
+    # print(f"Ulist\n{ulist}")
 
     ulist_essemeble = ulist[:,np.newaxis] + u_perturbs
     # ulist_essemeble[:,:,0] = np.clip(ulist_essemeble[:,:,0], 0.0, u1_max)

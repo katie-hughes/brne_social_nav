@@ -123,7 +123,7 @@ int main(){
   arma::rowvec robot_state(std::vector<double>{1.0, 2.0, 3.0});
 
   brne::TrajGen tg{max_lin_vel, max_ang_vel, n_samples, n_steps, dt};
-  tg.perturb_ulist(nominal_lin_vel, nominal_ang_vel, robot_state);
+  auto traj = tg.traj_sample(nominal_lin_vel, nominal_ang_vel, robot_state);
 
   return 0;
 }
