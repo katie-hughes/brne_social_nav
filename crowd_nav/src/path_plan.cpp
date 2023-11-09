@@ -329,6 +329,8 @@ class PathPlan : public rclcpp::Node
           }
         }
         // compute the optimal path
+        auto opt_traj = trajgen.sim_traj(robot_pose.toVec(), opt_cmds);
+        // RCLCPP_INFO_STREAM(get_logger(), "Opt traj\n" << opt_traj);
         optimal_path.header.stamp = current_timestamp;
         optimal_path.header.frame_id = "odom";
         optimal_path.poses.clear();
@@ -337,8 +339,8 @@ class PathPlan : public rclcpp::Node
           ps.header.stamp = current_timestamp;
           ps.header.frame_id = "odom";
           // TODO fill these with the actual trajectory
-          ps.pose.position.x = i*0.1;
-          ps.pose.position.y = 0;
+          ps.pose.position.x = opt_traj.at(i,0);
+          ps.pose.position.y = opt_traj.at(i,1);
           optimal_path.poses.push_back(ps);
         }
 
