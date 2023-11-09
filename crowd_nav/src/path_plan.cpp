@@ -242,7 +242,7 @@ class PathPlan : public rclcpp::Node
       builtin_interfaces::msg::Time current_timestamp;
       current_timestamp = this->get_clock()->now();
       auto current_time = current_timestamp.sec + 1e-9 * current_timestamp.nanosec;
-      RCLCPP_INFO_STREAM(get_logger(), "Current time: " << current_timestamp.sec << "s " << current_timestamp.nanosec << "ns ");
+      // RCLCPP_INFO_STREAM(get_logger(), "Current time: " << current_timestamp.sec << "s " << current_timestamp.nanosec << "ns ");
 
       selected_peds.pedestrians.clear();
       std::vector<double> dists_to_peds;
@@ -275,35 +275,27 @@ class PathPlan : public rclcpp::Node
 
       RCLCPP_INFO_STREAM(get_logger(), "Agents: " << n_agents);
 
-      arma::rowvec goal_vec(2, arma::fill::zeros);
+      arma::rowvec goal_vec;
       if (goal_set){
-        goal_vec.at(0) = goal.pose.position.x;
-        goal_vec.at(1) = goal.pose.position.y;
+        goal_vec = arma::rowvec(std::vector<double>{goal.pose.position.x,
+                                                    goal.pose.position.y});
       } else {
-        goal_vec.at(0) = 6.0;
-        goal_vec.at(1) = 0.0;
+        goal_vec = arma::rowvec(std::vector<double>{6.0, 0.0});
       }
 
-      RCLCPP_INFO_STREAM(get_logger(), "Goal Vec\n" << goal_vec);
-
       // get the controls to go to the goal
-
       auto theta_a = robot_pose.theta;
       if (robot_pose.theta > 0.0){
         theta_a -= M_PI_2;
       } else {
         theta_a += M_PI_2;
       }
-
       arma::rowvec axis_vec(std::vector<double>{cos(theta_a), sin(theta_a)});
       arma::rowvec pose_vec(std::vector<double>{robot_pose.x, robot_pose.y});
       arma::rowvec vec_to_goal = goal_vec - pose_vec;
       auto dist_to_goal = arma::norm(vec_to_goal);
-      RCLCPP_INFO_STREAM(get_logger(), "Dist to goal: " << dist_to_goal);
       auto proj_len = arma::dot(axis_vec, vec_to_goal) / arma::dot(vec_to_goal, vec_to_goal) * dist_to_goal;
-      RCLCPP_INFO_STREAM(get_logger(), "Proj len: " << proj_len);
       auto radius = 0.5 * dist_to_goal / proj_len;
-      RCLCPP_INFO_STREAM(get_logger(), "radius: " << radius);
       // find nominal linear and angular velocity
       double nominal_ang_vel = 0;
       if (robot_pose.theta > 0.0){
@@ -312,7 +304,6 @@ class PathPlan : public rclcpp::Node
         nominal_ang_vel =  nominal_lin_vel/radius;
       }
       auto traj_samples = trajgen.traj_sample(nominal_lin_vel, nominal_ang_vel, robot_pose.toVec());
-      RCLCPP_INFO_STREAM(get_logger(), "Traj Samples size " << traj_samples.size());
 
 
       if (n_agents > 1){
