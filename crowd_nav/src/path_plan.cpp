@@ -317,8 +317,15 @@ class PathPlan : public rclcpp::Node
         auto x_pts = brne.mvn_sample_normal(n_agents-1);
         auto y_pts = brne.mvn_sample_normal(n_agents-1);
 
+        // these have been filled in
         arma::mat xtraj_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
         arma::mat ytraj_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
+
+        // these: still need to fill in!
+        arma::mat x_nominal(n_agents, n_steps, arma::fill::zeros);
+        arma::mat y_nominal(n_agents, n_steps, arma::fill::zeros);
+        arma::mat x_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
+        arma::mat y_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
 
         // pick only the closest pedestrians to interact with
         // dists_to_peds and selected_peds arrays
@@ -350,15 +357,60 @@ class PathPlan : public rclcpp::Node
           // if the speed factor is 0 then this will just be equal to ped_xmean
         }
         // RCLCPP_INFO_STREAM(get_logger(), "robot xtraj samples \n" << robot_xtraj_samples);
-        // set this also in xtraj samples
+        // apply the pedestrian's samples
         xtraj_samples.submat(0, 0, n_samples-1, n_steps-1) = trajgen.get_xtraj_samples();
         ytraj_samples.submat(0, 0, n_samples-1, n_steps-1) = trajgen.get_ytraj_samples();
-
         // after this xtraj and ytraj samples are fully filled in!
 
-        // last step is there is the safety mask calculation. Which i will do later
+        // TODO last step is there is the safety mask calculation
 
         // BRNE OPTIMIZATION HERE
+        auto weights = brne.brne_nav(xtraj_samples, ytraj_samples);
+
+        // RCLCPP_INFO_STREAM(get_logger(), "BRNE WEIGHTS\n" << weights);
+
+        // TODO apply the safety mask to the weights
+
+        // calculate the optimal trajectory
+        // auto trajs = brne.compute_optimal_trajectory(x_nominal, y_nominal, x_samples, y_samples);
+
+        auto ulist = trajgen.get_ulist();
+        auto ulist_lin = arma::conv_to<arma::rowvec>::from(ulist.col(0));
+        auto ulist_ang = arma::conv_to<arma::rowvec>::from(ulist.col(1));
+        auto opt_cmds_lin = arma::mean(ulist_lin % weights.row(0)); 
+        auto opt_cmds_ang = arma::mean(ulist_ang % weights.row(0)); 
+
+        RCLCPP_INFO_STREAM(get_logger(), "opt lin: " << opt_cmds_lin);
+        RCLCPP_INFO_STREAM(get_logger(), "opt ang: " << opt_cmds_ang);
+
+        if (goal_set){
+          for (int i=0; i<n_steps; i++){
+            geometry_msgs::msg::Twist tw;
+            tw.linear.x = opt_cmds_lin;
+            tw.angular.z = opt_cmds_ang;
+            robot_cmds.twists.push_back(tw);
+          }
+        }
+
+        arma::mat opt_cmds(n_steps, 2, arma::fill::zeros);
+        opt_cmds.col(0) = arma::vec(n_steps, arma::fill::value(opt_cmds_lin));
+        opt_cmds.col(1) = arma::vec(n_steps, arma::fill::value(opt_cmds_ang));
+        
+        // RCLCPP_INFO_STREAM(get_logger(), "Opt cmds\n" << opt_cmds);
+
+        // compute the optimal path
+        auto opt_traj = trajgen.sim_traj(robot_pose.toVec(), opt_cmds);
+        optimal_path.header.stamp = current_timestamp;
+        optimal_path.poses.clear();
+        for (int i=0; i<n_steps; i++){
+          geometry_msgs::msg::PoseStamped ps;
+          ps.header.stamp = current_timestamp;
+          ps.header.frame_id = "odom";
+          ps.pose.position.x = opt_traj.at(i,0);
+          ps.pose.position.y = opt_traj.at(i,1);
+          optimal_path.poses.push_back(ps);
+        }
+
 
       } else {
         // go straight to the goal

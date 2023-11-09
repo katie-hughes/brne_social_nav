@@ -342,6 +342,7 @@ class BrneNavRos(Node):
             # generate optimal ctrl cmds and update buffer
             opt_cmds_1 = np.mean(ulist_essemble[:,:,0] * weights[0], axis=1)
             opt_cmds_2 = np.mean(ulist_essemble[:,:,1] * weights[0], axis=1)
+            self.get_logger().info(f"opt cmds 1 {opt_cmds_1}")
             self.cmds = np.array([opt_cmds_1, opt_cmds_2]).T
             self.cmds_traj = self.cmd_tracker.sim_traj(robot_state, self.cmds)
 

@@ -120,6 +120,9 @@ namespace brne
 
       arma::mat ulist;
 
+      arma::mat x_nominal;
+      arma::mat y_nominal;
+
       arma::mat xtraj_samples;
       arma::mat ytraj_samples;
 
@@ -149,6 +152,8 @@ namespace brne
       arma::mat get_xtraj_samples();
 
       arma::mat get_ytraj_samples();
+
+      arma::mat get_ulist();
 
       arma::mat opt_controls(arma::rowvec goal);
 

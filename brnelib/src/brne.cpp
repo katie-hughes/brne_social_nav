@@ -334,6 +334,10 @@ namespace brne
     return ytraj_samples;
   }
 
+  arma::mat TrajGen::get_ulist(){
+    return ulist;
+  }
+
   arma::mat TrajGen::opt_controls(arma::rowvec goal){
     // std::cout << "End pose\n" << end_pose << std::endl;
     arma::mat goal_mat(n_samples, 2, arma::fill::zeros);
