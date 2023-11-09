@@ -226,6 +226,7 @@ class BrneNavRos(Node):
             x_pts = brne.mvn_sample_normal((num_agents-1) * self.num_samples, self.plan_steps, self.cov_Lmat)
             y_pts = brne.mvn_sample_normal((num_agents-1) * self.num_samples, self.plan_steps, self.cov_Lmat)
 
+            self.get_logger().info(f'X and y pts shape {x_pts.shape} {y_pts.shape}')
             # ctrl space configuration here
             xtraj_samples = np.zeros((
                 num_agents * self.num_samples, self.plan_steps
@@ -242,6 +243,8 @@ class BrneNavRos(Node):
                 speed_factor = np.linalg.norm(ped_vel)
                 ped_xmean = ped_pos[0] + np.arange(self.plan_steps) * self.dt * ped_vel[0]
                 ped_ymean = ped_pos[1] + np.arange(self.plan_steps) * self.dt * ped_vel[1]
+
+                self.get_logger().info(f'shape into xtraj samples {(xtraj_samples[(i+1)*self.num_samples : (i+2)*self.num_samples]).shape}')
 
                 xtraj_samples[(i+1)*self.num_samples : (i+2)*self.num_samples] = \
                     x_pts[i*self.num_samples : (i+1)*self.num_samples] * speed_factor + ped_xmean
@@ -291,8 +294,8 @@ class BrneNavRos(Node):
                 ulist_essemble,
                 self.dt
             )
-            self.get_logger().info(f"traj {traj_essemble.shape}\n{traj_essemble}")
-            self.get_logger().info(f"for xtraj samples {(traj_essemble[:,0,:].T).shape}\n{traj_essemble[:,0,:].T}")
+            # self.get_logger().info(f"traj {traj_essemble.shape}\n{traj_essemble}")
+            # self.get_logger().info(f"for xtraj samples {(traj_essemble[:,0,:].T).shape}\n{traj_essemble[:,0,:].T}")
             xtraj_samples[0:self.num_samples] = traj_essemble[:,0,:].T
             ytraj_samples[0:self.num_samples] = traj_essemble[:,1,:].T
 

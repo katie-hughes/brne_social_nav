@@ -91,6 +91,9 @@ namespace brne
       /// @brief sample the multivariate normal distribution
       /// @return sample of size n_steps x n_samples
       arma::mat mvn_sample_normal();
+      /// @brief sample the multivariate normal distribution
+      /// @return sample of size n_steps x (n_samples*n_peds)
+      arma::mat mvn_sample_normal(int n_peds);
       /// @brief Compute BRNE weights for optimal trajectory
       /// @param xtraj_samples x trajectory samples, size (n_agents*n_samples) x n_steps
       /// @param ytraj_samples y trajectory samples, size (n_agents*n_samples) x n_steps

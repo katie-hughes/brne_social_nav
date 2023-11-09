@@ -118,6 +118,7 @@ class PathPlan : public rclcpp::Node
       std::chrono::milliseconds rate = (std::chrono::milliseconds) ((int)(1000. / replan_freq));
       timer_ = create_wall_timer(rate, std::bind(&PathPlan::timer_callback, this));
 
+      optimal_path.header.frame_id = "odom";
     }
 
   private:
@@ -228,7 +229,7 @@ class PathPlan : public rclcpp::Node
         // initially length is 0 and I want to append pedestrian 0
         // while(0<1)go through
         // while(1<1)BREAK
-        while (ped_buffer.pedestrians.size() < ped.id+1){
+        while (static_cast<int>(ped_buffer.pedestrians.size()) < static_cast<int>(ped.id+1)){
           crowd_nav_interfaces::msg::Pedestrian blank_ped;
           blank_ped.id = ped_buffer.pedestrians.size();
           ped_buffer.pedestrians.push_back(blank_ped);
@@ -256,14 +257,14 @@ class PathPlan : public rclcpp::Node
         auto dt = current_time - ped_time;
         // don't consider this pedestrian if it came in too long ago.
         if (dt > people_timeout){
-          RCLCPP_INFO_STREAM(get_logger(), "Ignoring pedestrian " << p.id);
+          // RCLCPP_INFO_STREAM(get_logger(), "Ignoring pedestrian " << p.id);
           continue;
         }
-        RCLCPP_INFO_STREAM(get_logger(), "pedestrian ID: " << p.id <<
-                                          "\n\tPosition: " << p.pose.position.x << " " << p.pose.position.y <<
-                                          "\n\tVelocity: " << p.velocity.linear.x << " " << p.velocity.linear.y <<
-                                          "\nTimestamp: " << p.header.stamp.sec  << "s " << p.header.stamp.nanosec << " ns");
-        RCLCPP_INFO_STREAM(get_logger(), "Time Difference " << dt);
+        // RCLCPP_INFO_STREAM(get_logger(), "pedestrian ID: " << p.id <<
+        //                                   "\n\tPosition: " << p.pose.position.x << " " << p.pose.position.y <<
+        //                                   "\n\tVelocity: " << p.velocity.linear.x << " " << p.velocity.linear.y <<
+        //                                   "\nTimestamp: " << p.header.stamp.sec  << "s " << p.header.stamp.nanosec << " ns");
+        // RCLCPP_INFO_STREAM(get_logger(), "Time Difference " << dt);
 
         // compute distance to the pedestrian from the robot
         auto dist_to_ped = dist(robot_pose.x, robot_pose.y, p.pose.position.x, p.pose.position.y);
@@ -312,9 +313,52 @@ class PathPlan : public rclcpp::Node
 
 
       if (n_agents > 1){
+        // create pedestrian samples
+        auto x_pts = brne.mvn_sample_normal(n_agents-1);
+        auto y_pts = brne.mvn_sample_normal(n_agents-1);
+
+        arma::mat xtraj_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
+        arma::mat ytraj_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
+
         // pick only the closest pedestrians to interact with
-        auto robot_xtraj_samples = trajgen.get_xtraj_samples();
-        auto robot_ytraj_samples = trajgen.get_ytraj_samples();
+        // dists_to_peds and selected_peds arrays
+        auto closest_idxs = arma::conv_to<arma::vec>::from(arma::sort_index(arma::vec(dists_to_peds)));
+        for (int p=0; p<(n_agents - 1); p++){
+          auto ped = selected_peds.pedestrians.at(closest_idxs.at(p));
+          RCLCPP_INFO_STREAM(get_logger(), "Ped " << ped.id << " pos " << 
+                                           ped.pose.position.x << " " << 
+                                           ped.pose.position.y);
+          // speed factor
+          arma::vec ped_vel(std::vector<double>(ped.velocity.linear.x, ped.velocity.linear.y));
+          auto speed_factor = arma::norm(ped_vel);
+          arma::rowvec ped_xmean = arma::rowvec(n_steps, arma::fill::value(ped.pose.position.x)) + 
+                                   arma::linspace<arma::rowvec>(0, (n_steps-1), n_steps) * dt * ped.velocity.linear.x;
+          arma::rowvec ped_ymean = arma::rowvec(n_steps, arma::fill::value(ped.pose.position.y)) + 
+                                   arma::linspace<arma::rowvec>(0, (n_steps-1), n_steps) * dt * ped.velocity.linear.y;
+
+          arma::mat ped_xmean_mat(n_samples, n_steps, arma::fill::zeros);
+          arma::mat ped_ymean_mat(n_samples, n_steps, arma::fill::zeros);
+          ped_xmean_mat.each_row() = ped_xmean;
+          ped_ymean_mat.each_row() = ped_ymean;
+          // RCLCPP_INFO_STREAM(get_logger(), "Ped xmean mat\n" << ped_xmean_mat);
+          // set submatrix in xtraj and ytraj samples.
+          // submatrix ((p+1)*nsamples, (p+2)*nsamples) = xpoints(p*nsamples, (p+1)*nsamples) * speed_factor + ped_xmean
+          xtraj_samples.submat((p+1)*n_samples, 0, (p+2)*n_samples-1, n_steps-1) = 
+              x_pts.submat(p*n_samples, 0, (p+1)*n_samples-1, n_steps-1) * speed_factor + ped_xmean_mat;
+          ytraj_samples.submat((p+1)*n_samples, 0, (p+2)*n_samples-1, n_steps-1) = 
+              y_pts.submat(p*n_samples, 0, (p+1)*n_samples-1, n_steps-1) * speed_factor + ped_ymean_mat;
+          // if the speed factor is 0 then this will just be equal to ped_xmean
+        }
+        // RCLCPP_INFO_STREAM(get_logger(), "robot xtraj samples \n" << robot_xtraj_samples);
+        // set this also in xtraj samples
+        xtraj_samples.submat(0, 0, n_samples-1, n_steps-1) = trajgen.get_xtraj_samples();
+        ytraj_samples.submat(0, 0, n_samples-1, n_steps-1) = trajgen.get_ytraj_samples();
+
+        // after this xtraj and ytraj samples are fully filled in!
+
+        // last step is there is the safety mask calculation. Which i will do later
+
+        // BRNE OPTIMIZATION HERE
 
       } else {
         // go straight to the goal
@@ -330,20 +374,16 @@ class PathPlan : public rclcpp::Node
         }
         // compute the optimal path
         auto opt_traj = trajgen.sim_traj(robot_pose.toVec(), opt_cmds);
-        // RCLCPP_INFO_STREAM(get_logger(), "Opt traj\n" << opt_traj);
         optimal_path.header.stamp = current_timestamp;
-        optimal_path.header.frame_id = "odom";
         optimal_path.poses.clear();
         for (int i=0; i<n_steps; i++){
           geometry_msgs::msg::PoseStamped ps;
           ps.header.stamp = current_timestamp;
           ps.header.frame_id = "odom";
-          // TODO fill these with the actual trajectory
           ps.pose.position.x = opt_traj.at(i,0);
           ps.pose.position.y = opt_traj.at(i,1);
           optimal_path.poses.push_back(ps);
         }
-
       }
       // publish controls
       cmd_buf_pub_->publish(robot_cmds);

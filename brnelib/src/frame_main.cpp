@@ -41,7 +41,7 @@ int main(){
   auto y0_sample = brne_test.mvn_sample_normal();
   auto y1_sample = brne_test.mvn_sample_normal();
 
-  // std::cout << "sample x0 \n" << x0_sample << std::endl;
+  std::cout << "sample x0 \n" << x0_sample << std::endl;
   // std::cout << "sample x1\n" << x1_sample << std::endl;
   // std::cout << "sample y0\n" << y0_sample << std::endl;
   // std::cout << "sample y1\n" << y1_sample << std::endl;
@@ -132,6 +132,11 @@ int main(){
   std::cout << "OPt cmds\n" << opt_cmds << std::endl;
 
   auto opt_traj = tg.sim_traj(robot_state, opt_cmds);
+
+
+  auto mvnsamp = brne_test.mvn_sample_normal(3);
+
+  std::cout << "MVN SAMP\n" << mvnsamp << std::endl;
 
   return 0;
 }

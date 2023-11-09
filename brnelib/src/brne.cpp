@@ -100,8 +100,12 @@ namespace brne
   }
 
   arma::mat BRNE::mvn_sample_normal(){
-    // TODO should do error checking to make sure Lmat is set
     arma::mat res(n_steps, n_samples, arma::fill::randn);
+    return (cov_Lmat * res).t();
+  }
+
+  arma::mat BRNE::mvn_sample_normal(int n_peds){
+    arma::mat res(n_steps, n_samples*n_peds, arma::fill::randn);
     return (cov_Lmat * res).t();
   }
   
@@ -252,24 +256,24 @@ namespace brne
     nominal_commands.col(0) = lin_vel_vec;
     nominal_commands.col(1) = ang_vel_vec;
 
-    std::cout << "Commands\n" << nominal_commands << std::endl;
+    // std::cout << "Commands\n" << nominal_commands << std::endl;
     auto n_per_dim = static_cast<int>(sqrt(n_samples));
     auto n_per_lin = static_cast<int>(n_per_dim*2);
     auto n_per_ang = static_cast<int>(n_per_dim/2);
-    std::cout << "N per dim: " << n_per_dim << " per lin " << n_per_lin << " per ang " << n_per_ang << std::endl;
+    // std::cout << "N per dim: " << n_per_dim << " per lin " << n_per_lin << " per ang " << n_per_ang << std::endl;
 
 
     auto lin_offset = std::min(lin_vel_vec.min(), max_lin_vel-lin_vel_vec.max());
     auto ang_offset = std::min(max_ang_vel + ang_vel_vec.min(), max_ang_vel-ang_vel_vec.max());
 
-    std::cout << "Lin offset " << lin_offset << " ang offset " << ang_offset << std::endl;
+    // std::cout << "Lin offset " << lin_offset << " ang offset " << ang_offset << std::endl;
 
 
     auto lin_ls = arma::linspace<arma::vec>(-lin_offset, lin_offset, n_per_lin);
     auto ang_ls = arma::linspace<arma::vec>(-ang_offset, ang_offset, n_per_ang);
 
-    std::cout << "Lin linspace\n" << lin_ls << std::endl;
-    std::cout << "Ang linspace\n" << ang_ls << std::endl;
+    // std::cout << "Lin linspace\n" << lin_ls << std::endl;
+    // std::cout << "Ang linspace\n" << ang_ls << std::endl;
 
     // want to get the combination of every single pair of lin/ang in these vectors
 
@@ -282,12 +286,12 @@ namespace brne
     }
     u_perturbs.col(0) = lin_col;
     u_perturbs.col(1) = ang_col;
-    std::cout << "u perturbs\n" << u_perturbs << std::endl;
+    // std::cout << "u perturbs\n" << u_perturbs << std::endl;
 
     ulist = arma::mat(u_perturbs);
     ulist.col(0) += lin_vel;
     ulist.col(1) += ang_vel;
-    std::cout << "ulist\n" << ulist << std::endl;
+    // std::cout << "ulist\n" << ulist << std::endl;
 
     // next I need to make arrays of states
 
@@ -305,7 +309,7 @@ namespace brne
     for (int t=0; t<n_steps; t++){
       states = dyn_step(states, ulist);
       traj.push_back(arma::mat(states));
-      std::cout << "State\n" << states << std::endl;
+      // std::cout << "State\n" << states << std::endl;
       xtraj_samples.col(t) = states.col(0);
       ytraj_samples.col(t) = states.col(1);
       if (t == n_steps - 1){
@@ -315,8 +319,8 @@ namespace brne
 
     }
 
-    std::cout << "X traj samples\n" << xtraj_samples << std::endl;
-    std::cout << "Y traj samples\n" << ytraj_samples << std::endl;
+    // std::cout << "X traj samples\n" << xtraj_samples << std::endl;
+    // std::cout << "Y traj samples\n" << ytraj_samples << std::endl;
     
 
     return traj;
@@ -331,12 +335,12 @@ namespace brne
   }
 
   arma::mat TrajGen::opt_controls(arma::rowvec goal){
-    std::cout << "End pose\n" << end_pose << std::endl;
+    // std::cout << "End pose\n" << end_pose << std::endl;
     arma::mat goal_mat(n_samples, 2, arma::fill::zeros);
     goal_mat.each_row() = goal;
-    std::cout << "Goal mat\n" << goal_mat << std::endl;
+    // std::cout << "Goal mat\n" << goal_mat << std::endl;
     auto opt_idx = (arma::vecnorm(end_pose - goal_mat, 2, 1)).index_min();
-    std::cout << "optimal_index\n" << opt_idx << std::endl;
+    // std::cout << "optimal_index\n" << opt_idx << std::endl;
     arma::mat opt_cmds(n_steps, 2, arma::fill::zeros);
     opt_cmds.each_row() = ulist.row(opt_idx);
     return opt_cmds;
@@ -383,19 +387,19 @@ namespace brne
   }
 
   arma::mat TrajGen::sim_traj(arma::rowvec state, arma::mat controls){
-    std::cout << "State\n" << state << std::endl;
-    std::cout << "Controls\n" << controls << std::endl;
+    // std::cout << "State\n" << state << std::endl;
+    // std::cout << "Controls\n" << controls << std::endl;
     arma::mat opt_traj(n_steps, 3, arma::fill::zeros);
     arma::rowvec current_state(state);
-    std::cout << "Current State" << current_state << std::endl;
+    // std::cout << "Current State" << current_state << std::endl;
     opt_traj.row(0) = arma::rowvec(current_state);
-    std::cout << "Traj\n" << opt_traj << std::endl;
+    // std::cout << "Traj\n" << opt_traj << std::endl;
     for (int i=1; i<n_steps; i++){
       current_state = dyn_step(current_state, controls.row(i-1));
-      std::cout << "Current State" << current_state << std::endl;
+      // std::cout << "Current State" << current_state << std::endl;
       opt_traj.row(i) = arma::rowvec(current_state);
     }
-    std::cout << "Traj\n" << opt_traj << std::endl;
+    // std::cout << "Traj\n" << opt_traj << std::endl;
     return opt_traj;
   }
 
