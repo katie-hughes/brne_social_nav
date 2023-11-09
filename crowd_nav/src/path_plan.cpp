@@ -38,7 +38,7 @@ class PathPlan : public rclcpp::Node
 {
   public:
     PathPlan()
-    : Node("plan_paths"), goal_set{false}
+    : Node("plan_paths"), goal_set{false}, walls_published{false}
     {
       // define parameters
       declare_parameter("replan_freq", 1.0);
@@ -113,6 +113,7 @@ class PathPlan : public rclcpp::Node
         "odom", 10, std::bind(&PathPlan::odom_cb, this, std::placeholders::_1));
       cmd_buf_pub_ = create_publisher<crowd_nav_interfaces::msg::TwistArray>("cmd_buf", 10);
       path_pub_ = create_publisher<nav_msgs::msg::Path>("/optimal_path", 10);
+      walls_pub_ = create_publisher<visualization_msgs::msg::MarkerArray>("/walls", 10);
 
       // Create a timer that executes at replan_freq
       std::chrono::milliseconds rate = (std::chrono::milliseconds) ((int)(1000. / replan_freq));
@@ -153,9 +154,41 @@ class PathPlan : public rclcpp::Node
 
     rclcpp::Publisher<crowd_nav_interfaces::msg::TwistArray>::SharedPtr cmd_buf_pub_;
     rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr path_pub_;
+    rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr walls_pub_;
 
     bool goal_set;
+    bool walls_published;
     geometry_msgs::msg::PoseStamped goal;
+
+    void pub_walls(){
+      RCLCPP_INFO_STREAM(get_logger(), "\nn\n\n\nPUB WALLS\n\n\n");
+      auto now = this->get_clock()->now();
+      auto height = 1.0;
+      auto length = 10.0;
+      auto thickness = 0.01;
+      auto transparency = 0.2;
+      visualization_msgs::msg::MarkerArray ma;
+      for (int i=0; i<2; i++){
+        visualization_msgs::msg::Marker wall;
+        wall.header.frame_id = "odom";
+        wall.header.stamp = now;
+        wall.id = i;
+        wall.type = 1; // cube
+        wall.action = 0;
+        wall.pose.position.x = 0.5*length -1.0;
+        wall.pose.position.y = y_min;
+        wall.pose.position.z = 0.5*height;
+        wall.color.a = transparency;
+        wall.color.b = 1.0;
+        wall.scale.x = length;
+        wall.scale.y = thickness;
+        wall.scale.z = height;
+        ma.markers.push_back(wall);
+      }
+      ma.markers.at(0).pose.position.y = y_min;
+      ma.markers.at(0).pose.position.y = y_max;
+      walls_pub_->publish(ma);
+    }
 
     void goal_cb(const geometry_msgs::msg::PoseStamped & msg)
     {
@@ -241,6 +274,11 @@ class PathPlan : public rclcpp::Node
 
     void timer_callback()
     {
+      pub_walls();
+      // if (!walls_published){
+      //   pub_walls();
+      //   walls_published = true;
+      // }
       robot_cmds.twists.clear();
       RCLCPP_INFO_STREAM(get_logger(), "\n\nTimer Tick");
       RCLCPP_INFO_STREAM(get_logger(), "Robot @: " << robot_pose.x << " " << robot_pose.y << " " << robot_pose.theta);
