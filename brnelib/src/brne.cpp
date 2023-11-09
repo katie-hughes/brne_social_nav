@@ -284,7 +284,7 @@ namespace brne
     u_perturbs.col(1) = ang_col;
     std::cout << "u perturbs\n" << u_perturbs << std::endl;
 
-    arma::mat ulist = u_perturbs;
+    ulist = arma::mat(u_perturbs);
     ulist.col(0) += lin_vel;
     ulist.col(1) += ang_vel;
     std::cout << "ulist\n" << ulist << std::endl;
@@ -298,12 +298,48 @@ namespace brne
 
     std::vector<arma::mat> traj;
 
+    xtraj_samples = arma::mat(n_samples, n_steps, arma::fill::zeros);
+    ytraj_samples = arma::mat(n_samples, n_steps, arma::fill::zeros);
+    end_pose = arma::mat(n_samples, 2, arma::fill::zeros);
+
     for (int t=0; t<n_steps; t++){
       states = dyn_step(states, ulist);
       traj.push_back(arma::mat(states));
       std::cout << "State\n" << states << std::endl;
+      xtraj_samples.col(t) = states.col(0);
+      ytraj_samples.col(t) = states.col(1);
+      if (t == n_steps - 1){
+        end_pose.col(0) = states.col(0);
+        end_pose.col(1) = states.col(1);
+      }
+
     }
+
+    std::cout << "X traj samples\n" << xtraj_samples << std::endl;
+    std::cout << "Y traj samples\n" << ytraj_samples << std::endl;
+    
+
     return traj;
+  }
+
+  arma::mat TrajGen::get_xtraj_samples(){
+    return xtraj_samples;
+  }
+
+  arma::mat TrajGen::get_ytraj_samples(){
+    return ytraj_samples;
+  }
+
+  arma::mat TrajGen::opt_controls(arma::rowvec goal){
+    std::cout << "End pose\n" << end_pose << std::endl;
+    arma::mat goal_mat(n_samples, 2, arma::fill::zeros);
+    goal_mat.each_row() = goal;
+    std::cout << "Goal mat\n" << goal_mat << std::endl;
+    auto opt_idx = (arma::vecnorm(end_pose - goal_mat, 2, 1)).index_min();
+    std::cout << "optimal_index\n" << opt_idx << std::endl;
+    arma::mat opt_cmds(n_steps, 2, arma::fill::zeros);
+    opt_cmds.each_row() = ulist.row(opt_idx);
+    return opt_cmds;
   }
 
 

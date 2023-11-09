@@ -291,7 +291,8 @@ class BrneNavRos(Node):
                 ulist_essemble,
                 self.dt
             )
-            # self.get_logger().info(f"traj {traj_essemble.shape}\n{traj_essemble}")
+            self.get_logger().info(f"traj {traj_essemble.shape}\n{traj_essemble}")
+            self.get_logger().info(f"for xtraj samples {(traj_essemble[:,0,:].T).shape}\n{traj_essemble[:,0,:].T}")
             xtraj_samples[0:self.num_samples] = traj_essemble[:,0,:].T
             ytraj_samples[0:self.num_samples] = traj_essemble[:,1,:].T
 

@@ -24,6 +24,9 @@ struct RobotPose{
   double x;
   double y;
   double theta;
+  arma::rowvec toVec(){
+    return arma::rowvec(std::vector<double>{x,y,theta});
+  }
 };
 
 double dist(double x1, double y1, double x2, double y2){
@@ -95,6 +98,8 @@ class PathPlan : public rclcpp::Node
                         dt, n_steps, n_samples,
                         y_min, y_max};
 
+      trajgen = brne::TrajGen{max_lin_vel, max_ang_vel, n_samples, n_steps, dt};
+
       // Print out the parameters of the BRNE object to make sure it got initialized right
       RCLCPP_INFO_STREAM(get_logger(), brne.param_string());
 
@@ -123,6 +128,7 @@ class PathPlan : public rclcpp::Node
     int n_prev_peds = 0;
 
     brne::BRNE brne{};
+    brne::TrajGen trajgen{};
 
     rclcpp::TimerBase::SharedPtr timer_;
 
@@ -131,6 +137,8 @@ class PathPlan : public rclcpp::Node
 
     crowd_nav_interfaces::msg::PedestrianArray ped_buffer;
     crowd_nav_interfaces::msg::PedestrianArray selected_peds;
+
+    crowd_nav_interfaces::msg::TwistArray robot_cmds;
 
     RobotPose robot_pose;
 
@@ -227,6 +235,7 @@ class PathPlan : public rclcpp::Node
 
     void timer_callback()
     {
+      robot_cmds.twists.clear();
       RCLCPP_INFO_STREAM(get_logger(), "\n\nTimer Tick");
       RCLCPP_INFO_STREAM(get_logger(), "Robot @: " << robot_pose.x << " " << robot_pose.y << " " << robot_pose.theta);
       // read in pedestrian buffer
@@ -295,38 +304,37 @@ class PathPlan : public rclcpp::Node
       RCLCPP_INFO_STREAM(get_logger(), "Proj len: " << proj_len);
       auto radius = 0.5 * dist_to_goal / proj_len;
       RCLCPP_INFO_STREAM(get_logger(), "radius: " << radius);
-      // the nominal commands are a matrix
-      arma::vec lin_vel_vec(n_steps, arma::fill::value(nominal_lin_vel));
-      arma::vec ang_vel_vec;
+      // find nominal linear and angular velocity
+      double nominal_ang_vel = 0;
       if (robot_pose.theta > 0.0){
-        ang_vel_vec = arma::vec(n_steps, arma::fill::value(-nominal_lin_vel/radius));
+        nominal_ang_vel = -nominal_lin_vel/radius;
       } else {
-        ang_vel_vec = arma::vec(n_steps, arma::fill::value( nominal_lin_vel/radius));
+        nominal_ang_vel =  nominal_lin_vel/radius;
       }
-      arma::mat nominal_commands(n_steps, 2, arma::fill::zeros);
-      nominal_commands.col(0) = lin_vel_vec;
-      nominal_commands.col(1) = ang_vel_vec;
-      RCLCPP_INFO_STREAM(get_logger(), "nominal cmds\n" << nominal_commands);
-
+      auto traj_samples = trajgen.traj_sample(nominal_lin_vel, nominal_ang_vel, robot_pose.toVec());
+      RCLCPP_INFO_STREAM(get_logger(), "Traj Samples size " << traj_samples.size());
 
 
       if (n_agents > 1){
         // pick only the closest pedestrians to interact with
+        auto robot_xtraj_samples = trajgen.get_xtraj_samples();
+        auto robot_ytraj_samples = trajgen.get_ytraj_samples();
 
       } else {
         // go straight to the goal
+        auto opt_cmds = trajgen.opt_controls(goal_vec);
+        // RCLCPP_INFO_STREAM(get_logger(), "Opt cmds\n" << opt_cmds);
+        if (goal_set){
+          for (int i=0; i<n_steps; i++){
+            geometry_msgs::msg::Twist tw;
+            tw.linear.x = opt_cmds.at(i,0);
+            tw.angular.z = opt_cmds.at(i,1);
+            robot_cmds.twists.push_back(tw);
+          }
+        }
       }
-
-
-
-
-
-
-
-
       // publish controls
-      crowd_nav_interfaces::msg::TwistArray buf;
-      cmd_buf_pub_->publish(buf);
+      cmd_buf_pub_->publish(robot_cmds);
     }
 };
 

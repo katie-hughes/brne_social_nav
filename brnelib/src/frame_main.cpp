@@ -120,10 +120,16 @@ int main(){
   double nominal_lin_vel = 0.4;
   double nominal_ang_vel = 0.1;
 
-  arma::rowvec robot_state(std::vector<double>{1.0, 2.0, 3.0});
+  arma::rowvec robot_state(std::vector<double>{0.0, 0.0, 0.0});
+
+  arma::rowvec goal(std::vector<double>{6.0, 0.0});
 
   brne::TrajGen tg{max_lin_vel, max_ang_vel, n_samples, n_steps, dt};
   auto traj = tg.traj_sample(nominal_lin_vel, nominal_ang_vel, robot_state);
+
+  auto opt_cmds = tg.opt_controls(goal);
+
+  std::cout << "OPt cmds\n" << opt_cmds << std::endl;
 
   return 0;
 }

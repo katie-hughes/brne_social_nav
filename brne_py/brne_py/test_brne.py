@@ -162,7 +162,7 @@ print('\n\n')
 
 # exit()
 
-robot_state = np.array([1, 2, 3])
+robot_state = np.array([0, 0, 0])
 
 tiles = np.tile(robot_state, reps=(test_nsamples,1)).T
 print(f"tiles {tiles.shape}\n{tiles}")
@@ -174,3 +174,12 @@ for i in traj:
     print(i.shape)
     print(i.T)
     iteration += 1
+
+goal = np.array([6.0, 0])
+
+end_pose_essemble = traj[-1, 0:2, :].T
+print(f"End pose\n{end_pose_essemble}")
+dists2goal_essemble = np.linalg.norm(end_pose_essemble - goal, axis=1)
+print(f"dist to goal\n{dists2goal_essemble.T}")
+opt_cmds = ulist[:, np.argmin(dists2goal_essemble), :]
+print(f"Opt commands\n{opt_cmds}")

@@ -115,6 +115,13 @@ namespace brne
       int n_steps;
       double dt;
 
+      arma::mat ulist;
+
+      arma::mat xtraj_samples;
+      arma::mat ytraj_samples;
+
+      arma::mat end_pose;
+
       arma::mat dyn(arma::mat state, arma::mat controls);
       arma::mat dyn_step(arma::mat state, arma::mat controls);
     public:
@@ -132,5 +139,11 @@ namespace brne
       /// @param ang_vel nominal angular velocity
       /// @param state vector of [x,y,theta] of the robot's position
       std::vector<arma::mat> traj_sample(double lin_vel, double ang_vel, arma::rowvec state);
+      
+      arma::mat get_xtraj_samples();
+
+      arma::mat get_ytraj_samples();
+
+      arma::mat opt_controls(arma::rowvec goal);
   };
 }
