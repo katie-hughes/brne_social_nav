@@ -365,4 +365,38 @@ namespace brne
     return state + (k1 + 2.0*k2 + 2.0*k3 + k4)/6.0;
   }
 
+  arma::rowvec TrajGen::dyn(arma::rowvec state, arma::rowvec controls){
+    arma::rowvec sdot(3, arma::fill::zeros);
+    sdot.at(0) = controls.at(0) * cos(state.at(2));
+    sdot.at(1) = controls.at(0) * sin(state.at(2));
+    sdot.at(2) = controls.at(1);
+    // std::cout << "Sdot\n" << sdot << std::endl;
+    return sdot;
+  }
+
+  arma::rowvec TrajGen::dyn_step(arma::rowvec state, arma::rowvec controls){
+    arma::rowvec k1 = dt * dyn(state, controls);
+    arma::rowvec k2 = dt * dyn(state + 0.5*k1, controls);
+    arma::rowvec k3 = dt * dyn(state + 0.5*k2, controls);
+    arma::rowvec k4 = dt * dyn(state + k3, controls);
+    return state + (k1 + 2.0*k2 + 2.0*k3 + k4)/6.0;
+  }
+
+  arma::mat TrajGen::sim_traj(arma::rowvec state, arma::mat controls){
+    std::cout << "State\n" << state << std::endl;
+    std::cout << "Controls\n" << controls << std::endl;
+    arma::mat opt_traj(n_steps, 3, arma::fill::zeros);
+    arma::rowvec current_state(state);
+    std::cout << "Current State" << current_state << std::endl;
+    opt_traj.row(0) = arma::rowvec(current_state);
+    std::cout << "Traj\n" << opt_traj << std::endl;
+    for (int i=1; i<n_steps; i++){
+      current_state = dyn_step(current_state, controls.row(i-1));
+      std::cout << "Current State" << current_state << std::endl;
+      opt_traj.row(i) = arma::rowvec(current_state);
+    }
+    std::cout << "Traj\n" << opt_traj << std::endl;
+    return opt_traj;
+  }
+
 }

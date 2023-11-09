@@ -131,5 +131,7 @@ int main(){
 
   std::cout << "OPt cmds\n" << opt_cmds << std::endl;
 
+  auto opt_traj = tg.sim_traj(robot_state, opt_cmds);
+
   return 0;
 }

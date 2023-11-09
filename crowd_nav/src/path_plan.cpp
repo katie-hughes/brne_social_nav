@@ -17,6 +17,7 @@
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "builtin_interfaces/msg/time.hpp"
+#include "nav_msgs/msg/path.hpp"
 
 using namespace std::chrono_literals;
 
@@ -111,6 +112,7 @@ class PathPlan : public rclcpp::Node
       odom_sub_ = create_subscription<nav_msgs::msg::Odometry>(
         "odom", 10, std::bind(&PathPlan::odom_cb, this, std::placeholders::_1));
       cmd_buf_pub_ = create_publisher<crowd_nav_interfaces::msg::TwistArray>("cmd_buf", 10);
+      path_pub_ = create_publisher<nav_msgs::msg::Path>("/optimal_path", 10);
 
       // Create a timer that executes at replan_freq
       std::chrono::milliseconds rate = (std::chrono::milliseconds) ((int)(1000. / replan_freq));
@@ -140,6 +142,8 @@ class PathPlan : public rclcpp::Node
 
     crowd_nav_interfaces::msg::TwistArray robot_cmds;
 
+    nav_msgs::msg::Path optimal_path;
+
     RobotPose robot_pose;
 
     rclcpp::Subscription<crowd_nav_interfaces::msg::PedestrianArray>::SharedPtr pedestrian_sub_;
@@ -147,6 +151,7 @@ class PathPlan : public rclcpp::Node
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
 
     rclcpp::Publisher<crowd_nav_interfaces::msg::TwistArray>::SharedPtr cmd_buf_pub_;
+    rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr path_pub_;
 
     bool goal_set;
     geometry_msgs::msg::PoseStamped goal;
@@ -323,9 +328,25 @@ class PathPlan : public rclcpp::Node
             robot_cmds.twists.push_back(tw);
           }
         }
+        // compute the optimal path
+        optimal_path.header.stamp = current_timestamp;
+        optimal_path.header.frame_id = "odom";
+        optimal_path.poses.clear();
+        for (int i=0; i<n_steps; i++){
+          geometry_msgs::msg::PoseStamped ps;
+          ps.header.stamp = current_timestamp;
+          ps.header.frame_id = "odom";
+          // TODO fill these with the actual trajectory
+          ps.pose.position.x = i*0.1;
+          ps.pose.position.y = 0;
+          optimal_path.poses.push_back(ps);
+        }
+
       }
       // publish controls
       cmd_buf_pub_->publish(robot_cmds);
+      // publish optimal path
+      path_pub_->publish(optimal_path);
     }
 };
 

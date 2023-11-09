@@ -123,7 +123,10 @@ namespace brne
       arma::mat end_pose;
 
       arma::mat dyn(arma::mat state, arma::mat controls);
+      arma::rowvec dyn(arma::rowvec state, arma::rowvec controls);
+
       arma::mat dyn_step(arma::mat state, arma::mat controls);
+      arma::rowvec dyn_step(arma::rowvec state, arma::rowvec controls);
     public:
       /// @brief empty constructor. Not actually useful, but might need for ros node.
       explicit TrajGen();
@@ -145,5 +148,7 @@ namespace brne
       arma::mat get_ytraj_samples();
 
       arma::mat opt_controls(arma::rowvec goal);
+
+      arma::mat sim_traj(arma::rowvec state, arma::mat controls);
   };
 }
