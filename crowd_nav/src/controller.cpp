@@ -20,17 +20,17 @@ class Controller : public rclcpp::Node
 {
   public:
     Controller()
-    : Node("controller")
+    : Node("controller"), current_idx{0}
     {
+      declare_parameter("dt", 1.0);
+      declare_parameter("n_steps", 1);
 
-      auto pd = rcl_interfaces::msg::ParameterDescriptor{};
+      dt = get_parameter("dt").as_double();
+      n_steps = get_parameter("n_steps").as_int();
 
-      pd.description = "Timer rate (Hz)";
-      declare_parameter("rate", 2., pd);
-
-      rate_hz = get_parameter("rate").as_double();
-      RCLCPP_INFO_STREAM(get_logger(), "Rate is " << ((int)(1000. / rate_hz)) << "ms");
-      std::chrono::milliseconds rate = (std::chrono::milliseconds) ((int)(1000. / rate_hz));
+      RCLCPP_INFO_STREAM(get_logger(), "dt " << dt << " sec");
+      RCLCPP_INFO_STREAM(get_logger(), "Number of steps: " << n_steps);
+      std::chrono::milliseconds rate = (std::chrono::milliseconds) ((int)(1000. * dt));
 
       cmd_buf_sub_ = create_subscription<crowd_nav_interfaces::msg::TwistArray>(
         "cmd_buf", 10, std::bind(&Controller::cmd_buf_cb, this, std::placeholders::_1));
@@ -39,11 +39,12 @@ class Controller : public rclcpp::Node
 
       timer_ = create_wall_timer(
       rate, std::bind(&Controller::timer_callback, this));
-
     }
 
   private:
-    double rate_hz;
+    double dt;
+    int n_steps;
+    int current_idx;
     crowd_nav_interfaces::msg::TwistArray cmd_buff;
     rclcpp::TimerBase::SharedPtr timer_;
 
@@ -55,11 +56,16 @@ class Controller : public rclcpp::Node
     {
       // RCLCPP_INFO_STREAM(get_logger(), "Received buffer. Size="<<msg.twists.size());
       cmd_buff = msg;
+      current_idx = 0;
     }
 
     void timer_callback()
     {
       geometry_msgs::msg::Twist vel;
+      if ((cmd_buff.twists.size() > 0) && (current_idx < n_steps)){
+        vel = cmd_buff.twists.at(current_idx);
+        current_idx += 1;
+      }
       cmd_vel_pub_->publish(vel);
     }
 };
