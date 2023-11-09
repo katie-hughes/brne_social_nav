@@ -50,17 +50,17 @@ class SimulatePedestrians : public rclcpp::Node
       // create a fake pedestrian with an id of 1
       crowd_nav_interfaces::msg::Pedestrian ped1;
       ped1.header.stamp = current_time;
-      ped1.id = 2;
+      ped1.id = 1;
       ped1.pose.position.x = 1.0;
       ped1.pose.position.y = 0.0;
       peds.pedestrians.push_back(ped1);
       // create a fake pedestrian with an id of 2
-      crowd_nav_interfaces::msg::Pedestrian ped2;
-      ped2.header.stamp = current_time;
-      ped2.id = 1;
-      ped2.pose.position.x = 3.0;
-      ped2.pose.position.y = -0.5;
-      peds.pedestrians.push_back(ped2);
+      // crowd_nav_interfaces::msg::Pedestrian ped2;
+      // ped2.header.stamp = current_time;
+      // ped2.id = 2;
+      // ped2.pose.position.x = 3.0;
+      // ped2.pose.position.y = -0.5;
+      // peds.pedestrians.push_back(ped2);
       // publish
       pedestrian_pub_->publish(peds);
     }

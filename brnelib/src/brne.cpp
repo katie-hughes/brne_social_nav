@@ -185,7 +185,7 @@ namespace brne
     all_pts.reset();
     // compute number of agents
     n_agents = xtraj_samples.n_rows / n_samples;
-    std::cout << "N agents: " << n_agents << std::endl;
+    // std::cout << "N agents: " << n_agents << std::endl;
     // compute all points index
     all_pts = arma::conv_to<arma::mat>::from(arma::linspace<arma::rowvec>(0, n_agents*n_samples-1, n_agents*n_samples));
     all_pts.reshape(n_samples, n_agents);
@@ -196,11 +196,11 @@ namespace brne
     compute_costs(xtraj_samples, ytraj_samples);
     weights = arma::mat(n_agents, n_samples, arma::fill::ones);
     for (int i=0; i<10; i++){
-      std::cout << "weights update #" << i << std::endl;
-      std::cout << "weights\n" << weights << std::endl;
+      // std::cout << "weights update #" << i << std::endl;
+      // std::cout << "weights\n" << weights << std::endl;
       update_weights();
     }
-    std::cout << "Final weights\n" << weights << std::endl;
+    // std::cout << "Final weights\n" << weights << std::endl;
 
     collision_check(ytraj_samples);
     // TODO: add a check to make sure that at least some of these are true for agent.
@@ -213,7 +213,7 @@ namespace brne
       weights.row(a) = masked_weights / arma::mean(masked_weights);
     }
 
-    std::cout << "Weights after masking\n" << weights << std::endl;
+    // std::cout << "Weights after masking\n" << weights << std::endl;
     return weights;
   }
 

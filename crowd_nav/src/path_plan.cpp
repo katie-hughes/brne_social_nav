@@ -161,7 +161,7 @@ class PathPlan : public rclcpp::Node
     geometry_msgs::msg::PoseStamped goal;
 
     void pub_walls(){
-      RCLCPP_INFO_STREAM(get_logger(), "\nn\n\n\nPUB WALLS\n\n\n");
+      // RCLCPP_INFO_STREAM(get_logger(), "\nn\n\n\nPUB WALLS\n\n\n");
       auto now = this->get_clock()->now();
       auto height = 1.0;
       auto length = 10.0;
@@ -274,14 +274,19 @@ class PathPlan : public rclcpp::Node
 
     void timer_callback()
     {
+      // RCLCPP_INFO_STREAM(get_logger(), "Start");
+      auto start = this->get_clock()->now();
+      // builtin_interfaces::msg::Time start;
+      // start = this->get_clock()->now();
+      // RCLCPP_INFO_STREAM(get_logger(), "Start" << start.seconds << "s, NS: " << start.nanoseconds);
       pub_walls();
       // if (!walls_published){
       //   pub_walls();
       //   walls_published = true;
       // }
       robot_cmds.twists.clear();
-      RCLCPP_INFO_STREAM(get_logger(), "\n\nTimer Tick");
-      RCLCPP_INFO_STREAM(get_logger(), "Robot @: " << robot_pose.x << " " << robot_pose.y << " " << robot_pose.theta);
+      // RCLCPP_INFO_STREAM(get_logger(), "\n\nTimer Tick");
+      // RCLCPP_INFO_STREAM(get_logger(), "Robot @: " << robot_pose.x << " " << robot_pose.y << " " << robot_pose.theta);
       // read in pedestrian buffer
       builtin_interfaces::msg::Time current_timestamp;
       current_timestamp = this->get_clock()->now();
@@ -307,7 +312,7 @@ class PathPlan : public rclcpp::Node
         // compute distance to the pedestrian from the robot
         auto dist_to_ped = dist(robot_pose.x, robot_pose.y, p.pose.position.x, p.pose.position.y);
         if (dist_to_ped > brne_activate_threshold){
-          RCLCPP_INFO_STREAM(get_logger(), "Pedestrian " << p.id << " too far away");
+          // RCLCPP_INFO_STREAM(get_logger(), "Pedestrian " << p.id << " too far away");
           continue;
         }
         dists_to_peds.push_back(dist_to_ped);
@@ -317,7 +322,7 @@ class PathPlan : public rclcpp::Node
       auto n_peds = static_cast<int>(selected_peds.pedestrians.size());
       auto n_agents = std::min(maximum_agents, n_peds + 1);
 
-      RCLCPP_INFO_STREAM(get_logger(), "Agents: " << n_agents);
+      // RCLCPP_INFO_STREAM(get_logger(), "Agents: " << n_agents);
 
       arma::rowvec goal_vec;
       if (goal_set){
@@ -370,9 +375,9 @@ class PathPlan : public rclcpp::Node
         auto closest_idxs = arma::conv_to<arma::vec>::from(arma::sort_index(arma::vec(dists_to_peds)));
         for (int p=0; p<(n_agents - 1); p++){
           auto ped = selected_peds.pedestrians.at(closest_idxs.at(p));
-          RCLCPP_INFO_STREAM(get_logger(), "Ped " << ped.id << " pos " << 
-                                           ped.pose.position.x << " " << 
-                                           ped.pose.position.y);
+          // RCLCPP_INFO_STREAM(get_logger(), "Ped " << ped.id << " pos " << 
+          //                                  ped.pose.position.x << " " << 
+          //                                  ped.pose.position.y);
           // speed factor
           arma::vec ped_vel(std::vector<double>(ped.velocity.linear.x, ped.velocity.linear.y));
           auto speed_factor = arma::norm(ped_vel);
@@ -403,7 +408,9 @@ class PathPlan : public rclcpp::Node
         // TODO last step is there is the safety mask calculation
 
         // BRNE OPTIMIZATION HERE
+
         auto weights = brne.brne_nav(xtraj_samples, ytraj_samples);
+
 
         // RCLCPP_INFO_STREAM(get_logger(), "BRNE WEIGHTS\n" << weights);
 
@@ -418,8 +425,8 @@ class PathPlan : public rclcpp::Node
         auto opt_cmds_lin = arma::mean(ulist_lin % weights.row(0)); 
         auto opt_cmds_ang = arma::mean(ulist_ang % weights.row(0)); 
 
-        RCLCPP_INFO_STREAM(get_logger(), "opt lin: " << opt_cmds_lin);
-        RCLCPP_INFO_STREAM(get_logger(), "opt ang: " << opt_cmds_ang);
+        // RCLCPP_INFO_STREAM(get_logger(), "opt lin: " << opt_cmds_lin);
+        // RCLCPP_INFO_STREAM(get_logger(), "opt ang: " << opt_cmds_ang);
 
         if (goal_set){
           for (int i=0; i<n_steps; i++){
@@ -479,6 +486,11 @@ class PathPlan : public rclcpp::Node
       cmd_buf_pub_->publish(robot_cmds);
       // publish optimal path
       path_pub_->publish(optimal_path);
+
+      // RCLCPP_INFO_STREAM(get_logger(), "End");
+      auto end = this->get_clock()->now();
+      auto diff = end - start;
+      RCLCPP_INFO_STREAM(get_logger(), "Time:" << diff.seconds() << " s " << diff.nanoseconds() << " ns");
     }
 };
 

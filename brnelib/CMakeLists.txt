@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.9)
 project(brnelib)
 
+add_definitions("-DENABLE_SSE")
+set(CMAKE_CXX_FLAGS " -Ofast -O3 ${SSE_FLAGS} -msse4")
+
 find_package(Armadillo REQUIRED)
 include_directories(${ARMADILLO_INCLUDE_DIRS})
 
