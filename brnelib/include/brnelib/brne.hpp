@@ -140,8 +140,9 @@ namespace brne
       /// @brief Construct a Trajectory Generator object
       /// @param max_lin_vel maximum linear velocity in m/s
       /// @param max_ang_vel maximum angular velocity in rad/s
-      /// @param n_samples number of samplesin the trajectory
-      /// @param dt time between ticks (s)
+      /// @param n_samples number of samples in the trajectory
+      /// @param n_steps number of time steps we are predicting forward
+      /// @param dt time between each timestep tick (s)
       explicit TrajGen(double max_lin_vel, double max_ang_vel, int n_samples, int n_steps, double dt);
 
       /// @brief Create a list of controls perturbed from nominal controls
@@ -150,14 +151,27 @@ namespace brne
       /// @param state vector of [x,y,theta] of the robot's position
       std::vector<arma::mat> traj_sample(double lin_vel, double ang_vel, arma::rowvec state);
       
+      /// @brief get the trajectory sample x coordinate for the robot
+      /// @return matrix of nsamples * nsteps
       arma::mat get_xtraj_samples();
 
+      /// @brief get the trajectory sample y coordinate for the robot
+      /// @return matrix of nsamples * nsteps
       arma::mat get_ytraj_samples();
 
+      /// @brief Get the controls for the robot
+      /// @return matrix of controls, size nsamples*2 (col 0 is linear and col 1 is angular control)
       arma::mat get_ulist();
 
+      /// @brief Get the optimal controls for a given goal location
+      /// @param goal goal vector of [x,y]
+      /// @return matrix of optimal controls of nsteps * 2
       arma::mat opt_controls(arma::rowvec goal);
 
+      /// @brief simulate a trajectory starting from state with controls
+      /// @param state starting position of [x,y,theta]
+      /// @param controls matrix of size nsteps*2 where each row is [lin vel, ang vel]
+      /// @return matrix of size nsteps*3 where each row is the [x,y,theta] at that timestep.
       arma::mat sim_traj(arma::rowvec state, arma::mat controls);
   };
 }
