@@ -274,16 +274,7 @@ class PathPlan : public rclcpp::Node
 
     void timer_callback()
     {
-      // RCLCPP_INFO_STREAM(get_logger(), "Start");
       auto start = this->get_clock()->now();
-      // builtin_interfaces::msg::Time start;
-      // start = this->get_clock()->now();
-      // RCLCPP_INFO_STREAM(get_logger(), "Start" << start.seconds << "s, NS: " << start.nanoseconds);
-      pub_walls();
-      // if (!walls_published){
-      //   pub_walls();
-      //   walls_published = true;
-      // }
       robot_cmds.twists.clear();
       // RCLCPP_INFO_STREAM(get_logger(), "\n\nTimer Tick");
       // RCLCPP_INFO_STREAM(get_logger(), "Robot @: " << robot_pose.x << " " << robot_pose.y << " " << robot_pose.theta);
@@ -364,12 +355,6 @@ class PathPlan : public rclcpp::Node
         arma::mat xtraj_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
         arma::mat ytraj_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
 
-        // these: still need to fill in!
-        arma::mat x_nominal(n_agents, n_steps, arma::fill::zeros);
-        arma::mat y_nominal(n_agents, n_steps, arma::fill::zeros);
-        arma::mat x_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
-        arma::mat y_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
-
         // pick only the closest pedestrians to interact with
         // dists_to_peds and selected_peds arrays
         auto closest_idxs = arma::conv_to<arma::vec>::from(arma::sort_index(arma::vec(dists_to_peds)));
@@ -416,17 +401,11 @@ class PathPlan : public rclcpp::Node
 
         // TODO apply the safety mask to the weights
 
-        // calculate the optimal trajectory
-        // auto trajs = brne.compute_optimal_trajectory(x_nominal, y_nominal, x_samples, y_samples);
-
         auto ulist = trajgen.get_ulist();
         auto ulist_lin = arma::conv_to<arma::rowvec>::from(ulist.col(0));
         auto ulist_ang = arma::conv_to<arma::rowvec>::from(ulist.col(1));
         auto opt_cmds_lin = arma::mean(ulist_lin % weights.row(0)); 
         auto opt_cmds_ang = arma::mean(ulist_ang % weights.row(0)); 
-
-        // RCLCPP_INFO_STREAM(get_logger(), "opt lin: " << opt_cmds_lin);
-        // RCLCPP_INFO_STREAM(get_logger(), "opt ang: " << opt_cmds_ang);
 
         if (goal_set){
           for (int i=0; i<n_steps; i++){
@@ -486,11 +465,16 @@ class PathPlan : public rclcpp::Node
       cmd_buf_pub_->publish(robot_cmds);
       // publish optimal path
       path_pub_->publish(optimal_path);
+      // publish the walls
+      pub_walls();
+      // if (!walls_published){
+      //   pub_walls();
+      //   walls_published = true;
+      // }
 
-      // RCLCPP_INFO_STREAM(get_logger(), "End");
       auto end = this->get_clock()->now();
       auto diff = end - start;
-      RCLCPP_INFO_STREAM(get_logger(), "Time:" << diff.seconds() << " s " << diff.nanoseconds() << " ns");
+      RCLCPP_INFO_STREAM(get_logger(), "Timer Duration: " << diff.seconds() << " s");
     }
 };
 
