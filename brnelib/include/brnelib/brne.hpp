@@ -6,6 +6,7 @@
 #include <vector>
 #include <armadillo>
 #include <random>
+#include <omp.h>
 
 namespace brne
 {

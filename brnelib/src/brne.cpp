@@ -65,6 +65,8 @@ namespace brne
     // smallest eigtenvalue of the matrix is??
     // largest / smallest
     arma::mat res(t1.size(), t2.size(), arma::fill::zeros);
+    // simplest form: Each loop iteration does not depend on others
+    #pragma omp parallel for collapse(2)
     for (auto i=0; i<static_cast<int>(t1.size()); i++){
       for (auto j=0; j<static_cast<int>(t2.size()); j++){
         res.at(i,j) = kernel_a2 * exp(-kernel_a1 * pow((t1.at(i) - t2.at(j)),2));

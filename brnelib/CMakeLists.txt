@@ -2,14 +2,24 @@ cmake_minimum_required(VERSION 3.9)
 project(brnelib)
 
 add_definitions("-DENABLE_SSE")
-set(CMAKE_CXX_FLAGS " -Ofast -O3 ${SSE_FLAGS} -msse4")
+set(CMAKE_CXX_FLAGS " -Ofast -O3 ${SSE_FLAGS} -msse4 -fopenmp")
+
+# A special treat for OpenMP
+find_package(OpenMP REQUIRED)
+
+if(OPENMP_FOUND)
+    message(STATUS "\nFound OpenMP! Turning on support for parallelization\n")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
 
 find_package(Armadillo REQUIRED)
 include_directories(${ARMADILLO_INCLUDE_DIRS})
 
 # create the library
 add_library(brnelib src/brne.cpp)
-target_link_libraries(brnelib ${ARMADILLO_LIBRARIES})
+target_link_libraries(brnelib ${ARMADILLO_LIBRARIES} OpenMP::OpenMP_CXX)
 # enable C++ 17
 target_compile_features(brnelib PUBLIC cxx_std_17) 
 # warnings are your friend!

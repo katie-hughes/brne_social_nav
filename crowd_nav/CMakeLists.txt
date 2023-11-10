@@ -25,6 +25,7 @@ find_package(image_geometry REQUIRED)
 find_package(crowd_nav_interfaces REQUIRED)
 find_package(brnelib REQUIRED)
 find_package(Armadillo REQUIRED)
+find_package(OpenMP REQUIRED)
 
 include_directories(${ARMADILLO_INCLUDE_DIRS})
 
@@ -41,7 +42,8 @@ ament_target_dependencies(path_plan
   nav_msgs
   sensor_msgs
   image_geometry
-  crowd_nav_interfaces)
+  crowd_nav_interfaces
+  OpenMP)
 
 target_link_libraries(path_plan brnelib::brnelib  ${ARMADILLO_LIBRARIES} "${cpp_typesupport_target}")
 

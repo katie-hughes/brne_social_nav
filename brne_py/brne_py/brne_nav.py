@@ -303,12 +303,17 @@ class BrneNavRos(Node):
             robot_xtrajs = traj_essemble[:,0,:].T
             robot_ytrajs = traj_essemble[:,1,:].T
             robot_samples2ped = (robot_xtrajs - closest_ped_pos[0])**2 + (robot_ytrajs - closest_ped_pos[1])**2
+            for rs in robot_samples2ped:
+                self.get_logger().info(f'Robot samples2ped\n{rs}')
             robot_samples2ped = np.min(np.sqrt(robot_samples2ped), axis=1)
+            self.get_logger().info(f'Robot samples2ped\n{robot_samples2ped}')
             safety_mask = (robot_samples2ped > self.close_stop_threshold).astype(float)
+            self.get_logger().info(f'safety mask\n{safety_mask}')
             safety_samples_percent = safety_mask.mean() * 100
             self.get_logger().debug('percent of safe samples: {:.2f}%'.format(safety_samples_percent))
             self.get_logger().debug('dist 2 ped: {:.2f} m'.format(closest_dist2ped))
 
+            
             self.close_stop_flag = False
             if np.max(safety_mask) == 0.0:
                 safety_mask = np.ones_like(safety_mask)
@@ -322,6 +327,8 @@ class BrneNavRos(Node):
                 self.cost_a1, self.cost_a2, self.cost_a3, self.ped_sample_scale,
                 self.corridor_y_min, self.corridor_y_max
             )
+
+            # self.get_logger().info(f"Weights\n{weights}")
 
             if self.brne_first_time:
                 self.get_logger().info("BRNE initialization complete!")

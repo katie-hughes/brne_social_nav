@@ -388,13 +388,23 @@ class PathPlan : public rclcpp::Node
               y_pts.submat(p*n_samples, 0, (p+1)*n_samples-1, n_steps-1) * speed_factor + ped_ymean_mat;
           // if the speed factor is 0 then this will just be equal to ped_xmean
         }
-        // RCLCPP_INFO_STREAM(get_logger(), "robot xtraj samples \n" << robot_xtraj_samples);
-        // apply the pedestrian's samples
-        xtraj_samples.submat(0, 0, n_samples-1, n_steps-1) = trajgen.get_xtraj_samples();
-        ytraj_samples.submat(0, 0, n_samples-1, n_steps-1) = trajgen.get_ytraj_samples();
+        // apply the robot's samples
+        auto robot_xtraj_samples = trajgen.get_xtraj_samples();
+        auto robot_ytraj_samples = trajgen.get_ytraj_samples();
+        xtraj_samples.submat(0, 0, n_samples-1, n_steps-1) = robot_xtraj_samples;
+        ytraj_samples.submat(0, 0, n_samples-1, n_steps-1) = robot_ytraj_samples;
         // after this xtraj and ytraj samples are fully filled in!
 
         // TODO last step is there is the safety mask calculation
+        // the idea is to see if the distance to the closest pedestrian
+        // in the robot samples at any point is less than the close stop threshold
+        // arma::mat closet_ped_x(n_samples, n_steps, 
+        //     arma::fill::value(selected_peds.pedestrians.at(closest_idxs.at(0)).pose.position.x));
+        // arma::mat closet_ped_y(n_samples, n_steps, 
+        //     arma::fill::value(selected_peds.pedestrians.at(closest_idxs.at(0)).pose.position.y));
+        // auto closest_ped = selected_peds.pedestrians.at(closest_idxs.at(0));
+        // RCLCPP_INFO_STREAM(get_logger(), "robot xtraj  samples\n" << robot_xtraj_samples);
+        // arma::mat d_robot_xtraj_ped = robot_xtraj_samples - closest_ped.pose.position.x;
 
         // BRNE OPTIMIZATION HERE
 
