@@ -131,6 +131,7 @@ namespace brne
     costs.reset();
     auto size = n_agents*n_samples;
     arma::mat new_costs(size, size, arma::fill::zeros);
+    #pragma omp parallel for collapse(2)
     for (auto i=0; i<size; i++){
       for (auto j=0; j<size; j++){
         arma::vec traj_costs(n_steps, arma::fill::zeros);
