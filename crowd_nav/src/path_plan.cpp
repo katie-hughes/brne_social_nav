@@ -38,7 +38,7 @@ class PathPlan : public rclcpp::Node
 {
   public:
     PathPlan()
-    : Node("plan_paths"), goal_set{false}, walls_published{false}
+    : Node("brne"), goal_set{false}, walls_published{false}
     {
       // define parameters
       declare_parameter("replan_freq", 1.0);
@@ -160,8 +160,10 @@ class PathPlan : public rclcpp::Node
     bool walls_published;
     geometry_msgs::msg::PoseStamped goal;
 
+    rclcpp::Time last_ped_stamp;
+    rclcpp::Time curr_ped_stamp;
+
     void pub_walls(){
-      // RCLCPP_INFO_STREAM(get_logger(), "\nn\n\n\nPUB WALLS\n\n\n");
       auto now = this->get_clock()->now();
       auto height = 1.0;
       auto length = 10.0;
@@ -216,7 +218,6 @@ class PathPlan : public rclcpp::Node
 
     void check_goal(){
       auto dist_to_goal = dist(robot_pose.x, robot_pose.y, goal.pose.position.x, goal.pose.position.y);
-      // RCLCPP_INFO_STREAM(get_logger(), "Dist to goal" << dist_to_goal);
       if (dist_to_goal < goal_threshold){
         RCLCPP_INFO_STREAM(get_logger(), "Goal Reached!");
         goal_set = false;
@@ -225,6 +226,7 @@ class PathPlan : public rclcpp::Node
 
     void pedestrians_cb(const crowd_nav_interfaces::msg::PedestrianArray & msg)
     {
+      curr_ped_stamp = this->get_clock()->now();
       // save values from previous iteration
       prev_ped_array = ped_array;
       n_prev_peds = n_peds;
@@ -253,10 +255,11 @@ class PathPlan : public rclcpp::Node
           arma::mat difference = prev_ped_array - for_compare;
           auto norm = arma::vecnorm(difference, 2, 1);
           f2f_vel = ped_array.row(p) - prev_ped_array.row(norm.index_min());
+          f2f_vel /= (curr_ped_stamp - last_ped_stamp).seconds();
           // RCLCPP_INFO_STREAM(get_logger(), "f2f vel: " << f2f_vel);
         }
         peds.pedestrians.at(p).velocity.linear.x = f2f_vel.at(0);
-        peds.pedestrians.at(p).velocity.linear.y = f2f_vel.at(0);
+        peds.pedestrians.at(p).velocity.linear.y = f2f_vel.at(1);
         // add to pedestrian buffer
         // first have to do some error checking to make sure the index is in bounds
         // initially length is 0 and I want to append pedestrian 0
@@ -269,6 +272,7 @@ class PathPlan : public rclcpp::Node
         }
         ped_buffer.pedestrians.at(ped.id) = peds.pedestrians.at(p);
       }
+      last_ped_stamp = curr_ped_stamp;
       // RCLCPP_INFO_STREAM(get_logger(), "ped array\n" << ped_array);
     }
 
@@ -474,7 +478,7 @@ class PathPlan : public rclcpp::Node
 
       auto end = this->get_clock()->now();
       auto diff = end - start;
-      RCLCPP_INFO_STREAM(get_logger(), "Timer Duration: " << diff.seconds() << " s");
+      RCLCPP_DEBUG_STREAM(get_logger(), "Timer Duration: " << diff.seconds() << " s");
     }
 };
 
