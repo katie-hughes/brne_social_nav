@@ -135,6 +135,7 @@ namespace brne
     for (auto i=0; i<size; i++){
       for (auto j=0; j<size; j++){
         arma::vec traj_costs(n_steps, arma::fill::zeros);
+        #pragma omp simd
         for (auto t=0; t<n_steps; t++){
           auto dst = pow(xtraj.at(i,t) - xtraj.at(j,t), 2) + pow(ytraj.at(i,t) - ytraj.at(j,t), 2);
           traj_costs.at(t) = 2.0 - 2.0/(1.0 + exp(-cost_a1 *pow(dst, cost_a2)));

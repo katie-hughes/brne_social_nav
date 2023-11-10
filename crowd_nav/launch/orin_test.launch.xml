@@ -1,0 +1,9 @@
+<launch>
+
+  <include file="$(find-pkg-share crowd_nav)/launch/crowdnav.launch.xml">
+      <arg name="launch_perception" value="false"/>
+      <arg name="sim_odom" value="false"/>
+      <arg name="lang" value="C++" />
+    </include>
+
+</launch>

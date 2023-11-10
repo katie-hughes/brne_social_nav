@@ -8,6 +8,7 @@
   <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
   <arg name="zed_localize" default="false" description="Update odom using the ZED"/>
   <arg name="use_rviz" default="true" description="Launch rviz"/>
+  <arg name="launch_perception" default="false" description="Launch perception related nodes"/>
 
   <!-- Python algorithm node -->
   <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\'')" 
@@ -26,7 +27,7 @@
   </node>
 
   <!-- perception nodes -->
-  <include file="$(find-pkg-share pedestrian_tracking)/launch/perception.launch.xml">
+  <include file="$(find-pkg-share pedestrian_tracking)/launch/perception.launch.xml" if="$(eval '\'$(var launch_perception)\' == \'true\'')">
       <arg name="launch_zed" value="$(var launch_zed)"/>
       <arg name="simulate" value="$(var sim_ped)"/>
       <arg name="onboard" value="$(var onboard)" />

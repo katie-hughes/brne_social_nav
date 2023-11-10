@@ -265,6 +265,8 @@ class PathPlan : public rclcpp::Node
         // initially length is 0 and I want to append pedestrian 0
         // while(0<1)go through
         // while(1<1)BREAK
+        // try this to fix time synnchronization issues
+        peds.pedestrians.at(p).header.stamp = curr_ped_stamp;
         while (static_cast<int>(ped_buffer.pedestrians.size()) < static_cast<int>(ped.id+1)){
           crowd_nav_interfaces::msg::Pedestrian blank_ped;
           blank_ped.id = ped_buffer.pedestrians.size();
@@ -295,7 +297,7 @@ class PathPlan : public rclcpp::Node
         auto dt = current_time - ped_time;
         // don't consider this pedestrian if it came in too long ago.
         if (dt > people_timeout){
-          // RCLCPP_INFO_STREAM(get_logger(), "Ignoring pedestrian " << p.id);
+          RCLCPP_INFO_STREAM(get_logger(), "Ignoring pedestrian " << p.id);
           continue;
         }
         // RCLCPP_INFO_STREAM(get_logger(), "pedestrian ID: " << p.id <<
@@ -317,7 +319,7 @@ class PathPlan : public rclcpp::Node
       auto n_peds = static_cast<int>(selected_peds.pedestrians.size());
       auto n_agents = std::min(maximum_agents, n_peds + 1);
 
-      // RCLCPP_INFO_STREAM(get_logger(), "Agents: " << n_agents);
+      RCLCPP_INFO_STREAM(get_logger(), "Agents: " << n_agents);
 
       arma::rowvec goal_vec;
       if (goal_set){
@@ -368,13 +370,12 @@ class PathPlan : public rclcpp::Node
           //                                  ped.pose.position.x << " " << 
           //                                  ped.pose.position.y);
           // speed factor
-          arma::vec ped_vel(std::vector<double>(ped.velocity.linear.x, ped.velocity.linear.y));
+          arma::vec ped_vel(std::vector<double>{ped.velocity.linear.x, ped.velocity.linear.y});
           auto speed_factor = arma::norm(ped_vel);
           arma::rowvec ped_xmean = arma::rowvec(n_steps, arma::fill::value(ped.pose.position.x)) + 
                                    arma::linspace<arma::rowvec>(0, (n_steps-1), n_steps) * dt * ped.velocity.linear.x;
           arma::rowvec ped_ymean = arma::rowvec(n_steps, arma::fill::value(ped.pose.position.y)) + 
                                    arma::linspace<arma::rowvec>(0, (n_steps-1), n_steps) * dt * ped.velocity.linear.y;
-
           arma::mat ped_xmean_mat(n_samples, n_steps, arma::fill::zeros);
           arma::mat ped_ymean_mat(n_samples, n_steps, arma::fill::zeros);
           ped_xmean_mat.each_row() = ped_xmean;
@@ -409,9 +410,6 @@ class PathPlan : public rclcpp::Node
         // BRNE OPTIMIZATION HERE
 
         auto weights = brne.brne_nav(xtraj_samples, ytraj_samples);
-
-
-        // RCLCPP_INFO_STREAM(get_logger(), "BRNE WEIGHTS\n" << weights);
 
         // TODO apply the safety mask to the weights
 
