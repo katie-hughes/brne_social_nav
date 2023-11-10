@@ -297,7 +297,7 @@ class PathPlan : public rclcpp::Node
         auto dt = current_time - ped_time;
         // don't consider this pedestrian if it came in too long ago.
         if (dt > people_timeout){
-          RCLCPP_INFO_STREAM(get_logger(), "Ignoring pedestrian " << p.id);
+          // RCLCPP_INFO_STREAM(get_logger(), "Ignoring pedestrian " << p.id);
           continue;
         }
         // RCLCPP_INFO_STREAM(get_logger(), "pedestrian ID: " << p.id <<
@@ -319,7 +319,7 @@ class PathPlan : public rclcpp::Node
       auto n_peds = static_cast<int>(selected_peds.pedestrians.size());
       auto n_agents = std::min(maximum_agents, n_peds + 1);
 
-      RCLCPP_INFO_STREAM(get_logger(), "Agents: " << n_agents);
+      // RCLCPP_DEBUG_STREAM(get_logger(), "Agents: " << n_agents);
 
       arma::rowvec goal_vec;
       if (goal_set){
@@ -486,7 +486,7 @@ class PathPlan : public rclcpp::Node
 
       auto end = this->get_clock()->now();
       auto diff = end - start;
-      RCLCPP_DEBUG_STREAM(get_logger(), "Timer Duration: " << diff.seconds() << " s");
+      RCLCPP_DEBUG_STREAM(get_logger(), "Agents" << n_agents << " Timer Duration: " << diff.seconds() << " s");
     }
 };
 
