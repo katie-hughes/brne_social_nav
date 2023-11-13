@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="lang" default="PYTHON" description="Choose whether python or C++ BRNE nodes are launched (Right now, only Python is valid). options: PYTHON, C++"/>
+  <arg name="lang" default="C++" description="Choose whether python or C++ BRNE nodes are launched (Right now, only Python is valid). options: PYTHON, C++"/>
   <arg name="sim_odom" default="true" description="Simulate cmd_vel->odom update"/>
   <arg name="launch_zed" default="false" description="Launch the zed camera node"/>
   <arg name="onboard" default="true" description="Is ZED onboard the Go1? Options: true, false"/>
@@ -8,23 +8,16 @@
   <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
   <arg name="zed_localize" default="false" description="Update odom using the ZED"/>
   <arg name="use_rviz" default="true" description="Launch rviz"/>
-  <arg name="launch_perception" default="false" description="Launch perception related nodes"/>
+  <arg name="launch_perception" default="true" description="Launch perception related nodes"/>
+  <arg name="launch_algorithm" default="true" description="Launch algorithm related nodes"/>
 
-  <!-- Python algorithm node -->
-  <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\'')" 
-        args="--ros-args --log-level brne_nav:=$(var debug_level)">
-        <remap from="/odom" to="/zed/zed_node/odom"/>
-  </node>
-
-  <!-- C++ algorithm nodes -->
-  <node pkg="crowd_nav" exec="path_plan" if="$(eval '\'$(var lang)\' == \'C++\'')" 
-        args="--ros-args --log-level brne:=$(var debug_level)">
-    <param from="$(find-pkg-share crowd_nav)/config/brne.yaml"/>
-    <remap from="/odom" to="/zed/zed_node/odom"/>
-  </node>
-  <node pkg="crowd_nav" exec="controller" if="$(eval '\'$(var lang)\' == \'C++\'')">
-    <param from="$(find-pkg-share crowd_nav)/config/brne.yaml"/>
-  </node>
+  <!-- algorithm nodes -->
+  <include file="$(find-pkg-share crowd_nav)/launch/algorithm.launch.xml" if="$(eval '\'$(var launch_perception)\' == \'true\'')">
+      <arg name="lang" value="$(var lang)"/>
+      <arg name="sim_odom" value="$(var sim_odom)"/>
+      <arg name="debug_level" value="$(var debug_level)" />
+      <arg name="use_rviz" value="$(var use_rviz)" />
+    </include>
 
   <!-- perception nodes -->
   <include file="$(find-pkg-share pedestrian_tracking)/launch/perception.launch.xml" if="$(eval '\'$(var launch_perception)\' == \'true\'')">
@@ -32,25 +25,6 @@
       <arg name="simulate" value="$(var sim_ped)"/>
       <arg name="onboard" value="$(var onboard)" />
       <arg name="localize" value="$(var zed_localize)" />
-    </include>
-
-  <!-- simulate cmd_vel to odom updates -->
-  <node pkg="crowd_nav" exec="sim_robot" if="$(eval '\'$(var sim_odom)\' == \'true\'')">
-    <remap from="/odom" to="/zed/zed_node/odom"/>
-  </node>
-  <!-- if we are simulating odom, we also need to add a dummy map frame for tf continuity -->
-  <node pkg="tf2_ros" exec="static_transform_publisher" 
-        args="0 0 0 1 0 0 0 'map' 'odom'" 
-        if="$(eval '\'$(var sim_odom)\' == \'true\'')">
-  </node>
-
-   <!-- Service to publish goal pose -->
-  <node pkg="crowd_nav" exec="pub_goal">
-  </node>
-
-  <!-- launch visualizations -->
-  <include file="$(find-pkg-share crowd_nav)/launch/visualizations.launch.xml" 
-           if="$(eval '\'$(var use_rviz)\' == \'true\'')"> 
     </include>
 
 </launch>

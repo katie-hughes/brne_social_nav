@@ -1,0 +1,43 @@
+<launch>
+
+  <arg name="lang" default="PYTHON" description="Choose whether python or C++ BRNE nodes are launched (Right now, only Python is valid). options: PYTHON, C++"/>
+  <arg name="sim_odom" default="true" description="Simulate cmd_vel->odom update"/>
+  <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
+  <arg name="use_rviz" default="true" description="Launch rviz"/>
+
+  <!-- Python algorithm node -->
+  <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\'')" 
+        args="--ros-args --log-level brne_nav:=$(var debug_level)">
+        <remap from="/odom" to="/zed/zed_node/odom"/>
+  </node>
+
+  <!-- C++ algorithm nodes -->
+  <node pkg="crowd_nav" exec="path_plan" if="$(eval '\'$(var lang)\' == \'C++\'')" 
+        args="--ros-args --log-level brne:=$(var debug_level)">
+    <param from="$(find-pkg-share crowd_nav)/config/brne.yaml"/>
+    <remap from="/odom" to="/zed/zed_node/odom"/>
+  </node>
+  <node pkg="crowd_nav" exec="controller" if="$(eval '\'$(var lang)\' == \'C++\'')">
+    <param from="$(find-pkg-share crowd_nav)/config/brne.yaml"/>
+  </node>
+
+  <!-- simulate cmd_vel to odom updates -->
+  <node pkg="crowd_nav" exec="sim_robot" if="$(eval '\'$(var sim_odom)\' == \'true\'')">
+    <remap from="/odom" to="/zed/zed_node/odom"/>
+  </node>
+  <!-- if we are simulating odom, we also need to add a dummy map frame for tf continuity -->
+  <node pkg="tf2_ros" exec="static_transform_publisher" 
+        args="0 0 0 1 0 0 0 'map' 'odom'" 
+        if="$(eval '\'$(var sim_odom)\' == \'true\'')">
+  </node>
+
+   <!-- Service to publish goal pose -->
+  <node pkg="crowd_nav" exec="pub_goal">
+  </node>
+
+  <!-- launch visualizations -->
+  <include file="$(find-pkg-share crowd_nav)/launch/visualizations.launch.xml" 
+           if="$(eval '\'$(var use_rviz)\' == \'true\'')"> 
+    </include>
+
+</launch>

@@ -163,6 +163,8 @@ class PathPlan : public rclcpp::Node
     rclcpp::Time last_ped_stamp;
     rclcpp::Time curr_ped_stamp;
 
+    std::vector<double> timer_len;
+
     void pub_walls(){
       auto now = this->get_clock()->now();
       auto height = 1.0;
@@ -399,13 +401,10 @@ class PathPlan : public rclcpp::Node
         // TODO last step is there is the safety mask calculation
         // the idea is to see if the distance to the closest pedestrian
         // in the robot samples at any point is less than the close stop threshold
-        // arma::mat closet_ped_x(n_samples, n_steps, 
-        //     arma::fill::value(selected_peds.pedestrians.at(closest_idxs.at(0)).pose.position.x));
-        // arma::mat closet_ped_y(n_samples, n_steps, 
-        //     arma::fill::value(selected_peds.pedestrians.at(closest_idxs.at(0)).pose.position.y));
+
         // auto closest_ped = selected_peds.pedestrians.at(closest_idxs.at(0));
-        // RCLCPP_INFO_STREAM(get_logger(), "robot xtraj  samples\n" << robot_xtraj_samples);
         // arma::mat d_robot_xtraj_ped = robot_xtraj_samples - closest_ped.pose.position.x;
+        // arma::mat d_robot_ytraj_ped = robot_ytraj_samples - closest_ped.pose.position.y;
 
         // BRNE OPTIMIZATION HERE
 
@@ -486,7 +485,12 @@ class PathPlan : public rclcpp::Node
 
       auto end = this->get_clock()->now();
       auto diff = end - start;
-      RCLCPP_DEBUG_STREAM(get_logger(), "Agents" << n_agents << " Timer Duration: " << diff.seconds() << " s");
+      timer_len.push_back(diff.seconds());
+      if (timer_len.size() >= 10){
+        auto dt_avg = arma::mean(arma::vec(timer_len));
+        RCLCPP_DEBUG_STREAM(get_logger(), "Agents: " << n_agents << " Avg timer: " << dt_avg << " s");
+        timer_len.clear();
+      }
     }
 };
 

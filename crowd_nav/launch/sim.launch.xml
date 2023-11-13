@@ -1,14 +1,12 @@
 <launch>
 
-  <arg name="lang" default="PYTHON" description="Choose whether python or C++ BRNE nodes are launched (Right now, only Python is valid). options: PYTHON, C++"/>
+  <arg name="lang" default="C++" description="Choose whether python or C++ BRNE nodes are launched. options: PYTHON, C++"/>
   <arg name="sim_ped" default="true" description="Simulate a static pedestrian"/>
 
   <include file="$(find-pkg-share crowd_nav)/launch/crowdnav.launch.xml">
       <arg name="sim_ped" value="$(var sim_ped)"/>
       <arg name="sim_odom" value="true"/>
       <arg name="launch_zed" value="false"/>
-      <arg name="onboard" value="false" />
-      <arg name="zed_localize" value="false" />
       <arg name="lang" value="$(var lang)" />
     </include>
 

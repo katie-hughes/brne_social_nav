@@ -151,6 +151,8 @@ class BrneNavRos(Node):
 
         self.brne_first_time = True
 
+        self.timer_len = []
+
         self.publish_walls()
 
     def publish_walls(self):
@@ -182,6 +184,8 @@ class BrneNavRos(Node):
         self.wall_pub.publish(ma)
 
     def brne_cb(self):
+
+        start_time = self.get_clock().now()
 
         ped_info_list = []
         dists2peds = []
@@ -215,8 +219,8 @@ class BrneNavRos(Node):
         num_peds_msg.data = int(num_agents-1)
         self.num_peds_pub.publish(num_peds_msg)
 
-        self.get_logger().debug(f'total # pedestrians: {self.num_peds}.')
-        self.get_logger().debug(f'brne # agents: {num_agents}.')
+        # self.get_logger().debug(f'total # pedestrians: {self.num_peds}.')
+        # self.get_logger().debug(f'brne # agents: {num_agents}.')
 
         # self.num_peds = 0
         if num_agents > 1:
@@ -226,7 +230,7 @@ class BrneNavRos(Node):
             x_pts = brne.mvn_sample_normal((num_agents-1) * self.num_samples, self.plan_steps, self.cov_Lmat)
             y_pts = brne.mvn_sample_normal((num_agents-1) * self.num_samples, self.plan_steps, self.cov_Lmat)
 
-            self.get_logger().info(f'X and y pts shape {x_pts.shape} {y_pts.shape}')
+            # self.get_logger().info(f'X and y pts shape {x_pts.shape} {y_pts.shape}')
             # ctrl space configuration here
             xtraj_samples = np.zeros((
                 num_agents * self.num_samples, self.plan_steps
@@ -244,7 +248,7 @@ class BrneNavRos(Node):
                 ped_xmean = ped_pos[0] + np.arange(self.plan_steps) * self.dt * ped_vel[0]
                 ped_ymean = ped_pos[1] + np.arange(self.plan_steps) * self.dt * ped_vel[1]
 
-                self.get_logger().info(f'shape into xtraj samples {(xtraj_samples[(i+1)*self.num_samples : (i+2)*self.num_samples]).shape}')
+                # self.get_logger().info(f'shape into xtraj samples {(xtraj_samples[(i+1)*self.num_samples : (i+2)*self.num_samples]).shape}')
 
                 xtraj_samples[(i+1)*self.num_samples : (i+2)*self.num_samples] = \
                     x_pts[i*self.num_samples : (i+1)*self.num_samples] * speed_factor + ped_xmean
@@ -303,15 +307,15 @@ class BrneNavRos(Node):
             robot_xtrajs = traj_essemble[:,0,:].T
             robot_ytrajs = traj_essemble[:,1,:].T
             robot_samples2ped = (robot_xtrajs - closest_ped_pos[0])**2 + (robot_ytrajs - closest_ped_pos[1])**2
-            for rs in robot_samples2ped:
-                self.get_logger().info(f'Robot samples2ped\n{rs}')
+            # for rs in robot_samples2ped:
+            #     self.get_logger().info(f'Robot samples2ped\n{rs}')
             robot_samples2ped = np.min(np.sqrt(robot_samples2ped), axis=1)
-            self.get_logger().info(f'Robot samples2ped\n{robot_samples2ped}')
+            # self.get_logger().info(f'Robot samples2ped\n{robot_samples2ped}')
             safety_mask = (robot_samples2ped > self.close_stop_threshold).astype(float)
-            self.get_logger().info(f'safety mask\n{safety_mask}')
+            # self.get_logger().info(f'safety mask\n{safety_mask}')
             safety_samples_percent = safety_mask.mean() * 100
-            self.get_logger().debug('percent of safe samples: {:.2f}%'.format(safety_samples_percent))
-            self.get_logger().debug('dist 2 ped: {:.2f} m'.format(closest_dist2ped))
+            # self.get_logger().debug('percent of safe samples: {:.2f}%'.format(safety_samples_percent))
+            # self.get_logger().debug('dist 2 ped: {:.2f} m'.format(closest_dist2ped))
 
             
             self.close_stop_flag = False
@@ -349,7 +353,7 @@ class BrneNavRos(Node):
             # generate optimal ctrl cmds and update buffer
             opt_cmds_1 = np.mean(ulist_essemble[:,:,0] * weights[0], axis=1)
             opt_cmds_2 = np.mean(ulist_essemble[:,:,1] * weights[0], axis=1)
-            self.get_logger().info(f"opt cmds 1 {opt_cmds_1}")
+            # self.get_logger().info(f"opt cmds 1 {opt_cmds_1}")
             self.cmds = np.array([opt_cmds_1, opt_cmds_2]).T
             self.cmds_traj = self.cmd_tracker.sim_traj(robot_state, self.cmds)
 
@@ -425,6 +429,13 @@ class BrneNavRos(Node):
             if self.robot_goal is None:
                 self.cmds = np.zeros((self.plan_steps, 2))
                 self.cmds_traj = np.tile(robot_state, reps=(self.plan_steps,1))
+
+        end_time = self.get_clock().now()
+        diff = (end_time - start_time).to_msg()
+        self.timer_len.append(diff.sec + diff.nanosec*1e-9)
+        if len(self.timer_len) >= 10:
+            self.get_logger().debug(f"agents {num_agents} avg time {np.mean(self.timer_len)}")
+            self.timer_len = []
 
     def publish_trajectory(self, publisher, xs, ys):
         p = Path()
@@ -551,7 +562,7 @@ class BrneNavRos(Node):
     def odom_cb(self, msg):
         # the odometry callback function updates the robot's current pose
         self.robot_pose = pose2d_transform(msg.pose.pose)
-        self.get_logger().debug(f'odom pose: {self.robot_pose}')
+        # self.get_logger().debug(f'odom pose: {self.robot_pose}')
         if self.robot_goal is None:
             return
 
@@ -586,7 +597,7 @@ class BrneNavRos(Node):
             cmd.angular.z = float(self.cmds[self.cmd_counter][1])
             self.cmd_counter += 1
 
-        self.get_logger().debug(f'current control: [{cmd.linear.x}, {cmd.angular.z}]')
+        # self.get_logger().debug(f'current control: [{cmd.linear.x}, {cmd.angular.z}]')
         self.cmd_vel_pub.publish(cmd)
 
 
