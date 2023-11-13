@@ -18,8 +18,8 @@
     R_lin: 1.0  # control penalty weight on linear velocity, the larger it is, the smoother the linear motion will be, but way point tracking accuracy might be compromised
     R_ang: 2.0  # control penalty weight on angular velocity, the larger it is, the smoother the rotation motion will be, but way point tracking accuracy might be compromised
     people_timeout: 5.0  # unit: seconds
-    y_min: -0.75  # lower bound of y coordinate (one side of corridor)
-    y_max: 0.75  # upper bound of y coordinate (the other side of corridor)
+    y_min: -0.65  # lower bound of y coordinate (one side of corridor)
+    y_max: 0.65  # upper bound of y coordinate (the other side of corridor)
     staircase_truncation: false  # saturate F2F velocity in a staircase manner
     people_timeout_off: true
     close_stop_threshold: 0.5  # threshold for safety mask, leading to estop
