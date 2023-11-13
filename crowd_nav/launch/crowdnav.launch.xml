@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="lang" default="C++" description="Choose whether python or C++ BRNE nodes are launched (Right now, only Python is valid). options: PYTHON, C++"/>
+  <arg name="lang" default="C++" description="Choose whether python or C++ BRNE nodes are launched. options: PYTHON, C++"/>
   <arg name="sim_odom" default="true" description="Simulate cmd_vel->odom update"/>
   <arg name="launch_zed" default="false" description="Launch the zed camera node"/>
   <arg name="onboard" default="true" description="Is ZED onboard the Go1? Options: true, false"/>
