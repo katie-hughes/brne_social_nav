@@ -405,6 +405,8 @@ class PathPlan : public rclcpp::Node
         // auto closest_ped = selected_peds.pedestrians.at(closest_idxs.at(0));
         // arma::mat d_robot_xtraj_ped = robot_xtraj_samples - closest_ped.pose.position.x;
         // arma::mat d_robot_ytraj_ped = robot_ytraj_samples - closest_ped.pose.position.y;
+        // arma::mat robot_samples_to_ped = arma::sqrt(arma::pow(d_robot_xtraj_ped, 2) + 
+        //                                             arma::pow(d_robot_ytraj_ped, 2));
 
         // BRNE OPTIMIZATION HERE
 

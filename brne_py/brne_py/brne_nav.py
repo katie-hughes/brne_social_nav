@@ -348,7 +348,10 @@ class BrneNavRos(Node):
 
             # apply safety mask
             weights[0] *= safety_mask
-            weights[0] /= np.mean(weights[0])
+            if (np.mean(weights[0]) != 0):
+                weights[0] /= np.mean(weights[0])
+            else:
+                self.get_logger().info("Stopping because of safety mask")
 
             # generate optimal ctrl cmds and update buffer
             opt_cmds_1 = np.mean(ulist_essemble[:,:,0] * weights[0], axis=1)
