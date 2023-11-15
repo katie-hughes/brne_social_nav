@@ -5,14 +5,11 @@ This is a ROS 2 package containing a python implementation of Bayes Rule Nash Eq
 
 ## ROS Nodes
 * `brne_nav`: Provides controls for the robot given odometry and pedestrian information.
-* `brne_nav_class`: attempt at a class based BRNE algorithm (not working)
 
 ## Python libraries
 * `brne.py`: Defines main BRNE functions
 * `traj_tracker.py`: Gets controls to follow a trajectory
-* `brne_class.py`: attempt at class based BRNE algorithm. Having trouble getting it to work with numba.
 
 ## Tests
 * `test_brne.py`: working through testing what happens in one iteration of BRNE in a non ROS context.
-* `test_brne.py`: working through testing what happens in one iteration of the BRNE class in a non ROS context.
-
+* `test_cpp_sampling`: Takes samples generated from my C++ library of the BRNE functions, and feeds it through the rest of the python algorithm for verification that the final results are the same.

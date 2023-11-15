@@ -68,12 +68,7 @@ add_executable(convert_zed_ped src/convert_zed_ped.cpp)
   zed_interfaces)
 
 
-add_executable(odom_passthrough src/odom_passthrough.cpp)
-  ament_target_dependencies(odom_passthrough
-  rclcpp
-  nav_msgs)
-
-install(TARGETS simulate_pedestrians show_pedestrians convert_zed_ped odom_passthrough 
+install(TARGETS simulate_pedestrians show_pedestrians convert_zed_ped
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY
