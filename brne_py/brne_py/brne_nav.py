@@ -65,8 +65,8 @@ class BrneNavRos(Node):
         self.declare_parameter('R_ang', 2.0)  # control penalty weight on angular velocity, the larger it is, the smoother the rotation motion will be, but way point tracking accuracy might be compromised
         self.declare_parameter('replan_freq', 10.0)  # unit: Hz
         self.declare_parameter('people_timeout', 5.0)  # unit: seconds
-        self.declare_parameter('corridor_y_min', -0.75)  # lower bound of y coordinate (one side of corridor)
-        self.declare_parameter('corridor_y_max', 0.75)  # upper bound of y coordinate (the other side of corridor)
+        self.declare_parameter('corridor_y_min', -0.65)  # lower bound of y coordinate (one side of corridor)
+        self.declare_parameter('corridor_y_max', 0.65)  # upper bound of y coordinate (the other side of corridor)
         self.declare_parameter('staircase_truncation', False)  # saturate F2F velocity in a staircase manner
         self.declare_parameter('people_timeout_off', True)
         self.declare_parameter('close_stop_threshold', 0.5)  # threshold for safety mask, leading to estop
@@ -307,10 +307,7 @@ class BrneNavRos(Node):
             robot_xtrajs = traj_essemble[:,0,:].T
             robot_ytrajs = traj_essemble[:,1,:].T
             robot_samples2ped = (robot_xtrajs - closest_ped_pos[0])**2 + (robot_ytrajs - closest_ped_pos[1])**2
-            # for rs in robot_samples2ped:
-            #     self.get_logger().info(f'Robot samples2ped\n{rs}')
             robot_samples2ped = np.min(np.sqrt(robot_samples2ped), axis=1)
-            # self.get_logger().info(f'Robot samples2ped\n{robot_samples2ped}')
             safety_mask = (robot_samples2ped > self.close_stop_threshold).astype(float)
             # self.get_logger().info(f'safety mask\n{safety_mask}')
             safety_samples_percent = safety_mask.mean() * 100

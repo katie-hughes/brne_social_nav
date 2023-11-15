@@ -59,6 +59,7 @@ class PathPlan : public rclcpp::Node
       declare_parameter("max_lin_vel", 1.0);
       declare_parameter("nominal_lin_vel", 1.0);
       declare_parameter("max_ang_vel", 1.0);
+      declare_parameter("close_stop_threshold", 1.0);
 
       // get parameters
       replan_freq = get_parameter("replan_freq").as_double();
@@ -79,6 +80,7 @@ class PathPlan : public rclcpp::Node
       max_ang_vel = get_parameter("max_ang_vel").as_double();
       max_lin_vel = get_parameter("max_lin_vel").as_double();
       nominal_lin_vel = get_parameter("nominal_lin_vel").as_double();
+      close_stop_threshold = get_parameter("close_stop_threshold").as_double();
 
       // print out parameters
       RCLCPP_INFO_STREAM(get_logger(), "Replan frequency: " << replan_freq << " Hz");
@@ -91,6 +93,7 @@ class PathPlan : public rclcpp::Node
       RCLCPP_INFO_STREAM(get_logger(), "Hallway: " << y_min << "->" << y_max);
       RCLCPP_INFO_STREAM(get_logger(), "People timeout after " << people_timeout << "s");
       RCLCPP_INFO_STREAM(get_logger(), "Goal Threshold " << goal_threshold << "m");
+      RCLCPP_INFO_STREAM(get_logger(), "Close stop threshold " << close_stop_threshold << "m");
       RCLCPP_INFO_STREAM(get_logger(), "Brne Activate Threshold " << brne_activate_threshold << "m");
       RCLCPP_INFO_STREAM(get_logger(), "Max Lin: " << max_lin_vel << " nominal lin: " << nominal_lin_vel << " max ang: " << max_ang_vel);
 
@@ -125,7 +128,7 @@ class PathPlan : public rclcpp::Node
   private:
     double replan_freq, kernel_a1, kernel_a2, cost_a1, cost_a2, cost_a3, y_min, y_max, dt, 
            max_ang_vel, max_lin_vel, people_timeout, goal_threshold, brne_activate_threshold,
-           nominal_lin_vel;
+           nominal_lin_vel, close_stop_threshold;
     int maximum_agents, n_samples, n_steps;
 
     int n_peds = 0;
@@ -398,21 +401,30 @@ class PathPlan : public rclcpp::Node
         ytraj_samples.submat(0, 0, n_samples-1, n_steps-1) = robot_ytraj_samples;
         // after this xtraj and ytraj samples are fully filled in!
 
-        // TODO last step is there is the safety mask calculation
+        // Safety mask calculation
         // the idea is to see if the distance to the closest pedestrian
-        // in the robot samples at any point is less than the close stop threshold
-
-        // auto closest_ped = selected_peds.pedestrians.at(closest_idxs.at(0));
-        // arma::mat d_robot_xtraj_ped = robot_xtraj_samples - closest_ped.pose.position.x;
-        // arma::mat d_robot_ytraj_ped = robot_ytraj_samples - closest_ped.pose.position.y;
-        // arma::mat robot_samples_to_ped = arma::sqrt(arma::pow(d_robot_xtraj_ped, 2) + 
-        //                                             arma::pow(d_robot_ytraj_ped, 2));
+        // in any of the robot samples is less than the close stop threshold
+        auto closest_ped = selected_peds.pedestrians.at(closest_idxs.at(0));
+        arma::mat robot_samples_to_ped = arma::sqrt(arma::pow(robot_xtraj_samples - 
+                                                              closest_ped.pose.position.x, 2) + 
+                                                    arma::pow(robot_ytraj_samples - 
+                                                              closest_ped.pose.position.y, 2));
+        auto closest_to_ped = arma::conv_to<arma::vec>::from(arma::min(robot_samples_to_ped, 1));
+        auto safety_mask = arma::conv_to<arma::rowvec>::from(closest_to_ped > close_stop_threshold);
+        // RCLCPP_INFO_STREAM(get_logger(), "percent of safe samples" << arma::mean(safety_mask) * 100.0);
 
         // BRNE OPTIMIZATION HERE
-
         auto weights = brne.brne_nav(xtraj_samples, ytraj_samples);
 
-        // TODO apply the safety mask to the weights
+        // apply the safety mask to the weights for the robot
+        RCLCPP_INFO_STREAM(get_logger(), "Before safety mask\n" <<  weights.row(0));
+        weights.row(0) %= safety_mask;
+        double mean_weights = arma::mean(weights.row(0));
+        if (mean_weights != 0){
+          weights.row(0) /= mean_weights;
+        } else {
+          RCLCPP_INFO_STREAM(get_logger(), "E-Stop from safety mask!");
+        }
 
         auto ulist = trajgen.get_ulist();
         auto ulist_lin = arma::conv_to<arma::rowvec>::from(ulist.col(0));
