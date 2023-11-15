@@ -417,7 +417,6 @@ class PathPlan : public rclcpp::Node
         auto weights = brne.brne_nav(xtraj_samples, ytraj_samples);
 
         // apply the safety mask to the weights for the robot
-        RCLCPP_INFO_STREAM(get_logger(), "Before safety mask\n" <<  weights.row(0));
         weights.row(0) %= safety_mask;
         double mean_weights = arma::mean(weights.row(0));
         if (mean_weights != 0){
