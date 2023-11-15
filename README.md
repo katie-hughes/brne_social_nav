@@ -1,7 +1,7 @@
 # unitree_crowd_nav
 Author: Katie Hughes
 
-This set of ROS 2 packages implements Bayes Rule Nash Equilibrium (BRNE) crowd navigation on a Unitree Go1 robot as well as pedestrian tracking using a ZED2i camera. These packages are designed to be run on an external computer that is connected to the Go1 via its wireless hotspot.
+This set of ROS 2 packages implements Bayes Rule Nash Equilibrium (BRNE) crowd navigation on a Unitree Go1 robot as well as pedestrian tracking using a ZED2i camera. 
 
 To set up the necessary packages:
 ```
@@ -13,59 +13,72 @@ vcs import --recursive < src/unitree_crowd_nav/crowdnav.repos
 colcon build
 ```
 
+Note: if you want to build this project to only test in simulation, or for use on an external computer that doesn't have/need the ZED SDK, you can build the project with the following command instead:
+```
+colcon build --packages-select crowd_nav brnelib crowd_nav_interfaces pedestrian_tracking brne_py zed_interfaces
+```
+# Running In Simulation
+
+To run the system in simulation, without being connected to the robot, run:
+```
+ros2 launch crowd_nav sim.launch.xml
+```
+This will bring up an RVIZ window which represents the scene. If you select a goal pose in RVIZ, you will see the robot move to it, avoiding the static pedestrian obstacles.
+
+This project contains both Python and C++ implementations of the BRNE algorithm code. The behavior should be identical. To specify which nodes get run, use the launch argument `lang:=C++` or `lang:=PYTHON` (Python is default for now).
+
+# Running On The Robot
+
 ## Connecting to the robot
 The Unitree Go1 has an onboard WLAN hotspot that is bridged to the ethernet connections between the boards. When the robot is powered on, check on your compter to see if the `UnitreeWifi` network is visible. In the event that it doesn't come up after a few minutes, the robot will need to be rebooted.
 
 Once you connect to the wifi, you will need to configure a static IP on your own computer that matches the subnet `192.168.123.xxx`, which is what the boards on the robot are also set up with. (I usually set my IP to `192.168.123.100`). Then, you should be able to directly ssh into and see ros topics from all boards inside the dog.
 
-## What needs to be running onboard the Go1 Xavier?
-### Processing `cmd_vel`
+If at any point you stop being able to ping these boards or your ssh session freezes, the hotspot has probably died. The only way around this issue that I have found is to turn the robot off for a few minutes, then power it back on. 
+
+## Go1 Xavier Setup
 The result of the BRNE algorithm is a motion plan represented as a series of `cmd_vel` commands. In order to process these commands, the [`unitree_nav`](https://github.com/ngmor/unitree_nav) package should be installed and running onboard the Go1 Xavier. To process the `cmd_vel`, run:
 ```
 ros2 launch unitree_nav control.launch.py use_rviz:=false
 ```
-### Creating `odom` updates
-The onboard Xavier can be responsible for providing odometry updates of the robot. If you need to generate a map of the area, run the following launchfile. You should only need to do this once provided the resulting map is good.
-```
-ros2 launch unitree_nav mapping.launch.py use_rviz:=false restart_map:=true localize_only:=false
-```
-While you are mapping, you can 
-Then to localize yourself within this map, run the following launchfile to get `/odom` updates.
-```
-ros2 launch unitree_nav mapping.launch.py use_rviz:=false restart_map:=false localize_only:=true
-```
 
-## What needs to be running on the external computer?
+## Using an onboard laptop
+If using a laptop strapped to the back of the robot, this computer will be responsible for pedestrian tracking with the ZED, odometry updates from the ZED, and the BRNE algorithm itself. To set all of this up, run 
 
-The external camera is responsible for detecting pedestrians as well as running the BRNE algorithm. 
-
-The core launchfile is below. You can see the various arguments with `--show-args`.
-```
-ros2 launch crowd_nav crowdnav.launch.xml
-```
-
-
-To do everything in simulation -- simulated odometry updates as well as simulated pedestrians -- run:
-```
-ros2 launch crowd_nav sim.launch.xml
-```
-
-For external ZED tracking but odometry updates from LIDAR run:
-```
-ros2 launch crowd_nav external.launch.xml
-```
-
-Finally, to do pedestrian tracking AND odometry updates with an onboard ZED, run:
 ```
 ros2 launch crowd_nav onboard.launch.xml
 ```
 
+Then, on an external computer, you will need to launch rviz to see the visualizations as well as to set the goal location. This can be done via
 
-## ROS 2 Packages
-- [brne_py](brne_py) - A python implementation of the BRNE algorithm
-- [crowd_nav_interfaces](crowd_nav_interfaces) - Defines some custom message types relevant to crowd navigation
-- [crowd_nav](crowd_nav) - Framework for a C++ implementation of the BRNE algorithm. Still in progress.
+```
+ros2 launch crowd_nav visualizations.launch.xml
+```
+
+## Using an onboard Jetson Orin Nano
+
+If using a Jetson Orin Nano mounted to the back of the robot, this board will be connected to the ZED and only responsible for the pedestrian tracking portion of the project. On this device, run:
+```
+ros2 launch pedestrian_tracking perception.launch.xml
+```
+
+The external computer will be responsible for the BRNE nodes and visualization, as the Orin Nano does not have enough CPU to handle this algorithm. On this device, run:
+```
+ros2 launch crowd_nav algorithm.launch.xml
+```
+
+# Dependencies
+
+This project depends on a recent version of armadillo for the C++ library. If you get errors while building, you will have to install the newest version from source. (TODO: insert link)
+
+The C++ implementation of the BRNE algorithm also depends on Catch2 for unit testing purposes. If this package is not found, you will also have to build it from source. (TODO: instert link)
+
+
+# ROS 2 Packages
+- [brne_py](brne_py) - A Python implemntation of the BNRE algorithm.
+- [crowd_nav_interfaces](crowd_nav_interfaces) - Defines some custom message types relevant to crowd navigation.
+- [crowd_nav](crowd_nav) - A ROS 2, C++ implementation of the BRNE algorithm, which also contains the core launchfiles.
 - [pedestrian_tracking](pedestrian_tracking) - Tracks, displays, and can simulate pedestrian locations.
 
-## Libraries
-- [brnelib](brnelib) - Framework for the BRNE algorithm in C++. Still in progress.
+# Libraries
+- [brnelib](brnelib) - Implementation of the BRNE algorithm in C++
