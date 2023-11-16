@@ -1,6 +1,7 @@
 <launch>
   <arg name="use_rviz" default="false" description="Launch rviz"/>
   <arg name="lang" default="PYTHON" description="Choose whether python or C++ BRNE nodes are launched. options: PYTHON, C++"/>
+  <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
 
   <include file="$(find-pkg-share crowd_nav)/launch/crowdnav.launch.xml">
       <arg name="sim_ped" value="false"/>
@@ -10,6 +11,7 @@
       <arg name="zed_localize" value="true" />
       <arg name="use_rviz" value="$(var use_rviz)" />
       <arg name="lang" value="$(var lang)" />
+      <arg name="debug_level" value="$(var debug_level)" />
     </include>
 
 </launch>
