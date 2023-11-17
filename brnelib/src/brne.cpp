@@ -171,8 +171,10 @@ namespace brne
       for (int j=0; j<n_samples; j++){
         auto c = 0.0;
         auto idx1 = all_pts.at(row.at(0), j);
+        // row.at(0) is just equal to i
         for (int k=0; k<n_agents-1; k++){
           for (int l=0; l<n_samples; l++){
+            // row.at(k+1) is 
             auto idx2 = all_pts.at(row.at(k+1), l);
             c += costs.at(idx1, idx2) * weights.at(row.at(k+1), l);
           }

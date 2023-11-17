@@ -1,30 +1,21 @@
 <launch>
 
   <arg name="lang" default="C++" description="Choose whether python or C++ BRNE nodes are launched. options: PYTHON, C++"/>
-  <arg name="sim_odom" default="true" description="Simulate cmd_vel->odom update"/>
-  <arg name="launch_zed" default="false" description="Launch the zed camera node"/>
-  <arg name="onboard" default="true" description="Is ZED onboard the Go1? Options: true, false"/>
-  <arg name="sim_ped" default="true" description="Simulate a static pedestrian"/>
+  <arg name="simulate" default="true" description="Simulate pedestrians and odometry"/>
   <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
-  <arg name="zed_localize" default="false" description="Update odom using the ZED"/>
   <arg name="use_rviz" default="true" description="Launch rviz"/>
-  <arg name="launch_perception" default="true" description="Launch perception related nodes"/>
-  <arg name="launch_algorithm" default="true" description="Launch algorithm related nodes"/>
 
   <!-- algorithm nodes -->
-  <include file="$(find-pkg-share crowd_nav)/launch/algorithm.launch.xml" if="$(eval '\'$(var launch_perception)\' == \'true\'')">
+  <include file="$(find-pkg-share crowd_nav)/launch/algorithm.launch.xml">
       <arg name="lang" value="$(var lang)"/>
-      <arg name="sim_odom" value="$(var sim_odom)"/>
+      <arg name="sim_odom" value="$(var simulate)"/>
       <arg name="debug_level" value="$(var debug_level)" />
       <arg name="use_rviz" value="$(var use_rviz)" />
     </include>
 
   <!-- perception nodes -->
-  <include file="$(find-pkg-share pedestrian_tracking)/launch/perception.launch.xml" if="$(eval '\'$(var launch_perception)\' == \'true\'')">
-      <arg name="launch_zed" value="$(var launch_zed)"/>
-      <arg name="simulate" value="$(var sim_ped)"/>
-      <arg name="onboard" value="$(var onboard)" />
-      <arg name="localize" value="$(var zed_localize)" />
-    </include>
+  <include file="$(find-pkg-share pedestrian_tracking)/launch/perception.launch.xml">
+      <arg name="simu_ped" value="$(var simulate)"/>
+  </include>
 
 </launch>

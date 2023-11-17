@@ -25,9 +25,11 @@ target_compile_features(brnelib PUBLIC cxx_std_17)
 # warnings are your friend!
 target_compile_options(brnelib PUBLIC -Wall -Wextra -Wpedantic)
 
-add_executable(frame_main src/frame_main.cpp)
-target_link_libraries(frame_main brnelib)
+add_executable(two_pedestrians src/two_pedestrians.cpp)
+target_link_libraries(two_pedestrians brnelib)
 
+add_executable(robot_test src/robot_test.cpp)
+target_link_libraries(robot_test brnelib)
 
 if(NOT CMAKE_CROSSCOMPILING)
 # stuff you don't want to be done when cross compiling
@@ -49,11 +51,12 @@ target_include_directories(brnelib
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
-target_compile_options(frame_main PUBLIC -Wall)
+target_compile_options(two_pedestrians PUBLIC -Wall)
+target_compile_options(robot_test PUBLIC -Wall)
 # install the include directories
 install(DIRECTORY include/brnelib DESTINATION include)
 # Install the targets and create a CMake Exported Target
-install(TARGETS frame_main brnelib EXPORT brnelib-targets)
+install(TARGETS two_pedestrians robot_test brnelib EXPORT brnelib-targets)
 # The project_name-targets now also needs to be exported.
 install(EXPORT brnelib-targets
         FILE brnelib-config.cmake

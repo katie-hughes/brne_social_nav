@@ -4,11 +4,7 @@
   <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
 
   <include file="$(find-pkg-share crowd_nav)/launch/crowdnav.launch.xml">
-      <arg name="sim_ped" value="false"/>
-      <arg name="sim_odom" value="false"/>
-      <arg name="launch_zed" value="true"/>
-      <arg name="onboard" value="true" />
-      <arg name="zed_localize" value="true" />
+      <arg name="simulate" value="false"/>
       <arg name="use_rviz" value="$(var use_rviz)" />
       <arg name="lang" value="$(var lang)" />
       <arg name="debug_level" value="$(var debug_level)" />

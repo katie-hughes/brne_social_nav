@@ -1,22 +1,18 @@
 <launch>
 
-    <arg name="launch_zed" default="true" description="Start the ZED camera. Options: true, false"/>
-    <arg name="onboard" default="true" description="Is ZED onboard the Go1? Options: true, false"/>
-    <arg name="localize" default="true" description="Publish odom updates from ZED. Options: true, false"/>
-    <arg name="simulate" default="false" description="Simulate a pedestrian. Options: true, false"/>
+    <arg name="sim_ped" default="false" description="Simulate pedestrian data. Options: true, false"/>
 
-    <!-- Start streaming from ZED -->
+    <!-- Start streaming from ZED if not simulating -->
     <include file="$(find-pkg-share pedestrian_tracking)/launch/zed.launch.xml" 
-             if="$(eval '\'$(var launch_zed)\' == \'true\'')">
-      <arg name="onboard" value="$(var onboard)" />
-      <arg name="localize" value="$(var localize)" />
+             if="$(eval '\'$(var simulate)\' == \'false\'')">
     </include>
 
-    <!-- launch simulated pedestrian node -->
-    <node pkg="pedestrian_tracking" exec="simulate_pedestrians" if="$(eval '\'$(var simulate)\' == \'true\'')">
+    <!-- launch simulated pedestrian node if simulating -->
+    <node pkg="pedestrian_tracking" exec="simulate_pedestrians" 
+          if="$(eval '\'$(var sim_ped)\' == \'true\'')">
     </node>
 
-    <!-- publish pedestrian markers -->
+    <!-- publish pedestrian markers regardless -->
     <node pkg="pedestrian_tracking" exec="show_pedestrians">
     </node>
 

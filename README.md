@@ -69,9 +69,17 @@ ros2 launch crowd_nav algorithm.launch.xml
 
 # Dependencies
 
-This project depends on a recent version of armadillo for the C++ library. If you get errors while building, you will have to install the newest version from source. (TODO: insert link)
+This project depends on a recent version of armadillo for the C++ library. If you get errors while building, you will have to install the newest version from source.
 
-The C++ implementation of the BRNE algorithm also depends on Catch2 for unit testing purposes. If this package is not found, you will also have to build it from source. (TODO: instert link)
+The C++ implementation of the BRNE algorithm also depends on Catch2 for unit testing purposes. If this package is not found, you will also have to build it from source.
+```
+git clone https://github.com/catchorg/Catch2.git
+cd Catch2
+mkdir build
+cd build
+cmake ..
+sudo make install
+```
 
 
 # ROS 2 Packages
