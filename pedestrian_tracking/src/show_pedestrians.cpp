@@ -46,7 +46,7 @@ class ShowPedestrians : public rclcpp::Node
         const auto ped = msg.pedestrians.at(i);
         visualization_msgs::msg::Marker m;
         m.header.stamp = current_time;
-        m.header.frame_id = "odom";
+        m.header.frame_id = "brne_odom";
         m.id = i; // ped.id;
         m.type = 3;       // cylinder
         m.action = 0;     // add/modify

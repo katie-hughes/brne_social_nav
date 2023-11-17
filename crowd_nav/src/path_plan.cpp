@@ -18,6 +18,8 @@
 #include "nav_msgs/msg/odometry.hpp"
 #include "builtin_interfaces/msg/time.hpp"
 #include "nav_msgs/msg/path.hpp"
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
 
 using namespace std::chrono_literals;
 
@@ -118,6 +120,9 @@ class PathPlan : public rclcpp::Node
       path_pub_ = create_publisher<nav_msgs::msg::Path>("/optimal_path", 10);
       walls_pub_ = create_publisher<visualization_msgs::msg::MarkerArray>("/walls", 10);
 
+      tf_buffer_= std::make_unique<tf2_ros::Buffer>(this->get_clock());
+      tf_listener_= std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+
       // Create a timer that executes at replan_freq
       std::chrono::milliseconds rate = (std::chrono::milliseconds) ((int)(1000. / replan_freq));
       timer_ = create_wall_timer(rate, std::bind(&PathPlan::timer_callback, this));
@@ -150,6 +155,9 @@ class PathPlan : public rclcpp::Node
     nav_msgs::msg::Path optimal_path;
 
     RobotPose robot_pose;
+
+    std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
+    std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
     rclcpp::Subscription<crowd_nav_interfaces::msg::PedestrianArray>::SharedPtr pedestrian_sub_;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr goal_sub_;
@@ -207,18 +215,18 @@ class PathPlan : public rclcpp::Node
 
     void odom_cb(const nav_msgs::msg::Odometry & msg)
     {
-      // get the angle from the quaternion
-      tf2::Quaternion q(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y,
-                        msg.pose.pose.orientation.z, msg.pose.pose.orientation.w);
-      tf2::Matrix3x3 m(q);
-      double roll, pitch, yaw;
-      m.getRPY(roll, pitch, yaw);
-      robot_pose.x = msg.pose.pose.position.x;
-      robot_pose.y = msg.pose.pose.position.y;
-      robot_pose.theta = yaw;
-      if (goal_set){
-        check_goal();
-      }
+      // // get the angle from the quaternion
+      // tf2::Quaternion q(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y,
+      //                   msg.pose.pose.orientation.z, msg.pose.pose.orientation.w);
+      // tf2::Matrix3x3 m(q);
+      // double roll, pitch, yaw;
+      // m.getRPY(roll, pitch, yaw);
+      // robot_pose.x = msg.pose.pose.position.x;
+      // robot_pose.y = msg.pose.pose.position.y;
+      // robot_pose.theta = yaw;
+      // if (goal_set){
+      //   check_goal();
+      // }
     }
 
     void check_goal(){
@@ -229,8 +237,39 @@ class PathPlan : public rclcpp::Node
       }
     }
 
+    void update_robot_position(){
+      // update robot position by reading the tf
+      geometry_msgs::msg::TransformStamped T_bodom_brne;
+      try {
+        T_bodom_brne = tf_buffer_->lookupTransform(
+          "brne_odom", "brne",
+          tf2::TimePointZero);
+        // set robot pose 
+        // get the angle from the quaternion
+        tf2::Quaternion q(T_bodom_brne.transform.rotation.x, 
+                          T_bodom_brne.transform.rotation.y, 
+                          T_bodom_brne.transform.rotation.z, 
+                          T_bodom_brne.transform.rotation.w);
+        tf2::Matrix3x3 m(q);
+        double roll, pitch, yaw;
+        m.getRPY(roll, pitch, yaw);
+        robot_pose.x = T_bodom_brne.transform.translation.x;
+        robot_pose.y = T_bodom_brne.transform.translation.y;
+        robot_pose.theta = yaw;
+        RCLCPP_INFO_STREAM(get_logger(),  "X: " << robot_pose.x << 
+                                         " Y: " << robot_pose.y << 
+                                         " Theta: " << robot_pose.theta);
+        if (goal_set){
+          check_goal();
+      }
+      } catch (const tf2::TransformException & ex) {
+        RCLCPP_INFO_STREAM(get_logger(), "Couldn't get BRNE position");
+      }
+    }
+
     void pedestrians_cb(const crowd_nav_interfaces::msg::PedestrianArray & msg)
     {
+      update_robot_position();
       curr_ped_stamp = this->get_clock()->now();
       // save values from previous iteration
       prev_ped_array = ped_array;

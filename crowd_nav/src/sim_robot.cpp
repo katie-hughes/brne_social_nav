@@ -16,6 +16,8 @@
 #include "nav_msgs/msg/odometry.hpp"
 #include "tf2_ros/transform_broadcaster.h"
 #include "tf2/LinearMath/Quaternion.h"
+#include "tf2_ros/transform_listener.h"
+#include "tf2_ros/buffer.h"
 
 using namespace std::chrono_literals;
 
@@ -39,6 +41,8 @@ class SimRobot : public rclcpp::Node
 
       odom_pub_ = create_publisher<nav_msgs::msg::Odometry>("odom", 10);
 
+      tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+
       timer_ = create_wall_timer(
       rate, std::bind(&SimRobot::timer_callback, this));
 
@@ -51,9 +55,12 @@ class SimRobot : public rclcpp::Node
   private:
     double rate_hz;
     nav_msgs::msg::Odometry odom;
+    geometry_msgs::msg::TransformStamped t;
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
+
+    std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
     rclcpp::Time last_time;
     rclcpp::Time current_time;
@@ -77,6 +84,7 @@ class SimRobot : public rclcpp::Node
         } else if (theta <= -pi){
           theta += 2*pi;
         }
+        // update odom message
         odom.header.stamp = current_time;
         odom.pose.pose.position.x += (vx*cos(theta))*dt*1e-9;
         odom.pose.pose.position.y += (vx*sin(theta))*dt*1e-9;
@@ -86,6 +94,17 @@ class SimRobot : public rclcpp::Node
         odom.pose.pose.orientation.y = q.y();
         odom.pose.pose.orientation.z = q.z();
         odom.pose.pose.orientation.w = q.w();
+        // update tf
+        t.header.stamp = current_time;
+        t.header.frame_id = "brne_odom";
+        t.child_frame_id = "brne";
+        t.transform.translation.x += (vx*cos(theta))*dt*1e-9;
+        t.transform.translation.y += (vx*sin(theta))*dt*1e-9;
+        t.transform.rotation.x = q.x();
+        t.transform.rotation.y = q.y();
+        t.transform.rotation.z = q.z();
+        t.transform.rotation.w = q.w();
+        tf_broadcaster_->sendTransform(t);
       } else {
         first_time = false;
       }

@@ -13,9 +13,21 @@
           if="$(eval '\'$(var sim_ped)\' == \'false\'')">
     </node>
 
-    <!-- Add transform from odom to base link of the robot. offset is only in x direction -->
+    <!-- Add transform between odom to brne_odom -->
     <node pkg="tf2_ros" exec="static_transform_publisher" 
           args="--frame-id odom
+              --child-frame-id brne_odom
+              --x $(var zed_x_offset)
+              --y 0
+              --z 0
+              --roll 0
+              --pitch 0
+              --yaw 0" >
+    </node>
+
+    <!-- Add transform from odom to base link of the robot -->
+    <node pkg="tf2_ros" exec="static_transform_publisher" 
+          args="--frame-id zed_camera_link
               --child-frame-id base_link
               --x $(var zed_x_offset)
               --y 0
@@ -26,16 +38,30 @@
           if="$(eval '\'$(var sim_ped)\' == \'false\'')">
     </node>
 
-    <!-- Create the BRNE frame as a child of odom, at same location as base_link -->
+    <!-- Add transform from zed cam link to brne frame (current location of robot) -->
     <node pkg="tf2_ros" exec="static_transform_publisher" 
-          args="--frame-id odom
+          args="--frame-id zed_camera_link
               --child-frame-id brne
               --x $(var zed_x_offset)
               --y 0
               --z 0
               --roll 0
               --pitch 0
-              --yaw 0" >
+              --yaw 0" 
+          if="$(eval '\'$(var sim_ped)\' == \'false\'')">
+    </node>
+
+    <!-- If simulating, then there is no zed cam link. So brne frame connects to brne odom -->
+    <node pkg="tf2_ros" exec="static_transform_publisher" 
+          args="--frame-id brne_odom
+              --child-frame-id brne
+              --x 0
+              --y 0
+              --z 0
+              --roll 0
+              --pitch 0
+              --yaw 0" 
+          if="$(eval '\'$(var sim_ped)\' == \'true\'')">
     </node>
 
     <!-- launch simulated pedestrian node if simulating -->

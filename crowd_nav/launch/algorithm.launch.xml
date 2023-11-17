@@ -25,11 +25,6 @@
   <node pkg="crowd_nav" exec="sim_robot" if="$(eval '\'$(var sim_odom)\' == \'true\'')">
     <remap from="/odom" to="/zed/zed_node/odom"/>
   </node>
-  <!-- if we are simulating odom, we also need to add a dummy map frame for tf continuity -->
-  <node pkg="tf2_ros" exec="static_transform_publisher" 
-        args="0 0 0 1 0 0 0 'map' 'odom'" 
-        if="$(eval '\'$(var sim_odom)\' == \'true\'')">
-  </node>
 
    <!-- Service to publish goal pose -->
   <node pkg="crowd_nav" exec="pub_goal">

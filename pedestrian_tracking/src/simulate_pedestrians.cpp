@@ -28,13 +28,11 @@ class SimulatePedestrians : public rclcpp::Node
       declare_parameter("rate", 2., pd);
 
       rate_hz = get_parameter("rate").as_double();
-      RCLCPP_INFO_STREAM(get_logger(), "Rate is " << ((int)(1000. / rate_hz)) << "ms");
       std::chrono::milliseconds rate = (std::chrono::milliseconds) ((int)(1000. / rate_hz));
 
       pedestrian_pub_ = create_publisher<crowd_nav_interfaces::msg::PedestrianArray>("pedestrians", 10);
 
-      timer_ = create_wall_timer(
-      rate, std::bind(&SimulatePedestrians::timer_callback, this));
+      timer_ = create_wall_timer(rate, std::bind(&SimulatePedestrians::timer_callback, this));
     }
 
   private:
