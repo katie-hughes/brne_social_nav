@@ -16,6 +16,7 @@
 #include "tf2_ros/buffer.h"
 #include "zed_interfaces/msg/objects_stamped.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
+#include "nav_msgs/msg/odometry.hpp"
 
 
 using namespace std::chrono_literals;
@@ -24,7 +25,7 @@ class ConvertPeds : public rclcpp::Node
 {
   public:
     ConvertPeds()
-    : Node("convert_peds")
+    : Node("convert_zed")
     {
       zed_sub_ = create_subscription<zed_interfaces::msg::ObjectsStamped>(
         "zed/zed_node/obj_det/objects", 10, std::bind(&ConvertPeds::zed_cb, this, std::placeholders::_1));
@@ -36,6 +37,16 @@ class ConvertPeds : public rclcpp::Node
 
       tf_buffer_= std::make_unique<tf2_ros::Buffer>(this->get_clock());
       tf_listener_= std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+
+      brne_odom_pub_ = create_publisher<nav_msgs::msg::Odometry>("brne_odom", 10);
+
+      double rate_hz = 50;
+      std::chrono::milliseconds rate = (std::chrono::milliseconds) ((int)(1000. / rate_hz));
+
+      timer_ = create_wall_timer(rate, std::bind(&ConvertPeds::timer_callback, this));
+
+      brne_odom.header.frame_id = "brne_odom";
+      brne_odom.child_frame_id = "brne";
     }
 
   private:
@@ -49,6 +60,9 @@ class ConvertPeds : public rclcpp::Node
 
     rclcpp::Subscription<zed_interfaces::msg::ObjectsStamped>::SharedPtr zed_sub_;
     rclcpp::Publisher<crowd_nav_interfaces::msg::PedestrianArray>::SharedPtr pedestrian_pub_;
+
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr brne_odom_pub_;
+    nav_msgs::msg::Odometry brne_odom;
 
     void zed_cb(const zed_interfaces::msg::ObjectsStamped & msg)
     {
@@ -87,6 +101,28 @@ class ConvertPeds : public rclcpp::Node
         }
       }
       pedestrian_pub_->publish(pa);
+    }
+
+    void timer_callback()
+    {
+      geometry_msgs::msg::TransformStamped T_bodom_brne;
+        try {
+          T_bodom_brne = tf_buffer_->lookupTransform(
+            "brne_odom", "brne",
+            tf2::TimePointZero);
+          brne_odom.header.stamp = this->get_clock()->now();
+          brne_odom.pose.pose.position.x = T_bodom_brne.transform.translation.x;
+          brne_odom.pose.pose.position.y = T_bodom_brne.transform.translation.y;
+          brne_odom.pose.pose.position.z = T_bodom_brne.transform.translation.z;
+          brne_odom.pose.pose.orientation.w = T_bodom_brne.transform.rotation.w;
+          brne_odom.pose.pose.orientation.x = T_bodom_brne.transform.rotation.x;
+          brne_odom.pose.pose.orientation.y = T_bodom_brne.transform.rotation.y;
+          brne_odom.pose.pose.orientation.z = T_bodom_brne.transform.rotation.z;
+          brne_odom_pub_->publish(brne_odom);
+        } catch (const tf2::TransformException & ex) {
+          // RCLCPP_INFO_STREAM(get_logger(), "Could not transform brne_odom -> brne");
+          return;
+        }
     }
 };
 

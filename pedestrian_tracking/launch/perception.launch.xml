@@ -9,7 +9,7 @@
     </include>
 
     <!-- convert zed object message to pedestrian type & transform frames -->
-    <node pkg="pedestrian_tracking" exec="convert_zed_ped"
+    <node pkg="pedestrian_tracking" exec="convert_zed"
           if="$(eval '\'$(var simulate)\' == \'false\'')">
     </node>
 

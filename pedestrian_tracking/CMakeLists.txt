@@ -52,8 +52,8 @@ add_executable(show_pedestrians src/show_pedestrians.cpp)
   image_geometry
   crowd_nav_interfaces)
 
-add_executable(convert_zed_ped src/convert_zed_ped.cpp)
-  ament_target_dependencies(convert_zed_ped
+add_executable(convert_zed src/convert_zed.cpp)
+  ament_target_dependencies(convert_zed
   rclcpp
   std_msgs
   std_srvs
@@ -82,7 +82,7 @@ add_executable(simulate_odom src/simulate_odom.cpp)
   image_geometry
   crowd_nav_interfaces)
 
-install(TARGETS simulate_pedestrians show_pedestrians convert_zed_ped simulate_odom
+install(TARGETS simulate_pedestrians show_pedestrians convert_zed simulate_odom
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY
