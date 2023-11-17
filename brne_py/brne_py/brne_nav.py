@@ -109,7 +109,7 @@ class BrneNavRos(Node):
         self.ped_sub = self.create_subscription(PedestrianArray,
                                                 '/pedestrians', self.ped_cb, 1,
                                                 callback_group=parallel_cb_group)
-        self.odom_sub = self.create_subscription(Odometry, "/odom", self.odom_cb, 1,
+        self.odom_sub = self.create_subscription(Odometry, "/brne_odom", self.odom_cb, 1,
                                                  callback_group=parallel_cb_group)
         self.goal_sub = self.create_subscription(PoseStamped, 'goal_pose', self.goal_cb, 1,
                                                  callback_group=parallel_cb_group)
@@ -165,7 +165,7 @@ class BrneNavRos(Node):
         ma = MarkerArray()
         for i in range(2):
             wall = Marker()
-            wall.header.frame_id = "odom"
+            wall.header.frame_id = "brne_odom"
             wall.header.stamp = now
             wall.id = i
             wall.type = 1 # cube
@@ -439,7 +439,7 @@ class BrneNavRos(Node):
 
     def publish_trajectory(self, publisher, xs, ys):
         p = Path()
-        p.header.frame_id = 'odom'
+        p.header.frame_id = 'brne_odom'
 
         for x, y in zip(xs, ys):
             pose = PoseStamped()
@@ -455,7 +455,7 @@ class BrneNavRos(Node):
         ma = MarkerArray()
         for xs, ys in zip(xsa, ysa):
             m = Marker()
-            m.header.frame_id = 'odom'
+            m.header.frame_id = 'brne_odom'
             m.ns = 'ped_traj'
             m.id = len(ma.markers)
             m.type = Marker.LINE_STRIP
