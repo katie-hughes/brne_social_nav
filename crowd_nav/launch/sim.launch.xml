@@ -7,7 +7,7 @@
       <arg name="simulate" value="true"/>
       <arg name="lang" value="$(var lang)"/>
       <arg name="debug_level" value="$(var debug_level)"/>
-      <arg name="use_rviz" value="$(var true)"/>
+      <arg name="use_rviz" value="true"/>
     </include>
 
 </launch>

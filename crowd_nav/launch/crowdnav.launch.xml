@@ -15,7 +15,7 @@
 
   <!-- perception nodes -->
   <include file="$(find-pkg-share pedestrian_tracking)/launch/perception.launch.xml">
-      <arg name="simu_ped" value="$(var simulate)"/>
+      <arg name="sim_ped" value="$(var simulate)"/>
   </include>
 
 </launch>
