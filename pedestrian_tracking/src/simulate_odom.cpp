@@ -41,6 +41,8 @@ class SimRobot : public rclcpp::Node
 
       odom_pub_ = create_publisher<nav_msgs::msg::Odometry>("odom", 10);
 
+      brne_odom_pub_ = create_publisher<nav_msgs::msg::Odometry>("brne_odom", 10);
+
       tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 
       timer_ = create_wall_timer(
@@ -49,16 +51,21 @@ class SimRobot : public rclcpp::Node
       odom.header.frame_id = "odom";
       odom.child_frame_id = "base_link";
 
+      brne_odom.header.frame_id = "brne_odom";
+      brne_odom.child_frame_id = "brne";
+
       first_time = true;
     }
 
   private:
     double rate_hz;
     nav_msgs::msg::Odometry odom;
+    nav_msgs::msg::Odometry brne_odom;
     geometry_msgs::msg::TransformStamped t;
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr brne_odom_pub_;
 
     std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
@@ -84,17 +91,25 @@ class SimRobot : public rclcpp::Node
         } else if (theta <= -pi){
           theta += 2*pi;
         }
+        tf2::Quaternion q;
+        q.setRPY(0, 0, theta);
         // update odom message
         odom.header.stamp = current_time;
         odom.pose.pose.position.x += (vx*cos(theta))*dt*1e-9;
         odom.pose.pose.position.y += (vx*sin(theta))*dt*1e-9;
-        tf2::Quaternion q;
-        q.setRPY(0, 0, theta);
         odom.pose.pose.orientation.x = q.x();
         odom.pose.pose.orientation.y = q.y();
         odom.pose.pose.orientation.z = q.z();
         odom.pose.pose.orientation.w = q.w();
-        // update tf
+        // update brne_odom message
+        brne_odom.header.stamp = current_time;
+        brne_odom.pose.pose.position.x += (vx*cos(theta))*dt*1e-9;
+        brne_odom.pose.pose.position.y += (vx*sin(theta))*dt*1e-9;
+        brne_odom.pose.pose.orientation.x = q.x();
+        brne_odom.pose.pose.orientation.y = q.y();
+        brne_odom.pose.pose.orientation.z = q.z();
+        brne_odom.pose.pose.orientation.w = q.w();
+        // update brne_odom -> brne tf
         t.header.stamp = current_time;
         t.header.frame_id = "brne_odom";
         t.child_frame_id = "brne";
@@ -113,7 +128,8 @@ class SimRobot : public rclcpp::Node
 
     void timer_callback()
     {
-      odom_pub_->publish(odom);
+      // odom_pub_->publish(odom);
+      brne_odom_pub_->publish(brne_odom);
     }
 };
 

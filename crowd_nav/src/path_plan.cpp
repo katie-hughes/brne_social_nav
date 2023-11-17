@@ -115,7 +115,7 @@ class PathPlan : public rclcpp::Node
       goal_sub_ = create_subscription<geometry_msgs::msg::PoseStamped>(
         "goal_pose", 10, std::bind(&PathPlan::goal_cb, this, std::placeholders::_1));
       odom_sub_ = create_subscription<nav_msgs::msg::Odometry>(
-        "odom", 10, std::bind(&PathPlan::odom_cb, this, std::placeholders::_1));
+        "brne_odom", 10, std::bind(&PathPlan::odom_cb, this, std::placeholders::_1));
       cmd_buf_pub_ = create_publisher<crowd_nav_interfaces::msg::TwistArray>("cmd_buf", 10);
       path_pub_ = create_publisher<nav_msgs::msg::Path>("/optimal_path", 10);
       walls_pub_ = create_publisher<visualization_msgs::msg::MarkerArray>("/walls", 10);
@@ -127,7 +127,7 @@ class PathPlan : public rclcpp::Node
       std::chrono::milliseconds rate = (std::chrono::milliseconds) ((int)(1000. / replan_freq));
       timer_ = create_wall_timer(rate, std::bind(&PathPlan::timer_callback, this));
 
-      optimal_path.header.frame_id = "odom";
+      optimal_path.header.frame_id = "brne_odom";
     }
 
   private:
@@ -185,7 +185,7 @@ class PathPlan : public rclcpp::Node
       visualization_msgs::msg::MarkerArray ma;
       for (int i=0; i<2; i++){
         visualization_msgs::msg::Marker wall;
-        wall.header.frame_id = "odom";
+        wall.header.frame_id = "brne_odom";
         wall.header.stamp = now;
         wall.id = i;
         wall.type = 1; // cube
@@ -215,18 +215,18 @@ class PathPlan : public rclcpp::Node
 
     void odom_cb(const nav_msgs::msg::Odometry & msg)
     {
-      // // get the angle from the quaternion
-      // tf2::Quaternion q(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y,
-      //                   msg.pose.pose.orientation.z, msg.pose.pose.orientation.w);
-      // tf2::Matrix3x3 m(q);
-      // double roll, pitch, yaw;
-      // m.getRPY(roll, pitch, yaw);
-      // robot_pose.x = msg.pose.pose.position.x;
-      // robot_pose.y = msg.pose.pose.position.y;
-      // robot_pose.theta = yaw;
-      // if (goal_set){
-      //   check_goal();
-      // }
+      // get the angle from the quaternion
+      tf2::Quaternion q(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y,
+                        msg.pose.pose.orientation.z, msg.pose.pose.orientation.w);
+      tf2::Matrix3x3 m(q);
+      double roll, pitch, yaw;
+      m.getRPY(roll, pitch, yaw);
+      robot_pose.x = msg.pose.pose.position.x;
+      robot_pose.y = msg.pose.pose.position.y;
+      robot_pose.theta = yaw;
+      if (goal_set){
+        check_goal();
+      }
     }
 
     void check_goal(){
@@ -269,7 +269,7 @@ class PathPlan : public rclcpp::Node
 
     void pedestrians_cb(const crowd_nav_interfaces::msg::PedestrianArray & msg)
     {
-      update_robot_position();
+      // update_robot_position();
       curr_ped_stamp = this->get_clock()->now();
       // save values from previous iteration
       prev_ped_array = ped_array;
@@ -492,7 +492,7 @@ class PathPlan : public rclcpp::Node
         for (int i=0; i<n_steps; i++){
           geometry_msgs::msg::PoseStamped ps;
           ps.header.stamp = current_timestamp;
-          ps.header.frame_id = "odom";
+          ps.header.frame_id = "brne_odom";
           ps.pose.position.x = opt_traj.at(i,0);
           ps.pose.position.y = opt_traj.at(i,1);
           optimal_path.poses.push_back(ps);
@@ -518,7 +518,7 @@ class PathPlan : public rclcpp::Node
         for (int i=0; i<n_steps; i++){
           geometry_msgs::msg::PoseStamped ps;
           ps.header.stamp = current_timestamp;
-          ps.header.frame_id = "odom";
+          ps.header.frame_id = "brne_odom";
           ps.pose.position.x = opt_traj.at(i,0);
           ps.pose.position.y = opt_traj.at(i,1);
           optimal_path.poses.push_back(ps);
