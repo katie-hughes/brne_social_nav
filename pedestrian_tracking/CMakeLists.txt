@@ -68,7 +68,21 @@ add_executable(convert_zed_ped src/convert_zed_ped.cpp)
   zed_interfaces)
 
 
-install(TARGETS simulate_pedestrians show_pedestrians convert_zed_ped
+add_executable(simulate_odom src/simulate_odom.cpp)
+  ament_target_dependencies(simulate_odom
+  rclcpp
+  std_msgs
+  std_srvs
+  tf2
+  tf2_ros
+  geometry_msgs
+  visualization_msgs
+  nav_msgs
+  sensor_msgs
+  image_geometry
+  crowd_nav_interfaces)
+
+install(TARGETS simulate_pedestrians show_pedestrians convert_zed_ped simulate_odom
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY

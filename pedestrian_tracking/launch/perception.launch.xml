@@ -1,16 +1,16 @@
 <launch>
 
     <arg name="zed_x_offset" default="-0.2" description="Offset from base link of robot to zed camera (m)"/>
-    <arg name="sim_ped" default="false" description="Simulate pedestrian data. Options: true, false"/>
+    <arg name="simulate" default="false" description="Simulate pedestrian/odom data. Options: true, false"/>
 
     <!-- Start streaming from ZED if not simulating -->
     <include file="$(find-pkg-share pedestrian_tracking)/launch/zed.launch.xml" 
-             if="$(eval '\'$(var sim_ped)\' == \'false\'')">
+             if="$(eval '\'$(var simulate)\' == \'false\'')">
     </include>
 
     <!-- convert zed object message to pedestrian type & transform frames -->
     <node pkg="pedestrian_tracking" exec="convert_zed_ped"
-          if="$(eval '\'$(var sim_ped)\' == \'false\'')">
+          if="$(eval '\'$(var simulate)\' == \'false\'')">
     </node>
 
     <!-- Add transform between odom to brne_odom -->
@@ -35,7 +35,7 @@
               --roll 0
               --pitch 0
               --yaw 0" 
-          if="$(eval '\'$(var sim_ped)\' == \'false\'')">
+          if="$(eval '\'$(var simulate)\' == \'false\'')">
     </node>
 
     <!-- Add transform from zed cam link to brne frame (current location of robot) -->
@@ -48,7 +48,7 @@
               --roll 0
               --pitch 0
               --yaw 0" 
-          if="$(eval '\'$(var sim_ped)\' == \'false\'')">
+          if="$(eval '\'$(var simulate)\' == \'false\'')">
     </node>
 
     <!-- If simulating, then there is no zed cam link. So brne frame connects to brne odom -->
@@ -61,12 +61,18 @@
               --roll 0
               --pitch 0
               --yaw 0" 
-          if="$(eval '\'$(var sim_ped)\' == \'true\'')">
+          if="$(eval '\'$(var simulate)\' == \'true\'')">
     </node>
 
     <!-- launch simulated pedestrian node if simulating -->
     <node pkg="pedestrian_tracking" exec="simulate_pedestrians" 
-          if="$(eval '\'$(var sim_ped)\' == \'true\'')">
+          if="$(eval '\'$(var simulate)\' == \'true\'')">
+    </node>
+
+    <!-- simulate cmd_vel to odom updates -->
+    <node pkg="pedestrian_tracking" exec="simulate_odom" 
+          if="$(eval '\'$(var simulate)\' == \'true\'')">
+        <remap from="/odom" to="/zed/zed_node/odom"/>
     </node>
 
     <!-- publish pedestrian markers regardless -->

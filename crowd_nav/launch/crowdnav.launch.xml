@@ -8,14 +8,13 @@
   <!-- algorithm nodes -->
   <include file="$(find-pkg-share crowd_nav)/launch/algorithm.launch.xml">
       <arg name="lang" value="$(var lang)"/>
-      <arg name="sim_odom" value="$(var simulate)"/>
       <arg name="debug_level" value="$(var debug_level)" />
       <arg name="use_rviz" value="$(var use_rviz)" />
     </include>
 
   <!-- perception nodes -->
   <include file="$(find-pkg-share pedestrian_tracking)/launch/perception.launch.xml">
-      <arg name="sim_ped" value="$(var simulate)"/>
+      <arg name="simulate" value="$(var simulate)"/>
   </include>
 
 </launch>

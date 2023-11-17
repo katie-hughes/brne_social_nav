@@ -1,7 +1,6 @@
 <launch>
 
   <arg name="lang" default="PYTHON" description="Choose whether python or C++ BRNE nodes are launched (Right now, only Python is valid). options: PYTHON, C++"/>
-  <arg name="sim_odom" default="true" description="Simulate cmd_vel->odom update"/>
   <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
   <arg name="use_rviz" default="true" description="Launch rviz"/>
 
@@ -19,11 +18,6 @@
   </node>
   <node pkg="crowd_nav" exec="controller" if="$(eval '\'$(var lang)\' == \'C++\'')">
     <param from="$(find-pkg-share crowd_nav)/config/brne.yaml"/>
-  </node>
-
-  <!-- simulate cmd_vel to odom updates -->
-  <node pkg="crowd_nav" exec="sim_robot" if="$(eval '\'$(var sim_odom)\' == \'true\'')">
-    <remap from="/odom" to="/zed/zed_node/odom"/>
   </node>
 
    <!-- Service to publish goal pose -->
