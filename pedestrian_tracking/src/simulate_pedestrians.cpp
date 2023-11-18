@@ -44,40 +44,20 @@ class SimulatePedestrians : public rclcpp::Node
 
     void timer_callback()
     {
-      int ped_counter = 0;
       crowd_nav_interfaces::msg::PedestrianArray peds;
       const auto current_time = this->get_clock()->now();
-      if (ped_counter < n_peds){
-        // create a fake pedestrian with an id of 1
-        crowd_nav_interfaces::msg::Pedestrian ped1;
-        ped1.header.stamp = current_time;
-        ped1.id = 1;
-        ped1.pose.position.x = 1.0;
-        ped1.pose.position.y = 0.0;
-        peds.pedestrians.push_back(ped1);
-        ped_counter++;
-      }
-      
-      if (ped_counter < n_peds){
-        // create a fake pedestrian with an id of 2
-        crowd_nav_interfaces::msg::Pedestrian ped2;
-        ped2.header.stamp = current_time;
-        ped2.id = 2;
-        ped2.pose.position.x = 2.0;
-        ped2.pose.position.y = -0.5;
-        peds.pedestrians.push_back(ped2);
-        ped_counter++;
-      }
-      
-      if (ped_counter < n_peds){
-        // ped 3
-        crowd_nav_interfaces::msg::Pedestrian ped3;
-        ped3.header.stamp = current_time;
-        ped3.id = 3;
-        ped3.pose.position.x = 2.5;
-        ped3.pose.position.y = 0.5;
-        peds.pedestrians.push_back(ped3);
-        ped_counter++;
+
+      int max_peds = 3;
+      std::vector<double> pedx{1.0,  2.0,  2.5};
+      std::vector<double> pedy{0.0, -0.5,  0.5};
+
+      for (int ped_counter = 0; ((ped_counter < n_peds) && (ped_counter < max_peds)); ped_counter++){
+        crowd_nav_interfaces::msg::Pedestrian pedi;
+        pedi.header.stamp = current_time;
+        pedi.id = ped_counter + 1;
+        pedi.pose.position.x = pedx.at(ped_counter);
+        pedi.pose.position.y = pedy.at(ped_counter);
+        peds.pedestrians.push_back(pedi);
       }
 
       pedestrian_pub_->publish(peds);
