@@ -2,6 +2,7 @@
 
     <arg name="zed_x_offset" default="-0.2" description="Offset from base link of robot to zed camera (m)"/>
     <arg name="simulate" default="false" description="Simulate pedestrian/odom data. Options: true, false"/>
+    <arg name="n_peds" default="1" description="How many pedestrians to simulate (1, 2, or 3)"/>
 
     <!-- Start streaming from ZED if not simulating -->
     <include file="$(find-pkg-share pedestrian_tracking)/launch/zed.launch.xml" 
@@ -67,6 +68,7 @@
     <!-- launch simulated pedestrian node if simulating -->
     <node pkg="pedestrian_tracking" exec="simulate_pedestrians" 
           if="$(eval '\'$(var simulate)\' == \'true\'')">
+      <param name="n_peds" value="$(var n_peds)"/>
     </node>
 
     <!-- simulate cmd_vel to odom updates -->

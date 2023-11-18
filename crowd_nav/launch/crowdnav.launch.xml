@@ -4,6 +4,7 @@
   <arg name="simulate" default="true" description="Simulate pedestrians and odometry"/>
   <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
   <arg name="use_rviz" default="true" description="Launch rviz"/>
+  <arg name="n_peds" default="1" description="How many pedestrians to simulate (1, 2, or 3)"/>
 
   <!-- algorithm nodes -->
   <include file="$(find-pkg-share crowd_nav)/launch/algorithm.launch.xml">
@@ -15,6 +16,7 @@
   <!-- perception nodes -->
   <include file="$(find-pkg-share pedestrian_tracking)/launch/perception.launch.xml">
       <arg name="simulate" value="$(var simulate)"/>
+      <arg name="n_peds" value="$(var n_peds)"/>
   </include>
 
 </launch>

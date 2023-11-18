@@ -176,6 +176,7 @@ namespace brne
           for (int l=0; l<n_samples; l++){
             // row.at(k+1) is 
             auto idx2 = all_pts.at(row.at(k+1), l);
+            // std::cout << "idx1: " << idx1 << "\tIdx2: " << idx2 << "\trow k+1: " << row.at(k+1) << "\tl:" << l << std::endl;
             c += costs.at(idx1, idx2) * weights.at(row.at(k+1), l);
           }
         }
