@@ -1,18 +1,17 @@
-# unitree_crowd_nav
+# BRNE Social Navigation
 Author: Katie Hughes
 
-This set of ROS 2 packages implements Bayes Rule Nash Equilibrium (BRNE) crowd navigation on a Unitree Go1 robot as well as pedestrian tracking using a ZED2i camera. 
+This set of ROS 2 packages implements Bayes Rule Nash Equilibrium (BRNE) crowd navigation as well as pedestrian tracking and odometry updates using a ZED2i camera. It can be deployed on a Unitree Go1 quadruped, but nothing about this package is specific to this robot.
 
 To set up the necessary packages:
 ```
 mkdir -p ${ws}/src
 cd ${ws}/src
-git clone git@github.com:katie-hughes/unitree_crowd_nav.git
+git clone https://github.com/katie-hughes/brne_social_nav.git
 cd ..
-vcs import --recursive < src/unitree_crowd_nav/crowdnav.repos
+vcs import --recursive < src/brne_social_nav/repos/crowdnav.repos
 colcon build
 ```
-
 Note: if you want to build this project to only test in simulation, or for use on an external computer that doesn't have/need the ZED SDK, you can build the project with the following command instead:
 ```
 colcon build --packages-select crowd_nav brnelib crowd_nav_interfaces pedestrian_tracking brne_py zed_interfaces
