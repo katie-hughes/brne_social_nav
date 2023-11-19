@@ -3,6 +3,7 @@ Author: Katie Hughes
 
 This set of ROS 2 packages implements Bayes Rule Nash Equilibrium (BRNE) crowd navigation as well as pedestrian tracking and odometry updates using a ZED2i camera. It can be deployed on a Unitree Go1 quadruped, but nothing about this package is specific to this robot.
 
+## Clone Packages
 To set up the necessary packages:
 ```
 mkdir -p ${ws}/src
@@ -10,11 +11,20 @@ cd ${ws}/src
 git clone https://github.com/katie-hughes/brne_social_nav.git
 cd ..
 vcs import --recursive < src/brne_social_nav/repos/crowdnav.repos
+```
+
+## Build Packages
+To build all packages:
+```
 colcon build
 ```
-Note: if you want to build this project to only test in simulation, or for use on an external computer that doesn't have/need the ZED SDK, you can build the project with the following command instead:
+If you want to build this project to only test in simulation, or for use on an external computer that doesn't have/need the ZED SDK, you can build the project with the following command instead:
 ```
 colcon build --packages-select crowd_nav brnelib crowd_nav_interfaces pedestrian_tracking brne_py zed_interfaces
+```
+Finally, if you are building only the perception related portions of this project (for example, to deploy on an Orin Nano), you can build with the following command:
+```
+colcon build --packages-select crowd_nav_interfaces zed_components zed_ros2 zed_wrapper zed_interfaces
 ```
 # Running In Simulation
 
@@ -22,11 +32,11 @@ To run the system in simulation, without being connected to the robot, run:
 ```
 ros2 launch crowd_nav sim.launch.xml
 ```
-This will bring up an RVIZ window which represents the scene. If you select a goal pose in RVIZ, you will see the robot move to it, avoiding the static pedestrian obstacles.
+This will bring up an RVIZ window which represents the scene. If you select a goal pose in RVIZ, you will see the robot move to it, avoiding the static pedestrian obstacles. The number of pedestrians can be adjusted with the launch argument `n_peds:=0`, `1`, `2`, or `3`. 
 
-This project contains both Python and C++ implementations of the BRNE algorithm code. The behavior should be identical. To specify which nodes get run, use the launch argument `lang:=C++` or `lang:=PYTHON` (Python is default for now).
+This project contains both Python and C++ implementations of the BRNE algorithm code. The behavior should be identical. To specify which nodes get run, use the launch argument `lang:=C++` or `lang:=PYTHON` (C++ is default). If you are interested in the time it takes for each iteration of the algorithm to execute, you can run with the launch argument `debug_level:=debug`.
 
-# Running On The Robot
+# Running On a Unitree Go1
 
 ## Connecting to the robot
 The Unitree Go1 has an onboard WLAN hotspot that is bridged to the ethernet connections between the boards. When the robot is powered on, check on your compter to see if the `UnitreeWifi` network is visible. In the event that it doesn't come up after a few minutes, the robot will need to be rebooted.
@@ -47,9 +57,9 @@ If using a laptop strapped to the back of the robot, this computer will be respo
 ```
 ros2 launch crowd_nav onboard.launch.xml
 ```
+As in simulation, you can choose the C++ or Python implementation of the BRNE nodes with `lang:=C++` or `lang:=PYTHON` (Python is default), and you can see the time for each algorithm iteration to execute with the launch argument `debug_level:=debug`.
 
 Then, on an external computer, you will need to launch rviz to see the visualizations as well as to set the goal location. This can be done via
-
 ```
 ros2 launch crowd_nav visualizations.launch.xml
 ```
@@ -65,10 +75,20 @@ The external computer will be responsible for the BRNE nodes and visualization, 
 ```
 ros2 launch crowd_nav algorithm.launch.xml
 ```
+Once again, you can choose the C++ or Python implementation of the BRNE nodes with `lang:=C++` or `lang:=PYTHON` (Python is default), and you can see the time for each algorithm iteration to execute with the launch argument `debug_level:=debug`.
 
 # Dependencies
 
-This project depends on a recent version of armadillo for the C++ library. If you get errors while building, you will have to install the newest version from source.
+This project depends on a recent version of armadillo for the C++ library. If you get errors while building, you will have to install the newest version from source. At the time of writing this, the stable version of armadillo is version 12.6.6, which is available at [Armadillo's download center](https://arma.sourceforge.net/download.html) ([download link here](https://sourceforge.net/projects/arma/files/armadillo-12.6.6.tar.xz)). Download this file, then:
+```
+tar xf armadillo-12.6.6.tar.xz
+cd armadillo-12.6.6
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+```
 
 The C++ implementation of the BRNE algorithm also depends on Catch2 for unit testing purposes. If this package is not found, you will also have to build it from source.
 ```
@@ -77,6 +97,7 @@ cd Catch2
 mkdir build
 cd build
 cmake ..
+make
 sudo make install
 ```
 
