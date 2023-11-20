@@ -1,8 +1,8 @@
 #include "brnelib/brne.hpp"
 
 int main(){
-  int n_steps =         5;
-  int n_samples =       16;
+  int n_steps =         20;
+  int n_samples =       50;
 
   double kernel_a1 =    0.5;
   double kernel_a2 =    0.2;
