@@ -7,7 +7,7 @@
 
 namespace brne {
 
-    TEST_CASE("placeholder", "brne"){
+    TEST_CASE("one_static_ped", "brne"){
         int n_steps =         5;
         int n_samples =       16;
 
@@ -55,13 +55,25 @@ namespace brne {
         xtraj_samples.submat((1)*n_samples, 0, (2)*n_samples-1, n_steps-1) = arma::mat(n_samples, n_steps, arma::fill::value(ped_x));
         ytraj_samples.submat((1)*n_samples, 0, (2)*n_samples-1, n_steps-1) = arma::mat(n_samples, n_steps, arma::fill::value(ped_y));
 
-        std::cout << "Xtraj samples \n" << xtraj_samples << std::endl;
-        std::cout << "Ytraj samples \n" << ytraj_samples << std::endl;
+        // std::cout << "Xtraj samples \n" << xtraj_samples << std::endl;
+        // std::cout << "Ytraj samples \n" << ytraj_samples << std::endl;
 
         auto weights = brne_test.brne_nav(xtraj_samples, ytraj_samples);
 
         std::cout << "Weights\n" << weights << std::endl;
-        REQUIRE(0);
+
+        REQUIRE(static_cast<int>(weights.n_rows) == n_agents);
+        REQUIRE(static_cast<int>(weights.n_cols) == n_samples);
+
+        arma::mat desired_weights(n_agents, n_samples, arma::fill::zeros);
+        // hardcoded from a version of the algorithm that I know works
+        desired_weights.row(0) = arma::rowvec(std::vector<double>{7.1966e+00,8.8948e-01,6.0468e-02,3.5967e-03,2.7752e-04,3.3587e-05,6.5357e-06,1.9297e-06,6.9580e+00,8.3311e-01,5.4973e-02,3.2140e-03,2.4731e-04,3.0161e-05,5.9462e-06,1.7818e-06});
+        desired_weights.row(1) = arma::rowvec(n_samples, arma::fill::ones);
+
+        std::cout << "Desired Weights\n" << desired_weights << std::endl;
+
+        REQUIRE(arma::approx_equal(weights, desired_weights, "absdiff", 0.0001));
+        // REQUIRE(0);
     }
 
 }
