@@ -1,8 +1,8 @@
 #include "brnelib/brne.hpp"
 
 int main(){
-  int n_steps =         5;
-  int n_samples =       16;
+  int n_steps =         25;
+  int n_samples =       196;
 
   double kernel_a1 =    0.5;
   double kernel_a2 =    0.2;
@@ -19,7 +19,9 @@ int main(){
                        cost_a1, cost_a2, cost_a3,
                        dt, n_steps, n_samples,
                        y_min, y_max};
-  brne_test.print_params();
+
+  std::cout << brne_test.param_string() << std::endl;
+  // brne_test.print_params();
 
   double max_lin_vel = 0.6;
   double max_ang_vel = 1.0;
@@ -48,12 +50,12 @@ int main(){
   xtraj_samples.submat((1)*n_samples, 0, (2)*n_samples-1, n_steps-1) = arma::mat(n_samples, n_steps, arma::fill::value(ped_x));
   ytraj_samples.submat((1)*n_samples, 0, (2)*n_samples-1, n_steps-1) = arma::mat(n_samples, n_steps, arma::fill::value(ped_y));
 
-  std::cout << "Xtraj samples \n" << xtraj_samples << std::endl;
-  std::cout << "Ytraj samples \n" << ytraj_samples << std::endl;
+  // std::cout << "Xtraj samples \n" << xtraj_samples << std::endl;
+  // std::cout << "Ytraj samples \n" << ytraj_samples << std::endl;
 
   auto weights = brne_test.brne_nav(xtraj_samples, ytraj_samples);
 
-  std::cout << "Weights\n" << weights << std::endl;
+  // std::cout << "Weights\n" << weights << std::endl;
 
   return 0;
 }

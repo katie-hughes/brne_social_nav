@@ -168,21 +168,33 @@ namespace brne
   void BRNE::update_weights(){
     for (int i=0; i<n_agents; i++){
       auto row = arma::conv_to<arma::rowvec>::from(index_table.row(i));
+
       for (int j=0; j<n_samples; j++){
         auto c = 0.0;
         auto idx1 = all_pts.at(row.at(0), j);
-        // row.at(0) is just equal to i
+
+        arma::mat mat_temp(n_agents-1, n_samples, arma::fill::zeros);
+        // #pragma omp parallel for collapse(2)
         for (int k=0; k<n_agents-1; k++){
-          for (int l=0; l<n_samples; l++){
-            // row.at(k+1) is 
-            auto idx2 = all_pts.at(row.at(k+1), l);
-            // std::cout << "idx1: " << idx1 << "\tIdx2: " << idx2 << "\trow k+1: " << row.at(k+1) << "\tl:" << l << std::endl;
-            c += costs.at(idx1, idx2) * weights.at(row.at(k+1), l);
-          }
+          // get costs at row idx1 from all_pts.at(row.at(k+1), 0) to all_pts.at(row.at(k+1), n_samples-1) to 
+          // get weights at row row.at(k+1)
+          // element wise multiply them together
+          mat_temp.row(k) = costs(idx1, arma::span(all_pts.at(row.at(k+1), 0), all_pts.at(row.at(k+1), n_samples-1))) % weights.row(row.at(k+1));
+          // std::chrono::time_point<std::chrono::steady_clock> start, end;
+          // start = std::chrono::steady_clock::now();
+          // for (int l=0; l<n_samples; l++){
+          //   auto idx2 = all_pts.at(row.at(k+1), l);
+          //   std::cout << "mat_temp("<<k<<","<<l<<")"<<" = costs("<<idx1<<","<<idx2<<") * weights("<<row.at(k+1)<<","<<l<<")"<<std::endl;
+          //   mat_temp.at(k,l) = costs.at(idx1, idx2) * weights.at(row.at(k+1), l);
+          // }
+          // end = std::chrono::steady_clock::now();
+          // auto elapsed_time = std::chrono::duration<double>(end - start).count();
+          // std::cout << "Loop " << j << " " << k << " For Elapsed time\t" << elapsed_time << "\n" << std::endl;
         }
-        c /= ((n_agents - 1) * n_samples);
+        c += arma::mean(arma::mean(mat_temp));
         weights.at(i,j) = exp(-1.0 * c);
       }
+
       weights.row(i) /= arma::mean(weights.row(i));
     }
   }
@@ -192,7 +204,6 @@ namespace brne
     all_pts.reset();
     // compute number of agents
     n_agents = xtraj_samples.n_rows / n_samples;
-    // std::cout << "N agents: " << n_agents << std::endl;
     // compute all points index
     all_pts = arma::conv_to<arma::mat>::from(arma::linspace<arma::rowvec>(0, n_agents*n_samples-1, n_agents*n_samples));
     all_pts.reshape(n_samples, n_agents);
@@ -220,7 +231,6 @@ namespace brne
       weights.row(a) = masked_weights / arma::mean(masked_weights);
     }
 
-    // std::cout << "Weights after masking\n" << weights << std::endl;
     return weights;
   }
 
@@ -236,8 +246,6 @@ namespace brne
         agent_y_samples.row(i) *= agent_weights.at(i);
       }
       traj agent_traj;
-      // std::cout << "new agent samples\n" << agent_x_samples << std::endl;
-      // auto test = x_nominal.row(a) + arma::mean(agent_x_samples,0);
       agent_traj.x = arma::conv_to<std::vector<double>>::from(x_nominal.row(a) + arma::mean(agent_x_samples,0));
       agent_traj.y = arma::conv_to<std::vector<double>>::from(y_nominal.row(a) + arma::mean(agent_y_samples,0));
       res.push_back(agent_traj);
@@ -263,24 +271,15 @@ namespace brne
     nominal_commands.col(0) = lin_vel_vec;
     nominal_commands.col(1) = ang_vel_vec;
 
-    // std::cout << "Commands\n" << nominal_commands << std::endl;
     auto n_per_dim = static_cast<int>(sqrt(n_samples));
     auto n_per_lin = static_cast<int>(n_per_dim*2);
     auto n_per_ang = static_cast<int>(n_per_dim/2);
-    // std::cout << "N per dim: " << n_per_dim << " per lin " << n_per_lin << " per ang " << n_per_ang << std::endl;
-
 
     auto lin_offset = std::min(lin_vel_vec.min(), max_lin_vel-lin_vel_vec.max());
     auto ang_offset = std::min(max_ang_vel + ang_vel_vec.min(), max_ang_vel-ang_vel_vec.max());
 
-    // std::cout << "Lin offset " << lin_offset << " ang offset " << ang_offset << std::endl;
-
-
     auto lin_ls = arma::linspace<arma::vec>(-lin_offset, lin_offset, n_per_lin);
     auto ang_ls = arma::linspace<arma::vec>(-ang_offset, ang_offset, n_per_ang);
-
-    // std::cout << "Lin linspace\n" << lin_ls << std::endl;
-    // std::cout << "Ang linspace\n" << ang_ls << std::endl;
 
     // want to get the combination of every single pair of lin/ang in these vectors
 
@@ -293,19 +292,15 @@ namespace brne
     }
     u_perturbs.col(0) = lin_col;
     u_perturbs.col(1) = ang_col;
-    // std::cout << "u perturbs\n" << u_perturbs << std::endl;
 
     ulist = arma::mat(u_perturbs);
     ulist.col(0) += lin_vel;
     ulist.col(1) += ang_vel;
-    // std::cout << "ulist\n" << ulist << std::endl;
 
     // next I need to make arrays of states
 
     arma::mat states(n_samples, 3, arma::fill::zeros);
     states.each_row() = state;
-
-    // arma::mat sdot = dyn(states, ulist);
 
     std::vector<arma::mat> traj;
 
@@ -316,7 +311,6 @@ namespace brne
     for (int t=0; t<n_steps; t++){
       states = dyn_step(states, ulist);
       traj.push_back(arma::mat(states));
-      // std::cout << "State\n" << states << std::endl;
       xtraj_samples.col(t) = states.col(0);
       ytraj_samples.col(t) = states.col(1);
       if (t == n_steps - 1){
@@ -325,10 +319,6 @@ namespace brne
       }
 
     }
-
-    // std::cout << "X traj samples\n" << xtraj_samples << std::endl;
-    // std::cout << "Y traj samples\n" << ytraj_samples << std::endl;
-    
 
     return traj;
   }
@@ -346,12 +336,9 @@ namespace brne
   }
 
   arma::mat TrajGen::opt_controls(arma::rowvec goal){
-    // std::cout << "End pose\n" << end_pose << std::endl;
     arma::mat goal_mat(n_samples, 2, arma::fill::zeros);
     goal_mat.each_row() = goal;
-    // std::cout << "Goal mat\n" << goal_mat << std::endl;
     auto opt_idx = (arma::vecnorm(end_pose - goal_mat, 2, 1)).index_min();
-    // std::cout << "optimal_index\n" << opt_idx << std::endl;
     arma::mat opt_cmds(n_steps, 2, arma::fill::zeros);
     opt_cmds.each_row() = ulist.row(opt_idx);
     return opt_cmds;
@@ -367,7 +354,6 @@ namespace brne
     sdot.col(0) = controls.col(0) % arma::cos(state.col(2));
     sdot.col(1) = controls.col(0) % arma::sin(state.col(2));
     sdot.col(2) = controls.col(1);
-    // std::cout << "Sdot\n" << sdot << std::endl;
     return sdot;
   }
 
@@ -398,19 +384,13 @@ namespace brne
   }
 
   arma::mat TrajGen::sim_traj(arma::rowvec state, arma::mat controls){
-    // std::cout << "State\n" << state << std::endl;
-    // std::cout << "Controls\n" << controls << std::endl;
     arma::mat opt_traj(n_steps, 3, arma::fill::zeros);
     arma::rowvec current_state(state);
-    // std::cout << "Current State" << current_state << std::endl;
     opt_traj.row(0) = arma::rowvec(current_state);
-    // std::cout << "Traj\n" << opt_traj << std::endl;
     for (int i=1; i<n_steps; i++){
       current_state = dyn_step(current_state, controls.row(i-1));
-      // std::cout << "Current State" << current_state << std::endl;
       opt_traj.row(i) = arma::rowvec(current_state);
     }
-    // std::cout << "Traj\n" << opt_traj << std::endl;
     return opt_traj;
   }
 

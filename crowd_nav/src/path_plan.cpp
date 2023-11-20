@@ -475,7 +475,11 @@ private:
       // RCLCPP_INFO_STREAM(get_logger(), "percent of safe samples" << arma::mean(safety_mask) * 100.0);
 
       // BRNE OPTIMIZATION HERE
+      const auto weights_start = this->get_clock()->now();
       auto weights = brne.brne_nav(xtraj_samples, ytraj_samples);
+      const auto weights_end = this->get_clock()->now();
+      const auto weights_diff = weights_end - weights_start;
+      RCLCPP_DEBUG_STREAM(get_logger(), "Weights calculation: " << weights_diff.seconds() << " s");
 
       // apply the safety mask to the weights for the robot
       weights.row(0) %= safety_mask;

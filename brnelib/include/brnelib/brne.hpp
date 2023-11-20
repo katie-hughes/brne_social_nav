@@ -6,6 +6,8 @@
 #include <vector>
 #include <armadillo>
 #include <random>
+#include <numeric>
+#include <chrono>
 #include <omp.h>
 
 namespace brne
