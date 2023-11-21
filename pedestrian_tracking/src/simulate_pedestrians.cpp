@@ -48,9 +48,9 @@ private:
     crowd_nav_interfaces::msg::PedestrianArray peds;
     const auto current_time = this->get_clock()->now();
 
-    int max_peds = 3;
-    std::vector<double> pedx{1.0, 2.0, 2.5};
-    std::vector<double> pedy{0.0, -0.5, 0.5};
+    std::vector<double> pedx{1.0,  2.0, 2.5, -1.0};
+    std::vector<double> pedy{0.0, -0.5, 0.5,  0.0};
+    const auto max_peds = static_cast<int>(pedx.size());
 
     for (int ped_counter = 0; ((ped_counter < n_peds) && (ped_counter < max_peds)); ped_counter++) {
       crowd_nav_interfaces::msg::Pedestrian pedi;
