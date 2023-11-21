@@ -53,7 +53,15 @@ int main(){
   // std::cout << "Xtraj samples \n" << xtraj_samples << std::endl;
   // std::cout << "Ytraj samples \n" << ytraj_samples << std::endl;
 
+  std::chrono::time_point<std::chrono::steady_clock> start, end;
+  start = std::chrono::steady_clock::now();
+
   auto weights = brne_test.brne_nav(xtraj_samples, ytraj_samples);
+
+  end = std::chrono::steady_clock::now();
+  const auto elapsed_time = std::chrono::duration<double>(end - start).count();
+  std::cout << "Whole function elapsed time " << elapsed_time << " S" << std::endl;
+
 
   // std::cout << "Weights\n" << weights << std::endl;
 
