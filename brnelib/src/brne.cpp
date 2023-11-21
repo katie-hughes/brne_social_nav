@@ -141,12 +141,6 @@ namespace brne
         if (agent_i == agent_j){
           continue;
         }
-        // // symmetry
-        // // dst when i = j is 0 meaning traj_costs is all 1 and new costs is a3
-        if (i == j){
-          new_costs.at(i,j) = cost_a3;
-          continue;
-        }
         // use costs(i,j) = costs(j,i)
         // std::cout << "("<<i<<","<<j<<")"<<": "<< agent_i << ", " << agent_j << std::endl;
         const auto dx = arma::conv_to<arma::rowvec>::from(xtraj.row(i) - xtraj.row(j));
