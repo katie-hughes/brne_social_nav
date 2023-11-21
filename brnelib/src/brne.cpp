@@ -133,27 +133,30 @@ namespace brne
     arma::mat new_costs(size, size, arma::fill::zeros);
     #pragma omp parallel for collapse(2)
     for (auto i=0; i<size; i++){
-      for (auto j=0; j<size; j++){
-        // arma::vec traj_costs(n_steps, arma::fill::zeros);
-        // #pragma omp simd
-        // symmetry
-        // row at i,t and j,t
+      for (auto j=i; j<size; j++){
+        // costs DOES NOT MATTER for a1 x a1, a2 x a2, etc. 
+        // so find the agent associated with the i,j point
+        const auto agent_i = i/n_samples;
+        const auto agent_j = j/n_samples;
+        if (agent_i == agent_j){
+          continue;
+        }
+        // // symmetry
+        // // dst when i = j is 0 meaning traj_costs is all 1 and new costs is a3
+        if (i == j){
+          new_costs.at(i,j) = cost_a3;
+          continue;
+        }
+        // use costs(i,j) = costs(j,i)
+        // std::cout << "("<<i<<","<<j<<")"<<": "<< agent_i << ", " << agent_j << std::endl;
         const auto dx = arma::conv_to<arma::rowvec>::from(xtraj.row(i) - xtraj.row(j));
         const auto dy = arma::conv_to<arma::rowvec>::from(ytraj.row(i) - ytraj.row(j));
-        // std::cout << dx << std::endl;
         // compute distance
         const auto dst = arma::conv_to<arma::rowvec>::from(arma::pow(dx, 2) + arma::pow(dy, 2));
-        // std::cout << "dst\n" << dst << std::endl;
         // apply cost function
         const auto traj_costs = arma::conv_to<arma::rowvec>::from(2.0 - 2.0/(1.0 + arma::exp(-cost_a1 * arma::pow(dst, cost_a2))));
-        // std::cout << "traj costs\n" << traj_costs << std::endl;
-        // 
-        // for (auto t=0; t<n_steps; t++){
-        //   // std::cout << "("<<i<<","<<t<<")"<<" and ("<<j<<","<<t<<")"<< std::endl;
-        //   auto dst = pow(xtraj.at(i,t) - xtraj.at(j,t), 2) + pow(ytraj.at(i,t) - ytraj.at(j,t), 2);
-        //   traj_costs.at(t) = 2.0 - 2.0/(1.0 + exp(-cost_a1 *pow(dst, cost_a2)));
-        // }
         new_costs.at(i,j) = traj_costs.max() * cost_a3;
+        new_costs.at(j,i) = new_costs.at(i,j);
       }
     }
     costs = new_costs;
@@ -181,11 +184,9 @@ namespace brne
   void BRNE::update_weights(){
     for (int i=0; i<n_agents; i++){
       auto row = arma::conv_to<arma::rowvec>::from(index_table.row(i));
-
       for (int j=0; j<n_samples; j++){
         auto c = 0.0;
         auto idx1 = all_pts.at(row.at(0), j);
-
         arma::mat mat_temp(n_agents-1, n_samples, arma::fill::zeros);
         // #pragma omp parallel for collapse(2)
         for (int k=0; k<n_agents-1; k++){
@@ -193,27 +194,16 @@ namespace brne
           // get weights at row row.at(k+1)
           // element wise multiply them together
           mat_temp.row(k) = costs(idx1, arma::span(all_pts.at(row.at(k+1), 0), all_pts.at(row.at(k+1), n_samples-1))) % weights.row(row.at(k+1));
-          // std::chrono::time_point<std::chrono::steady_clock> start, end;
-          // start = std::chrono::steady_clock::now();
-          // for (int l=0; l<n_samples; l++){
-          //   auto idx2 = all_pts.at(row.at(k+1), l);
-          //   std::cout << "mat_temp("<<k<<","<<l<<")"<<" = costs("<<idx1<<","<<idx2<<") * weights("<<row.at(k+1)<<","<<l<<")"<<std::endl;
-          //   mat_temp.at(k,l) = costs.at(idx1, idx2) * weights.at(row.at(k+1), l);
-          // }
-          // end = std::chrono::steady_clock::now();
-          // auto elapsed_time = std::chrono::duration<double>(end - start).count();
-          // std::cout << "Loop " << j << " " << k << " For Elapsed time\t" << elapsed_time << "\n" << std::endl;
         }
         c += arma::mean(arma::mean(mat_temp));
         weights.at(i,j) = exp(-1.0 * c);
       }
-
       weights.row(i) /= arma::mean(weights.row(i));
     }
   }
 
   arma::mat BRNE::brne_nav(arma::mat xtraj_samples, arma::mat ytraj_samples){
-    std::chrono::time_point<std::chrono::steady_clock> start, end;
+    // std::chrono::time_point<std::chrono::steady_clock> start, end;
 
     weights.reset();
     all_pts.reset();
@@ -223,27 +213,22 @@ namespace brne
     all_pts = arma::conv_to<arma::mat>::from(arma::linspace<arma::rowvec>(0, n_agents*n_samples-1, n_agents*n_samples));
     all_pts.reshape(n_samples, n_agents);
     all_pts = all_pts.t();
-
-    start = std::chrono::steady_clock::now();
     // TODO I could cache this for different numbers of agents
     compute_index_table();
+
+    // start = std::chrono::steady_clock::now();
     // get the costs
     compute_costs(xtraj_samples, ytraj_samples);
-    weights = arma::mat(n_agents, n_samples, arma::fill::ones);
-    
-    end = std::chrono::steady_clock::now();
-    const auto costs_elapsed_time = std::chrono::duration<double>(end - start).count();
-    std::cout << "costs elapsed time " << costs_elapsed_time << " S" << std::endl;
+    // end = std::chrono::steady_clock::now();
+    // const auto costs_elapsed_time = std::chrono::duration<double>(end - start).count();
+    // std::cout << "costs elapsed time " << costs_elapsed_time << " S" << std::endl;
 
-    start = std::chrono::steady_clock::now();
+    weights = arma::mat(n_agents, n_samples, arma::fill::ones);
     for (int i=0; i<10; i++){
       // std::cout << "weights update #" << i << std::endl;
       // std::cout << "weights\n" << weights << std::endl;
       update_weights();
     }
-    end = std::chrono::steady_clock::now();
-    const auto update_elapsed_time = std::chrono::duration<double>(end - start).count();
-    std::cout << "weights update elapsed time " << update_elapsed_time << " S" << std::endl;
     // std::cout << "Final weights\n" << weights << std::endl;
 
     collision_check(ytraj_samples);
