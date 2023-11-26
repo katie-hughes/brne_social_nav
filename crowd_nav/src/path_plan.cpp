@@ -125,6 +125,7 @@ public:
     cmd_buf_pub_ = create_publisher<crowd_nav_interfaces::msg::TwistArray>("cmd_buf", 10);
     path_pub_ = create_publisher<nav_msgs::msg::Path>("/optimal_path", 10);
     walls_pub_ = create_publisher<visualization_msgs::msg::MarkerArray>("/walls", 10);
+    brne_peds_pub_ = create_publisher<visualization_msgs::msg::MarkerArray>("/brne_peds", 10);
 
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -172,6 +173,7 @@ private:
   rclcpp::Publisher<crowd_nav_interfaces::msg::TwistArray>::SharedPtr cmd_buf_pub_;
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr path_pub_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr walls_pub_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr brne_peds_pub_;
 
   bool goal_set;
   bool walls_published;
@@ -179,8 +181,6 @@ private:
 
   rclcpp::Time last_ped_stamp;
   rclcpp::Time curr_ped_stamp;
-
-  std::vector<double> timer_len;
 
   void pub_walls()
   {
@@ -247,41 +247,8 @@ private:
     }
   }
 
-  void update_robot_position()
-  {
-    // update robot position by reading the tf
-    geometry_msgs::msg::TransformStamped T_bodom_brne;
-    try {
-      T_bodom_brne = tf_buffer_->lookupTransform(
-        "brne_odom", "brne",
-        tf2::TimePointZero);
-      // set robot pose
-      // get the angle from the quaternion
-      tf2::Quaternion q(T_bodom_brne.transform.rotation.x,
-        T_bodom_brne.transform.rotation.y,
-        T_bodom_brne.transform.rotation.z,
-        T_bodom_brne.transform.rotation.w);
-      tf2::Matrix3x3 m(q);
-      double roll, pitch, yaw;
-      m.getRPY(roll, pitch, yaw);
-      robot_pose.x = T_bodom_brne.transform.translation.x;
-      robot_pose.y = T_bodom_brne.transform.translation.y;
-      robot_pose.theta = yaw;
-      RCLCPP_INFO_STREAM(
-        get_logger(), "X: " << robot_pose.x <<
-          " Y: " << robot_pose.y <<
-          " Theta: " << robot_pose.theta);
-      if (goal_set) {
-        check_goal();
-      }
-    } catch (const tf2::TransformException & ex) {
-      RCLCPP_INFO_STREAM(get_logger(), "Couldn't get BRNE position");
-    }
-  }
-
   void pedestrians_cb(const crowd_nav_interfaces::msg::PedestrianArray & msg)
   {
-    // update_robot_position();
     curr_ped_stamp = this->get_clock()->now();
     // save values from previous iteration
     prev_ped_array = ped_array;
@@ -334,6 +301,51 @@ private:
     // RCLCPP_INFO_STREAM(get_logger(), "ped array\n" << ped_array);
   }
 
+  void pub_ped_markers(){
+    // plot selected peds
+    const auto now = this->get_clock()->now();
+    const auto thickness = 0.05;
+    const auto transparency = 0.5;
+    const auto velocity_scale = 1.0;
+    const auto base_vel = 0.05;
+    visualization_msgs::msg::MarkerArray ma;
+    for (int i=0; i<static_cast<int>(selected_peds.pedestrians.size()); i++){
+      const auto pose_i = selected_peds.pedestrians.at(i).pose.position;
+      const auto vel_i = selected_peds.pedestrians.at(i).velocity.linear;
+      const auto vel_abs = dist(0, 0, vel_i.x, vel_i.y);
+      // create an arrow marker
+      visualization_msgs::msg::Marker ped_i;
+      ped_i.header.frame_id = "brne_odom";
+      ped_i.header.stamp = now;
+      ped_i.id = i;
+      ped_i.type = 0;   // arrow
+      ped_i.action = 0;
+      // pose is the end of the arrow
+      ped_i.pose.position.x = pose_i.x;
+      ped_i.pose.position.y = pose_i.y;
+      ped_i.pose.position.z = 0.01;
+      // orientation should be the velocity direction
+      const auto phi = atan2(vel_i.y, vel_i.x);
+      tf2::Quaternion q;
+      q.setRPY(0, 0, phi);
+      ped_i.pose.orientation.w = q.w();
+      ped_i.pose.orientation.x = q.x();
+      ped_i.pose.orientation.y = q.y();
+      ped_i.pose.orientation.z = q.z();
+      // scale is the size of the arrow, proportional to velocity
+      ped_i.scale.x = velocity_scale*vel_abs + base_vel;
+      ped_i.scale.y = thickness;
+      ped_i.scale.z = 0.01;
+      ped_i.color.a = transparency;
+      ped_i.color.r = 1.0;
+      ped_i.color.g = 0.67;
+      ped_i.color.b = 0.0;
+      ped_i.lifetime.sec = 1;
+      ma.markers.push_back(ped_i);
+    }
+    brne_peds_pub_->publish(ma);
+  }
+
   void timer_callback()
   {
     auto start = this->get_clock()->now();
@@ -356,12 +368,6 @@ private:
         // RCLCPP_INFO_STREAM(get_logger(), "Ignoring pedestrian " << p.id);
         continue;
       }
-      // RCLCPP_INFO_STREAM(get_logger(), "pedestrian ID: " << p.id <<
-      //                                   "\n\tPosition: " << p.pose.position.x << " " << p.pose.position.y <<
-      //                                   "\n\tVelocity: " << p.velocity.linear.x << " " << p.velocity.linear.y <<
-      //                                   "\nTimestamp: " << p.header.stamp.sec  << "s " << p.header.stamp.nanosec << " ns");
-      // RCLCPP_INFO_STREAM(get_logger(), "Time Difference " << dt);
-
       // compute distance to the pedestrian from the robot
       auto dist_to_ped = dist(robot_pose.x, robot_pose.y, p.pose.position.x, p.pose.position.y);
       if (dist_to_ped > brne_activate_threshold) {
@@ -374,6 +380,8 @@ private:
 
     auto n_peds = static_cast<int>(selected_peds.pedestrians.size());
     auto n_agents = std::min(maximum_agents, n_peds + 1);
+
+    pub_ped_markers();
 
     // RCLCPP_DEBUG_STREAM(get_logger(), "Agents: " << n_agents);
 
@@ -475,26 +483,26 @@ private:
       // RCLCPP_INFO_STREAM(get_logger(), "percent of safe samples" << arma::mean(safety_mask) * 100.0);
 
       // BRNE OPTIMIZATION HERE
-      const auto weights_start = this->get_clock()->now();
+      // const auto weights_start = this->get_clock()->now();
       auto weights = brne.brne_nav(xtraj_samples, ytraj_samples);
-      const auto weights_end = this->get_clock()->now();
-      const auto weights_diff = weights_end - weights_start;
-      RCLCPP_DEBUG_STREAM(get_logger(), "Weights calculation: " << weights_diff.seconds() << " s");
+      // const auto weights_end = this->get_clock()->now();
+      // const auto weights_diff = weights_end - weights_start;
+      // RCLCPP_DEBUG_STREAM(get_logger(), "Weights calculation: " << weights_diff.seconds() << " s");
 
       // apply the safety mask to the weights for the robot
       weights.row(0) %= safety_mask;
-      double mean_weights = arma::mean(weights.row(0));
+      const double mean_weights = arma::mean(weights.row(0));
       if (mean_weights != 0) {
         weights.row(0) /= mean_weights;
       } else {
         RCLCPP_INFO_STREAM(get_logger(), "E-Stop from safety mask!");
       }
 
-      auto ulist = trajgen.get_ulist();
-      auto ulist_lin = arma::conv_to<arma::rowvec>::from(ulist.col(0));
-      auto ulist_ang = arma::conv_to<arma::rowvec>::from(ulist.col(1));
-      auto opt_cmds_lin = arma::mean(ulist_lin % weights.row(0));
-      auto opt_cmds_ang = arma::mean(ulist_ang % weights.row(0));
+      const auto ulist = trajgen.get_ulist();
+      const auto ulist_lin = arma::conv_to<arma::rowvec>::from(ulist.col(0));
+      const auto ulist_ang = arma::conv_to<arma::rowvec>::from(ulist.col(1));
+      const auto opt_cmds_lin = arma::mean(ulist_lin % weights.row(0));
+      const auto opt_cmds_ang = arma::mean(ulist_ang % weights.row(0));
 
       if (goal_set) {
         for (int i = 0; i < n_steps; i++) {
@@ -512,7 +520,7 @@ private:
       // RCLCPP_INFO_STREAM(get_logger(), "Opt cmds\n" << opt_cmds);
 
       // compute the optimal path
-      auto opt_traj = trajgen.sim_traj(robot_pose.toVec(), opt_cmds);
+      const auto opt_traj = trajgen.sim_traj(robot_pose.toVec(), opt_cmds);
       optimal_path.header.stamp = current_timestamp;
       optimal_path.poses.clear();
       for (int i = 0; i < n_steps; i++) {
@@ -527,7 +535,7 @@ private:
 
     } else {
       // go straight to the goal
-      auto opt_cmds = trajgen.opt_controls(goal_vec);
+      const auto opt_cmds = trajgen.opt_controls(goal_vec);
       // RCLCPP_INFO_STREAM(get_logger(), "Opt cmds\n" << opt_cmds);
       if (goal_set) {
         for (int i = 0; i < n_steps; i++) {
@@ -538,7 +546,7 @@ private:
         }
       }
       // compute the optimal path
-      auto opt_traj = trajgen.sim_traj(robot_pose.toVec(), opt_cmds);
+      const auto opt_traj = trajgen.sim_traj(robot_pose.toVec(), opt_cmds);
       optimal_path.header.stamp = current_timestamp;
       optimal_path.poses.clear();
       for (int i = 0; i < n_steps; i++) {
@@ -563,12 +571,7 @@ private:
 
     auto end = this->get_clock()->now();
     auto diff = end - start;
-    timer_len.push_back(diff.seconds());
-    if (timer_len.size() >= 10) {
-      auto dt_avg = arma::mean(arma::vec(timer_len));
-      RCLCPP_DEBUG_STREAM(get_logger(), "Agents: " << n_agents << " Avg timer: " << dt_avg << " s");
-      timer_len.clear();
-    }
+    RCLCPP_DEBUG_STREAM(get_logger(), "Agents: " << n_agents << " Timer: " << diff.seconds() << " s");
   }
 };
 

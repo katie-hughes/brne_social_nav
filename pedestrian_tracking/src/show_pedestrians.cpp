@@ -41,6 +41,8 @@ private:
     // clear previous marker array
     ma.markers.clear();
     const int n_pedestrians = msg.pedestrians.size();
+    const auto alpha = 1.0;
+    const auto height = 0.01;
     for (int i = 0; i < n_pedestrians; i++) {
       const auto ped = msg.pedestrians.at(i);
       visualization_msgs::msg::Marker m;
@@ -50,17 +52,17 @@ private:
       m.type = 3;         // cylinder
       m.action = 0;       // add/modify
       // Set color as orange
+      m.color.a = alpha;
       m.color.r = 1.0;
       m.color.g = 0.67;
       m.color.b = 0.0;
-      m.color.a = 1.0;
       // Set Radius
       m.scale.x = 0.1;
       m.scale.y = 0.1;
-      m.scale.z = 0.25;
+      m.scale.z = height;
       m.pose.position.x = ped.pose.position.x;
       m.pose.position.y = ped.pose.position.y;
-      m.pose.position.z = 0.125;
+      m.pose.position.z = 0.5*height;
       m.lifetime.sec = 1;
       // Add to marker array
       ma.markers.push_back(m);

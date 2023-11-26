@@ -47,7 +47,7 @@ class BrneNavRos(Node):
         ####################################################################################
         # ALL PARAMETERS ARE DEFINED HERE!!!
         ####################################################################################
-        self.declare_parameter('maximum_agents', 5)  # maximum number of agents BRNE will consider (including the robot)
+        self.declare_parameter('maximum_agents', 8)  # maximum number of agents BRNE will consider (including the robot)
         self.declare_parameter('num_samples', 196)  # number of samples assigned to each agent
         self.declare_parameter('dt', 0.1)
         self.declare_parameter('plan_steps', 25)  # time steps of the planning horizon
@@ -150,8 +150,6 @@ class BrneNavRos(Node):
         self.close_stop_flag = False
 
         self.brne_first_time = True
-
-        self.timer_len = []
 
         self.publish_walls()
 
@@ -432,10 +430,8 @@ class BrneNavRos(Node):
 
         end_time = self.get_clock().now()
         diff = (end_time - start_time).to_msg()
-        self.timer_len.append(diff.sec + diff.nanosec*1e-9)
-        if len(self.timer_len) >= 10:
-            self.get_logger().debug(f"agents {num_agents} avg time {np.mean(self.timer_len)}")
-            self.timer_len = []
+        diff_sec = diff.sec + diff.nanosec*1e-9
+        self.get_logger().debug(f"Agents: {num_agents} Timer: {diff_sec}")
 
     def publish_trajectory(self, publisher, xs, ys):
         p = Path()
