@@ -11,7 +11,7 @@
   </node>
 
   <!-- C++ algorithm nodes -->
-  <node pkg="crowd_nav" exec="path_plan" if="$(eval '\'$(var lang)\' == \'C++\'')" 
+  <node pkg="crowd_nav" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'C++\'')" 
         args="--ros-args --log-level brne:=$(var debug_level)">
     <param from="$(find-pkg-share crowd_nav)/config/brne.yaml"/>
     <remap from="/odom" to="/zed/zed_node/odom"/>

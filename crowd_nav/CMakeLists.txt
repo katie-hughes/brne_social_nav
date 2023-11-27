@@ -29,9 +29,9 @@ find_package(OpenMP REQUIRED)
 
 include_directories(${ARMADILLO_INCLUDE_DIRS})
 
-add_executable(path_plan src/path_plan.cpp)
+add_executable(brne_nav src/brne_nav.cpp)
 
-ament_target_dependencies(path_plan
+ament_target_dependencies(brne_nav
   rclcpp
   std_msgs
   std_srvs
@@ -45,7 +45,7 @@ ament_target_dependencies(path_plan
   crowd_nav_interfaces
   OpenMP)
 
-target_link_libraries(path_plan brnelib::brnelib  ${ARMADILLO_LIBRARIES} "${cpp_typesupport_target}")
+target_link_libraries(brne_nav brnelib::brnelib  ${ARMADILLO_LIBRARIES} "${cpp_typesupport_target}")
 
 add_executable(controller src/controller.cpp)
 
@@ -70,7 +70,7 @@ ament_target_dependencies(pub_goal
   geometry_msgs
   crowd_nav_interfaces)
 
-install(TARGETS path_plan controller pub_goal
+install(TARGETS brne_nav controller pub_goal
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY
