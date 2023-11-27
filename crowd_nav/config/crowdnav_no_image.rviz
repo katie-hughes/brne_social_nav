@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /ZED odometry1/Shape1
+        - /TF1/Frames1
         - /BRNE odometry1/Shape1
       Splitter Ratio: 0.5312976837158203
     Tree Height: 797
@@ -69,7 +70,7 @@ Visualization Manager:
       Name: ZED odometry
       Position Tolerance: 0.10000000149011612
       Shape:
-        Alpha: 1
+        Alpha: 0.30000001192092896
         Axes Length: 1
         Axes Radius: 0.10000000149011612
         Color: 255; 25; 0
@@ -150,7 +151,7 @@ Visualization Manager:
       Enabled: true
       Name: Walls
       Namespaces:
-        "": true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -159,28 +160,19 @@ Visualization Manager:
         Value: /walls
       Value: true
     - Class: rviz_default_plugins/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 2
       Frames:
-        All Enabled: true
-        brne:
-          Value: true
-        brne_odom:
-          Value: true
-        odom:
-          Value: true
+        All Enabled: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        odom:
-          brne_odom:
-            brne:
-              {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Angle Tolerance: 0.10000000149011612
       Class: rviz_default_plugins/Odometry
       Covariance:
@@ -224,7 +216,7 @@ Visualization Manager:
       Enabled: true
       Name: BRNE Peds
       Namespaces:
-        "": true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -278,7 +270,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 10.837647438049316
+      Distance: 12.057770729064941
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1

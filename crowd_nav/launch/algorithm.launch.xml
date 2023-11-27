@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="lang" default="PYTHON" description="Choose whether python or C++ BRNE nodes are launched (Right now, only Python is valid). options: PYTHON, C++"/>
+  <arg name="lang" default="C++" description="Choose whether python or C++ BRNE nodes are launched (Right now, only Python is valid). options: PYTHON, C++"/>
   <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
   <arg name="use_rviz" default="true" description="Launch rviz"/>
 

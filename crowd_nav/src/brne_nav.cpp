@@ -509,6 +509,18 @@ private:
           geometry_msgs::msg::Twist tw;
           tw.linear.x = opt_cmds_lin;
           tw.angular.z = opt_cmds_ang;
+          // manually adjust for dog's drift (discovered these values experimentally)
+          if ((opt_cmds_lin > 0.1) && (opt_cmds_lin < 0.3)){
+            tw.angular.z -= 0.04;
+          } else if ((opt_cmds_lin >= 0.3) && (opt_cmds_lin < 0.5)){
+            tw.angular.z -= 0.05;
+          } else if (opt_cmds_lin >= 0.5){
+            tw.angular.z -= 0.06;
+          }
+          if (i == 0){
+            RCLCPP_INFO_STREAM(get_logger(), "Opt lin " << opt_cmds_lin << " ang " << opt_cmds_ang 
+                                          << "Twist lin: " << tw.linear.x << " ang " << tw.angular.z);
+          }
           robot_cmds.twists.push_back(tw);
         }
       }
@@ -536,12 +548,25 @@ private:
     } else {
       // go straight to the goal
       const auto opt_cmds = trajgen.opt_controls(goal_vec);
-      // RCLCPP_INFO_STREAM(get_logger(), "Opt cmds\n" << opt_cmds);
       if (goal_set) {
         for (int i = 0; i < n_steps; i++) {
           geometry_msgs::msg::Twist tw;
-          tw.linear.x = opt_cmds.at(i, 0);
-          tw.angular.z = opt_cmds.at(i, 1);
+          const auto opt_cmds_lin = opt_cmds.at(i, 0);
+          const auto opt_cmds_ang = opt_cmds.at(i, 1);
+          tw.linear.x = opt_cmds_lin;
+          tw.angular.z = opt_cmds_ang;
+          // manually adjust for dog's drift (discovered these values experimentally)
+          if ((opt_cmds_lin > 0.1) && (opt_cmds_lin < 0.3)){
+            tw.angular.z -= 0.04;
+          } else if ((opt_cmds_lin >= 0.3) && (opt_cmds_lin < 0.5)){
+            tw.angular.z -= 0.05;
+          } else if (opt_cmds_lin >= 0.5){
+            tw.angular.z -= 0.06;
+          }
+          if (i == 0){
+            RCLCPP_INFO_STREAM(get_logger(), "Opt lin " << opt_cmds_lin << " ang " << opt_cmds_ang 
+                                          << "Twist lin: " << tw.linear.x << " ang " << tw.angular.z);
+          }
           robot_cmds.twists.push_back(tw);
         }
       }
