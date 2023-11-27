@@ -2,7 +2,7 @@
   ros__parameters:
     replan_freq: 10.0  # unit: Hz
     dt: 0.1
-    maximum_agents: 8  # maximum number of agents BRNE will consider (including the robot)
+    maximum_agents: 5  # maximum number of agents BRNE will consider (including the robot)
     n_samples: 196  # number of samples assigned to each agent. needs to be the square of an even number
     n_steps: 25  # time steps of the planning horizon
     max_lin_vel: 0.6  # 0.6,0.8 maximum linear velocity allowed on the robot
