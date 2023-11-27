@@ -69,6 +69,7 @@ private:
   void zed_cb(const zed_interfaces::msg::ObjectsStamped & msg)
   {
     crowd_nav_interfaces::msg::PedestrianArray pa;
+    pa.header.stamp = msg.header.stamp;
     const int n_peds = msg.objects.size();
     // RCLCPP_INFO_STREAM(get_logger(), "\n\nMESSAGE");
     for (int i = 0; i < n_peds; i++) {
