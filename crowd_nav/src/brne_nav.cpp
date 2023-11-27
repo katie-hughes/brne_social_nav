@@ -277,9 +277,26 @@ private:
         for_compare.col(1) = ys;
         arma::mat difference = prev_ped_array - for_compare;
         auto norm = arma::vecnorm(difference, 2, 1);
-        f2f_vel = ped_array.row(p) - prev_ped_array.row(norm.index_min());
-        f2f_vel /= (curr_ped_stamp - last_ped_stamp).seconds();
-        // RCLCPP_INFO_STREAM(get_logger(), "f2f vel: " << f2f_vel);
+        const auto prev_association_index = norm.index_min();
+        f2f_vel = ped_array.row(p) - prev_ped_array.row(prev_association_index);
+        const auto dt_ped = (curr_ped_stamp - last_ped_stamp).seconds();
+        if (dt_ped < 0.001){
+          // RCLCPP_INFO_STREAM(get_logger(), "\n\nDO NOT TRUST\n\n");
+          // zero this because the dt is too small to say anything intelligent
+          f2f_vel *= 0;
+        } else {
+          f2f_vel /= dt_ped;
+        }
+        // staircase truncation of f2f vel
+        const auto abs_speed = arma::norm(f2f_vel);
+        // RCLCPP_INFO_STREAM(get_logger(), "Abs speed " << abs_speed);
+        if (abs_speed <= 0.3){
+          // assume standing still
+          f2f_vel *= 0;
+        } else if ((abs_speed > 0.3) && (abs_speed <= 0.6)){
+          f2f_vel *= (0.3/abs_speed);
+        }
+        // RCLCPP_INFO_STREAM(get_logger(), "f2f vel: " << f2f_vel << " Associated with " << prev_association_index << " dt " << dt_ped);
       }
       peds.pedestrians.at(p).velocity.linear.x = f2f_vel.at(0);
       peds.pedestrians.at(p).velocity.linear.y = f2f_vel.at(1);
@@ -383,8 +400,6 @@ private:
 
     pub_ped_markers();
 
-    // RCLCPP_DEBUG_STREAM(get_logger(), "Agents: " << n_agents);
-
     arma::rowvec goal_vec;
     if (goal_set) {
       goal_vec = arma::rowvec(
@@ -417,7 +432,6 @@ private:
     }
     auto traj_samples = trajgen.traj_sample(nominal_lin_vel, nominal_ang_vel, robot_pose.toVec());
 
-
     if (n_agents > 1) {
       // create pedestrian samples
       auto x_pts = brne.mvn_sample_normal(n_agents - 1);
@@ -433,10 +447,6 @@ private:
         arma::conv_to<arma::vec>::from(arma::sort_index(arma::vec(dists_to_peds)));
       for (int p = 0; p < (n_agents - 1); p++) {
         auto ped = selected_peds.pedestrians.at(closest_idxs.at(p));
-        // RCLCPP_INFO_STREAM(get_logger(), "Ped " << ped.id << " pos " <<
-        //                                  ped.pose.position.x << " " <<
-        //                                  ped.pose.position.y);
-        // speed factor
         arma::vec ped_vel(std::vector<double>{ped.velocity.linear.x, ped.velocity.linear.y});
         auto speed_factor = arma::norm(ped_vel);
         arma::rowvec ped_xmean = arma::rowvec(n_steps, arma::fill::value(ped.pose.position.x)) +
@@ -480,14 +490,9 @@ private:
           closest_ped.pose.position.y, 2));
       auto closest_to_ped = arma::conv_to<arma::vec>::from(arma::min(robot_samples_to_ped, 1));
       auto safety_mask = arma::conv_to<arma::rowvec>::from(closest_to_ped > close_stop_threshold);
-      // RCLCPP_INFO_STREAM(get_logger(), "percent of safe samples" << arma::mean(safety_mask) * 100.0);
 
-      // BRNE OPTIMIZATION HERE
-      // const auto weights_start = this->get_clock()->now();
+      // BRNE OPTIMIZATION 
       auto weights = brne.brne_nav(xtraj_samples, ytraj_samples);
-      // const auto weights_end = this->get_clock()->now();
-      // const auto weights_diff = weights_end - weights_start;
-      // RCLCPP_DEBUG_STREAM(get_logger(), "Weights calculation: " << weights_diff.seconds() << " s");
 
       // apply the safety mask to the weights for the robot
       weights.row(0) %= safety_mask;
@@ -516,10 +521,6 @@ private:
             tw.angular.z -= 0.05;
           } else if (opt_cmds_lin >= 0.5){
             tw.angular.z -= 0.06;
-          }
-          if (i == 0){
-            RCLCPP_INFO_STREAM(get_logger(), "Opt lin " << opt_cmds_lin << " ang " << opt_cmds_ang 
-                                          << "Twist lin: " << tw.linear.x << " ang " << tw.angular.z);
           }
           robot_cmds.twists.push_back(tw);
         }
@@ -563,10 +564,6 @@ private:
           } else if (opt_cmds_lin >= 0.5){
             tw.angular.z -= 0.06;
           }
-          if (i == 0){
-            RCLCPP_INFO_STREAM(get_logger(), "Opt lin " << opt_cmds_lin << " ang " << opt_cmds_ang 
-                                          << "Twist lin: " << tw.linear.x << " ang " << tw.angular.z);
-          }
           robot_cmds.twists.push_back(tw);
         }
       }
@@ -589,10 +586,6 @@ private:
     path_pub_->publish(optimal_path);
     // publish the walls
     pub_walls();
-    // if (!walls_published){
-    //   pub_walls();
-    //   walls_published = true;
-    // }
 
     auto end = this->get_clock()->now();
     auto diff = end - start;
