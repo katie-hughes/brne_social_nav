@@ -239,9 +239,6 @@ private:
   void pedestrians_cb(const crowd_nav_interfaces::msg::PedestrianArray & msg)
   {
     const auto curr_ped_stamp = this->get_clock()->now();
-    // save values from previous iteration
-    // make a copy of the message
-    // start reading in message data
     const int n_peds = msg.pedestrians.size();
     // iterate through pedestrians
     for (int p = 0; p < n_peds; p++) {

@@ -137,7 +137,7 @@ private:
         const auto dt_ped = (ped_stamp - prev_ped_stamp).seconds();
         f2f_vel /= dt_ped;
       }
-      RCLCPP_INFO_STREAM(get_logger(), "Vel " << f2f_vel.at(0) << " " << f2f_vel.at(1));
+      // RCLCPP_INFO_STREAM(get_logger(), "Vel " << f2f_vel.at(0) << " " << f2f_vel.at(1));
       pa.pedestrians.at(i).velocity.linear.x = f2f_vel.at(0);
       pa.pedestrians.at(i).velocity.linear.y = f2f_vel.at(1);
     }
