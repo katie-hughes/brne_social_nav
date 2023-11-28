@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 
+#include <armadillo>
+
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "sensor_msgs/msg/camera_info.hpp"
@@ -25,7 +27,7 @@ class ConvertPeds : public rclcpp::Node
 {
 public:
   ConvertPeds()
-  : Node("convert_zed")
+  : Node("convert_zed"), n_prev_peds{0}
   {
     zed_sub_ = create_subscription<zed_interfaces::msg::ObjectsStamped>(
       "zed/zed_node/obj_det/objects", 10,
@@ -66,13 +68,23 @@ private:
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr brne_odom_pub_;
   nav_msgs::msg::Odometry brne_odom;
 
+  arma::mat ped_array;
+  arma::mat prev_ped_array;
+  int n_prev_peds;
+  int n_peds;
+
+  rclcpp::Time prev_ped_stamp;
+  rclcpp::Time ped_stamp;
+
   void zed_cb(const zed_interfaces::msg::ObjectsStamped & msg)
   {
     crowd_nav_interfaces::msg::PedestrianArray pa;
-    pa.header.stamp = this->get_clock()->now(); // msg.header.stamp;
-    const int n_peds = msg.objects.size();
+    ped_stamp = msg.header.stamp; // this->get_clock()->now();
+
+    pa.header.stamp = ped_stamp;
+    const int n_peds_msg = msg.objects.size();
     // RCLCPP_INFO_STREAM(get_logger(), "\n\nMESSAGE");
-    for (int i = 0; i < n_peds; i++) {
+    for (int i = 0; i < n_peds_msg; i++) {
       const auto p = msg.objects.at(i);
       // These positions are in zed frame. Need to be converted into BRNE frame.
       // frame id is always zed_left_camera_frame
@@ -103,7 +115,38 @@ private:
         RCLCPP_INFO_STREAM(get_logger(), "Could not transform");
       }
     }
+
+    n_peds = pa.pedestrians.size();
+    ped_array = arma::mat(n_peds, 2, arma::fill::zeros);
+    arma::mat for_compare(n_prev_peds, 2, arma::fill::zeros);
+    for (int i=0; i<n_peds; i++){
+      // do the frame to frame velocity transformation
+      const auto ped = pa.pedestrians.at(i);
+      ped_array.at(i, 0) = ped.pose.position.x;
+      ped_array.at(i, 1) = ped.pose.position.y;
+      arma::rowvec f2f_vel(2, arma::fill::zeros);
+      if (n_prev_peds > 0){
+        const arma::vec xs(n_prev_peds, arma::fill::value(ped.pose.position.x));
+        const arma::vec ys(n_prev_peds, arma::fill::value(ped.pose.position.y));
+        for_compare.col(0) = xs;
+        for_compare.col(1) = ys;
+        arma::mat difference = prev_ped_array - for_compare;
+        auto norm = arma::vecnorm(difference, 2, 1);
+        const auto prev_association_index = norm.index_min();
+        f2f_vel = ped_array.row(i) - prev_ped_array.row(prev_association_index);
+        const auto dt_ped = (ped_stamp - prev_ped_stamp).seconds();
+        f2f_vel /= dt_ped;
+      }
+      RCLCPP_INFO_STREAM(get_logger(), "Vel " << f2f_vel.at(0) << " " << f2f_vel.at(1));
+      pa.pedestrians.at(i).velocity.linear.x = f2f_vel.at(0);
+      pa.pedestrians.at(i).velocity.linear.y = f2f_vel.at(1);
+    }
     pedestrian_pub_->publish(pa);
+
+    // update previous values
+    prev_ped_stamp = ped_stamp;
+    prev_ped_array = ped_array;
+    n_prev_peds = n_peds;
   }
 
   void timer_callback()

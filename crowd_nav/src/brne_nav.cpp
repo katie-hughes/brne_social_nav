@@ -249,7 +249,7 @@ private:
 
   void pedestrians_cb(const crowd_nav_interfaces::msg::PedestrianArray & msg)
   {
-    curr_ped_stamp = this->get_clock()->now();
+    curr_ped_stamp = msg.header.stamp; // this->get_clock()->now();
     // save values from previous iteration
     prev_ped_array = ped_array;
     n_prev_peds = n_peds;
@@ -280,8 +280,8 @@ private:
         const auto prev_association_index = norm.index_min();
         f2f_vel = ped_array.row(p) - prev_ped_array.row(prev_association_index);
         const auto dt_ped = (curr_ped_stamp - last_ped_stamp).seconds();
-        if (dt_ped < 0.001){
-          // RCLCPP_INFO_STREAM(get_logger(), "\n\nDO NOT TRUST\n\n");
+        if (dt_ped < 0.05){
+          RCLCPP_INFO_STREAM(get_logger(), "ZERO: " << dt_ped);
           // zero this because the dt is too small to say anything intelligent
           f2f_vel *= 0;
         } else {

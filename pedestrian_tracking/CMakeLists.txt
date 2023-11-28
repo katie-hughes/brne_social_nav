@@ -24,6 +24,10 @@ find_package(image_geometry REQUIRED)
 find_package(crowd_nav_interfaces REQUIRED)
 find_package(zed_interfaces REQUIRED)
 
+find_package(Armadillo REQUIRED)
+include_directories(${ARMADILLO_INCLUDE_DIRS})
+
+
 add_executable(simulate_pedestrians src/simulate_pedestrians.cpp)
 ament_target_dependencies(simulate_pedestrians
   rclcpp
@@ -67,6 +71,7 @@ add_executable(convert_zed src/convert_zed.cpp)
   crowd_nav_interfaces
   zed_interfaces)
 
+target_link_libraries(convert_zed ${ARMADILLO_LIBRARIES} "${cpp_typesupport_target}")
 
 add_executable(simulate_odom src/simulate_odom.cpp)
   ament_target_dependencies(simulate_odom
