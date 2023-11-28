@@ -73,7 +73,7 @@ Visualization Manager:
         Alpha: 0.30000001192092896
         Axes Length: 1
         Axes Radius: 0.10000000149011612
-        Color: 255; 25; 0
+        Color: 154; 153; 150
         Head Length: 0.10000000149011612
         Head Radius: 0.10000000149011612
         Shaft Length: 0.20000000298023224
@@ -102,7 +102,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz_default_plugins/Path
-      Color: 25; 255; 0
+      Color: 143; 240; 164
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -151,7 +151,7 @@ Visualization Manager:
       Enabled: true
       Name: Walls
       Namespaces:
-        {}
+        "": true
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -198,7 +198,7 @@ Visualization Manager:
         Alpha: 1
         Axes Length: 1
         Axes Radius: 0.10000000149011612
-        Color: 26; 95; 180
+        Color: 143; 240; 164
         Head Length: 0.10000000149011612
         Head Radius: 0.10000000149011612
         Shaft Length: 0.20000000298023224
@@ -216,7 +216,7 @@ Visualization Manager:
       Enabled: true
       Name: BRNE Peds
       Namespaces:
-        {}
+        "": true
       Topic:
         Depth: 5
         Durability Policy: Volatile

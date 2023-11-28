@@ -406,7 +406,7 @@ private:
         std::vector<double>{goal.pose.position.x,
           goal.pose.position.y});
     } else {
-      goal_vec = arma::rowvec(std::vector<double>{6.0, 0.0});
+      goal_vec = arma::rowvec(std::vector<double>{10.0, 0.0});
     }
 
     // get the controls to go to the goal

@@ -8,6 +8,9 @@
 namespace brne {
 
     TEST_CASE("one_static_ped", "brne"){
+
+        // arma::arma_rng::set_seed_random();
+
         int n_steps =         5;
         int n_samples =       16;
 

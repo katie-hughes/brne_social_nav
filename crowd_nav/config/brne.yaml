@@ -12,7 +12,7 @@
     kernel_a2: 0.2  # control the "width/spreadness" of trajectory samples. Larger the value is, more spread the trajectory samples are.
     cost_a1: 4.0  # control the safety zone, smaller the value is, more conversative the robot will be.
     cost_a2: 1.0  # control the safety zone, larger the value is, more conservative the robot will be.
-    cost_a3: 80.0  #  control the safety penalty weight, larger the value is, more conservative the robot will be.
+    cost_a3: 1.0  #  control the safety penalty weight, larger the value is, more conservative the robot will be.
     ped_sample_scale: 0.1  # pedestrian's willingness for cooperation, default value is 1.0, the smaller it is, the less the robot would expect the pedestrians to make space for it
     ad: -5.0  # "aggressiveness" of the optimal controller, the more negative ad is, the more aggressive the robot will be on chasing the way points (might leads to jerky or aggressive behavior)
     R_lin: 1.0  # control penalty weight on linear velocity, the larger it is, the smoother the linear motion will be, but way point tracking accuracy might be compromised
