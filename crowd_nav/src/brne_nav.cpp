@@ -125,7 +125,6 @@ public:
     cmd_buf_pub_ = create_publisher<crowd_nav_interfaces::msg::TwistArray>("cmd_buf", 10);
     path_pub_ = create_publisher<nav_msgs::msg::Path>("/optimal_path", 10);
     walls_pub_ = create_publisher<visualization_msgs::msg::MarkerArray>("/walls", 10);
-    brne_peds_pub_ = create_publisher<visualization_msgs::msg::MarkerArray>("/brne_peds", 10);
 
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -143,16 +142,10 @@ private:
     nominal_lin_vel, close_stop_threshold;
   int maximum_agents, n_samples, n_steps;
 
-  int n_peds = 0;
-  int n_prev_peds = 0;
-
   brne::BRNE brne{};
   brne::TrajGen trajgen{};
 
   rclcpp::TimerBase::SharedPtr timer_;
-
-  arma::mat prev_ped_array;
-  arma::mat ped_array;
 
   crowd_nav_interfaces::msg::PedestrianArray ped_buffer;
   crowd_nav_interfaces::msg::PedestrianArray selected_peds;
@@ -173,14 +166,10 @@ private:
   rclcpp::Publisher<crowd_nav_interfaces::msg::TwistArray>::SharedPtr cmd_buf_pub_;
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr path_pub_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr walls_pub_;
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr brne_peds_pub_;
 
   bool goal_set;
   bool walls_published;
   geometry_msgs::msg::PoseStamped goal;
-
-  rclcpp::Time last_ped_stamp;
-  rclcpp::Time curr_ped_stamp;
 
   void pub_walls()
   {
@@ -249,118 +238,28 @@ private:
 
   void pedestrians_cb(const crowd_nav_interfaces::msg::PedestrianArray & msg)
   {
-    curr_ped_stamp = msg.header.stamp; // this->get_clock()->now();
+    const auto curr_ped_stamp = this->get_clock()->now();
     // save values from previous iteration
-    prev_ped_array = ped_array;
-    n_prev_peds = n_peds;
     // make a copy of the message
-    crowd_nav_interfaces::msg::PedestrianArray peds = msg;
     // start reading in message data
-    n_peds = peds.pedestrians.size();
-    ped_array = arma::mat(n_peds, 2, arma::fill::zeros);
+    const int n_peds = msg.pedestrians.size();
     // iterate through pedestrians
-    arma::mat for_compare(n_prev_peds, 2, arma::fill::zeros);
     for (int p = 0; p < n_peds; p++) {
-      auto ped = peds.pedestrians.at(p);
-      // RCLCPP_INFO_STREAM(get_logger(), "Ped: " << ped.pose.position.x << "," << ped.pose.position.y);
-      ped_array.at(p, 0) = ped.pose.position.x;
-      ped_array.at(p, 1) = ped.pose.position.y;
-      // make a matrix that looks like
-      // x y
-      // x y
-      // ... number of rows = number of pedestrians.
-      arma::rowvec f2f_vel(2, arma::fill::zeros);
-      if (n_prev_peds > 0) {
-        arma::vec xs(n_prev_peds, arma::fill::value(ped.pose.position.x));
-        arma::vec ys(n_prev_peds, arma::fill::value(ped.pose.position.y));
-        for_compare.col(0) = xs;
-        for_compare.col(1) = ys;
-        arma::mat difference = prev_ped_array - for_compare;
-        auto norm = arma::vecnorm(difference, 2, 1);
-        const auto prev_association_index = norm.index_min();
-        f2f_vel = ped_array.row(p) - prev_ped_array.row(prev_association_index);
-        const auto dt_ped = (curr_ped_stamp - last_ped_stamp).seconds();
-        if (dt_ped < 0.05){
-          RCLCPP_INFO_STREAM(get_logger(), "ZERO: " << dt_ped);
-          // zero this because the dt is too small to say anything intelligent
-          f2f_vel *= 0;
-        } else {
-          f2f_vel /= dt_ped;
-        }
-        // staircase truncation of f2f vel
-        const auto abs_speed = arma::norm(f2f_vel);
-        // RCLCPP_INFO_STREAM(get_logger(), "Abs speed " << abs_speed);
-        if (abs_speed <= 0.3){
-          // assume standing still
-          f2f_vel *= 0;
-        } else if ((abs_speed > 0.3) && (abs_speed <= 0.6)){
-          f2f_vel *= (0.3/abs_speed);
-        }
-        // RCLCPP_INFO_STREAM(get_logger(), "f2f vel: " << f2f_vel << " Associated with " << prev_association_index << " dt " << dt_ped);
-      }
-      peds.pedestrians.at(p).velocity.linear.x = f2f_vel.at(0);
-      peds.pedestrians.at(p).velocity.linear.y = f2f_vel.at(1);
+      auto ped = msg.pedestrians.at(p);
       // add to pedestrian buffer
       // first have to do some error checking to make sure the index is in bounds
       // initially length is 0 and I want to append pedestrian 0
       // while(0<1)go through
       // while(1<1)BREAK
       // try this to fix time synnchronization issues
-      peds.pedestrians.at(p).header.stamp = curr_ped_stamp;
+      ped.header.stamp = curr_ped_stamp;
       while (static_cast<int>(ped_buffer.pedestrians.size()) < static_cast<int>(ped.id + 1)) {
         crowd_nav_interfaces::msg::Pedestrian blank_ped;
         blank_ped.id = ped_buffer.pedestrians.size();
         ped_buffer.pedestrians.push_back(blank_ped);
       }
-      ped_buffer.pedestrians.at(ped.id) = peds.pedestrians.at(p);
+      ped_buffer.pedestrians.at(ped.id) = ped;
     }
-    last_ped_stamp = curr_ped_stamp;
-    // RCLCPP_INFO_STREAM(get_logger(), "ped array\n" << ped_array);
-  }
-
-  void pub_ped_markers(){
-    // plot selected peds
-    const auto now = this->get_clock()->now();
-    const auto thickness = 0.05;
-    const auto transparency = 0.5;
-    const auto velocity_scale = 1.0;
-    const auto base_vel = 0.05;
-    visualization_msgs::msg::MarkerArray ma;
-    for (int i=0; i<static_cast<int>(selected_peds.pedestrians.size()); i++){
-      const auto pose_i = selected_peds.pedestrians.at(i).pose.position;
-      const auto vel_i = selected_peds.pedestrians.at(i).velocity.linear;
-      const auto vel_abs = dist(0, 0, vel_i.x, vel_i.y);
-      // create an arrow marker
-      visualization_msgs::msg::Marker ped_i;
-      ped_i.header.frame_id = "brne_odom";
-      ped_i.header.stamp = now;
-      ped_i.id = i;
-      ped_i.type = 0;   // arrow
-      ped_i.action = 0;
-      // pose is the end of the arrow
-      ped_i.pose.position.x = pose_i.x;
-      ped_i.pose.position.y = pose_i.y;
-      ped_i.pose.position.z = 0.01;
-      // orientation should be the velocity direction
-      const auto phi = atan2(vel_i.y, vel_i.x);
-      tf2::Quaternion q;
-      q.setRPY(0, 0, phi);
-      ped_i.pose.orientation.w = q.w();
-      ped_i.pose.orientation.x = q.x();
-      ped_i.pose.orientation.y = q.y();
-      ped_i.pose.orientation.z = q.z();
-      // scale is the size of the arrow, proportional to velocity
-      ped_i.scale.x = velocity_scale*vel_abs + base_vel;
-      ped_i.scale.y = thickness;
-      ped_i.scale.z = 0.01;
-      ped_i.color.a = transparency;
-      ped_i.color.r = 1.0;
-      ped_i.color.g = 0.67;
-      ped_i.color.b = 0.0;
-      ped_i.lifetime.sec = 1;
-      ma.markers.push_back(ped_i);
-    }
-    brne_peds_pub_->publish(ma);
   }
 
   void timer_callback()
@@ -397,8 +296,6 @@ private:
 
     auto n_peds = static_cast<int>(selected_peds.pedestrians.size());
     auto n_agents = std::min(maximum_agents, n_peds + 1);
-
-    pub_ped_markers();
 
     arma::rowvec goal_vec;
     if (goal_set) {
@@ -500,7 +397,9 @@ private:
       if (mean_weights != 0) {
         weights.row(0) /= mean_weights;
       } else {
-        RCLCPP_INFO_STREAM(get_logger(), "E-Stop from safety mask!");
+        if (goal_set) {
+          RCLCPP_INFO_STREAM(get_logger(), "E-Stop from safety mask!");
+        }
       }
 
       const auto ulist = trajgen.get_ulist();

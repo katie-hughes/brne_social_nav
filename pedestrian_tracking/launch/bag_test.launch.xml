@@ -4,6 +4,14 @@
     <node pkg="pedestrian_tracking" exec="convert_zed">
     </node>
 
+    <!-- publish pedestrian markers regardless -->
+    <node pkg="pedestrian_tracking" exec="show_pedestrians">
+    </node>
+
+    <!-- simulate cmd_vel to odom updates -->
+    <node pkg="pedestrian_tracking" exec="simulate_odom" >
+    </node>
+
     <!-- Add transform between odom to brne_odom -->
     <node pkg="tf2_ros" exec="static_transform_publisher" 
           args="--frame-id odom
@@ -62,10 +70,6 @@
               --roll 0
               --pitch 0
               --yaw 0" >
-    </node>
-
-    <!-- publish pedestrian markers regardless -->
-    <node pkg="pedestrian_tracking" exec="show_pedestrians">
     </node>
 
 </launch>
