@@ -388,6 +388,14 @@ private:
       // BRNE OPTIMIZATION 
       auto weights = brne.brne_nav(xtraj_samples, ytraj_samples);
 
+      if (weights.is_empty()){
+        if (goal_set){
+          RCLCPP_INFO_STREAM(get_logger(), "No path found -- stopping navigation to this goal.");
+          goal_set = false;
+        }
+        return;
+      }
+
       // apply the safety mask to the weights for the robot
       weights.row(0) %= safety_mask;
       const double mean_weights = arma::mean(weights.row(0));

@@ -100,7 +100,8 @@ namespace brne
       /// @brief Compute BRNE weights for optimal trajectory
       /// @param xtraj_samples x trajectory samples, size (n_agents*n_samples) x n_steps
       /// @param ytraj_samples y trajectory samples, size (n_agents*n_samples) x n_steps
-      /// @return optimal weights of size n_agents x n_samples
+      /// @return optimal weights of size n_agents x n_samples. If the size is 0x0, 
+      /// there are no possible paths forward.
       arma::mat brne_nav(arma::mat xtraj_samples, arma::mat ytraj_samples);
       /// @brief Compute optimal trajectories from the BRNE weights
       /// @param x_nominal nominal x trajectory

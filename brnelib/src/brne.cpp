@@ -226,7 +226,11 @@ namespace brne
     // std::cout << "Final weights\n" << weights << std::endl;
 
     collision_check(ytraj_samples);
-    // TODO: add a check to make sure that at least some of these are true for agent.
+
+    // if coll_mask.row(0) is all 0s, then we are going out of bounds.
+    if (coll_mask.row(0).is_zero()){
+      return arma::mat{};
+    }
 
     for (int a=0; a<n_agents; a++){
       // element wise multiplication
@@ -235,7 +239,6 @@ namespace brne
       auto masked_weights = agent_weights % agent_mask;
       weights.row(a) = masked_weights / arma::mean(masked_weights);
     }
-
     return weights;
   }
 
