@@ -228,7 +228,7 @@ private:
 
   void check_goal()
   {
-    auto dist_to_goal =
+    const auto dist_to_goal =
       dist(robot_pose.x, robot_pose.y, goal.pose.position.x, goal.pose.position.y);
     if (dist_to_goal < goal_threshold) {
       RCLCPP_INFO_STREAM(get_logger(), "Goal Reached!");
@@ -245,10 +245,7 @@ private:
       auto ped = msg.pedestrians.at(p);
       // add to pedestrian buffer
       // first have to do some error checking to make sure the index is in bounds
-      // initially length is 0 and I want to append pedestrian 0
-      // while(0<1)go through
-      // while(1<1)BREAK
-      // try this to fix time synnchronization issues
+      // fix time synchronization issues
       ped.header.stamp = curr_ped_stamp;
       while (static_cast<int>(ped_buffer.pedestrians.size()) < static_cast<int>(ped.id + 1)) {
         crowd_nav_interfaces::msg::Pedestrian blank_ped;
@@ -263,36 +260,30 @@ private:
   {
     auto start = this->get_clock()->now();
     robot_cmds.twists.clear();
-    // RCLCPP_INFO_STREAM(get_logger(), "\n\nTimer Tick");
-    // RCLCPP_INFO_STREAM(get_logger(), "Robot @: " << robot_pose.x << " " << robot_pose.y << " " << robot_pose.theta);
-    // read in pedestrian buffer
     builtin_interfaces::msg::Time current_timestamp;
     current_timestamp = this->get_clock()->now();
     auto current_time = current_timestamp.sec + 1e-9 * current_timestamp.nanosec;
-    // RCLCPP_INFO_STREAM(get_logger(), "Current time: " << current_timestamp.sec << "s " << current_timestamp.nanosec << "ns ");
-
     selected_peds.pedestrians.clear();
+
     std::vector<double> dists_to_peds;
     for (auto p:ped_buffer.pedestrians) {
       auto ped_time = p.header.stamp.sec + 1e-9 * p.header.stamp.nanosec;
       auto dt = current_time - ped_time;
       // don't consider this pedestrian if it came in too long ago.
       if (dt > people_timeout) {
-        // RCLCPP_INFO_STREAM(get_logger(), "Ignoring pedestrian " << p.id);
         continue;
       }
       // compute distance to the pedestrian from the robot
       auto dist_to_ped = dist(robot_pose.x, robot_pose.y, p.pose.position.x, p.pose.position.y);
       if (dist_to_ped > brne_activate_threshold) {
-        // RCLCPP_INFO_STREAM(get_logger(), "Pedestrian " << p.id << " too far away");
         continue;
       }
       dists_to_peds.push_back(dist_to_ped);
       selected_peds.pedestrians.push_back(p);
     }
 
-    auto n_peds = static_cast<int>(selected_peds.pedestrians.size());
-    auto n_agents = std::min(maximum_agents, n_peds + 1);
+    const auto n_peds = static_cast<int>(selected_peds.pedestrians.size());
+    const auto n_agents = std::min(maximum_agents, n_peds + 1);
 
     arma::rowvec goal_vec;
     if (goal_set) {
@@ -310,13 +301,13 @@ private:
     } else {
       theta_a += M_PI_2;
     }
-    arma::rowvec axis_vec(std::vector<double>{cos(theta_a), sin(theta_a)});
-    arma::rowvec pose_vec(std::vector<double>{robot_pose.x, robot_pose.y});
-    arma::rowvec vec_to_goal = goal_vec - pose_vec;
-    auto dist_to_goal = arma::norm(vec_to_goal);
-    auto proj_len =
+    const arma::rowvec axis_vec(std::vector<double>{cos(theta_a), sin(theta_a)});
+    const arma::rowvec pose_vec(std::vector<double>{robot_pose.x, robot_pose.y});
+    const arma::rowvec vec_to_goal = goal_vec - pose_vec;
+    const auto dist_to_goal = arma::norm(vec_to_goal);
+    const auto proj_len =
       arma::dot(axis_vec, vec_to_goal) / arma::dot(vec_to_goal, vec_to_goal) * dist_to_goal;
-    auto radius = 0.5 * dist_to_goal / proj_len;
+    const auto radius = 0.5 * dist_to_goal / proj_len;
     // find nominal linear and angular velocity
     double nominal_ang_vel = 0;
     if (robot_pose.theta > 0.0) {
@@ -324,12 +315,12 @@ private:
     } else {
       nominal_ang_vel = nominal_lin_vel / radius;
     }
-    auto traj_samples = trajgen.traj_sample(nominal_lin_vel, nominal_ang_vel, robot_pose.toVec());
+    const auto traj_samples = trajgen.traj_sample(nominal_lin_vel, nominal_ang_vel, robot_pose.toVec());
 
     if (n_agents > 1) {
       // create pedestrian samples
-      auto x_pts = brne.mvn_sample_normal(n_agents - 1);
-      auto y_pts = brne.mvn_sample_normal(n_agents - 1);
+      const auto x_pts = brne.mvn_sample_normal(n_agents - 1);
+      const auto y_pts = brne.mvn_sample_normal(n_agents - 1);
 
       // these have been filled in
       arma::mat xtraj_samples(n_agents * n_samples, n_steps, arma::fill::zeros);
@@ -337,7 +328,7 @@ private:
 
       // pick only the closest pedestrians to interact with
       // dists_to_peds and selected_peds arrays
-      auto closest_idxs =
+      const auto closest_idxs =
         arma::conv_to<arma::vec>::from(arma::sort_index(arma::vec(dists_to_peds)));
       for (int p = 0; p < (n_agents - 1); p++) {
         auto ped = selected_peds.pedestrians.at(closest_idxs.at(p));
@@ -388,7 +379,8 @@ private:
       // BRNE OPTIMIZATION 
       auto weights = brne.brne_nav(xtraj_samples, ytraj_samples);
 
-      if (weights.is_empty()){
+      // check if a solution was not found.
+      if (weights.row(0).is_zero()){
         if (goal_set){
           RCLCPP_INFO_STREAM(get_logger(), "No path found -- stopping navigation to this goal.");
           goal_set = false;
@@ -396,7 +388,7 @@ private:
         return;
       }
 
-      // apply the safety mask to the weights for the robot
+      // apply the safety mask to the weights for the robot to stop if a pedestrian is too close
       weights.row(0) %= safety_mask;
       const double mean_weights = arma::mean(weights.row(0));
       if (mean_weights != 0) {

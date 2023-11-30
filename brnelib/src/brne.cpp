@@ -78,36 +78,32 @@ namespace brne
   void BRNE::compute_Lmat(){
     cov_mat.reset();
     cov_Lmat.reset();
-    arma::vec tlist = arma::linspace<arma::vec>(0, (n_steps-1)*dt, n_steps);
-    arma::vec train_ts(1, arma::fill::value(tlist.at(0)));
-    arma::vec train_noise(1, arma::fill::value(1e-3));
+    const arma::vec tlist = arma::linspace<arma::vec>(0, (n_steps-1)*dt, n_steps);
+    const arma::vec train_ts(1, arma::fill::value(tlist.at(0)));
+    const arma::vec train_noise(1, arma::fill::value(1e-3));
 
     auto cm_11 = compute_kernel_mat(train_ts, train_ts);
     cm_11 += train_noise.diag();
-    auto cm_12 = compute_kernel_mat(tlist, train_ts);
-    auto cm_22 = compute_kernel_mat(tlist, tlist);
+    const auto cm_12 = compute_kernel_mat(tlist, train_ts);
+    const auto cm_22 = compute_kernel_mat(tlist, tlist);
     // use left division to do the inverse
-    // do this with solve instead. arma::solve
+    // TODO do this with solve instead. arma::solve. instead of doing the inverse
     cov_mat = cm_22 - cm_12 * cm_11.i() * cm_12.t();
-    // smallest eigenvalue
-    const auto eigenvalue = arma::eig_sym(cov_mat);
     cov_mat += arma::eye(cov_mat.n_rows,cov_mat.n_rows) * 1e-6;
     auto success = arma::chol(cov_Lmat, cov_mat, "lower");
-    // std::cout << "Cholesky success? " << success << std::endl;
     while (!success){
       cov_mat += arma::eye(cov_mat.n_rows,cov_mat.n_rows) * 1e-6;
       success = arma::chol(cov_Lmat, cov_mat, "lower");
-      // std::cout << "Cholesky retry success? " << success << std::endl;
     }
   }
 
   arma::mat BRNE::mvn_sample_normal(){
-    arma::mat res(n_steps, n_samples, arma::fill::randn);
+    const arma::mat res(n_steps, n_samples, arma::fill::randn);
     return (cov_Lmat * res).t();
   }
 
   arma::mat BRNE::mvn_sample_normal(int n_peds){
-    arma::mat res(n_steps, n_samples*n_peds, arma::fill::randn);
+    const arma::mat res(n_steps, n_samples*n_peds, arma::fill::randn);
     return (cov_Lmat * res).t();
   }
   
@@ -129,7 +125,7 @@ namespace brne
 
   void BRNE::compute_costs(arma::mat xtraj, arma::mat ytraj){
     costs.reset();
-    auto size = n_agents*n_samples;
+    const auto size = n_agents*n_samples;
     arma::mat new_costs(size, size, arma::fill::zeros);
     #pragma omp parallel for collapse(2)
     for (auto i=0; i<size; i++){
@@ -158,6 +154,7 @@ namespace brne
 
   void BRNE::collision_check(arma::mat ytraj){
     // only keep where y_min < y_traj < y_max
+    // TODO could probably do this with vector operations instead of two for loops
     coll_mask.reset();
     arma::vec valid(ytraj.n_rows);
     for (int r=0; r<static_cast<int>(ytraj.n_rows); r++){
@@ -177,9 +174,8 @@ namespace brne
 
   void BRNE::update_weights(){
     for (int i=0; i<n_agents; i++){
-      auto row = arma::conv_to<arma::rowvec>::from(index_table.row(i));
+      const auto row = arma::conv_to<arma::rowvec>::from(index_table.row(i));
       for (int j=0; j<n_samples; j++){
-        auto c = 0.0;
         auto idx1 = all_pts.at(row.at(0), j);
         arma::mat mat_temp(n_agents-1, n_samples, arma::fill::zeros);
         // #pragma omp parallel for collapse(2)
@@ -189,7 +185,7 @@ namespace brne
           // element wise multiply them together
           mat_temp.row(k) = costs(idx1, arma::span(all_pts.at(row.at(k+1), 0), all_pts.at(row.at(k+1), n_samples-1))) % weights.row(row.at(k+1));
         }
-        c += arma::mean(arma::mean(mat_temp));
+        const auto c = arma::mean(arma::mean(mat_temp));
         weights.at(i,j) = exp(-1.0 * c);
       }
       weights.row(i) /= arma::mean(weights.row(i));
@@ -227,17 +223,16 @@ namespace brne
 
     collision_check(ytraj_samples);
 
-    // if coll_mask.row(0) is all 0s, then we are going out of bounds.
-    if (coll_mask.row(0).is_zero()){
-      return arma::mat{};
-    }
-
     for (int a=0; a<n_agents; a++){
+      const auto agent_mask = arma::conv_to<arma::rowvec>::from(coll_mask.row(a));
+      const auto agent_weights = arma::conv_to<arma::rowvec>::from(weights.row(a));
       // element wise multiplication
-      auto agent_weights = arma::conv_to<arma::rowvec>::from(weights.row(a));
-      auto agent_mask = arma::conv_to<arma::rowvec>::from(coll_mask.row(a));
-      auto masked_weights = agent_weights % agent_mask;
-      weights.row(a) = masked_weights / arma::mean(masked_weights);
+      const auto masked_weights = agent_weights % agent_mask;
+      const auto mean_masked = arma::mean(masked_weights);
+      weights.row(a) = masked_weights;
+      if (mean_masked != 0.0){
+        weights.row(a) /= mean_masked;
+      }
     }
     return weights;
   }
@@ -246,7 +241,7 @@ namespace brne
                                                      arma::mat x_samples, arma::mat y_samples){
     std::vector<traj> res;
     for (int a=0; a<n_agents; a++){
-      auto agent_weights = arma::conv_to<arma::vec>::from(weights.row(a));
+      const auto agent_weights = arma::conv_to<arma::vec>::from(weights.row(a));
       auto agent_x_samples = arma::conv_to<arma::mat>::from(x_samples.submat(a*n_samples, 0, (a+1)*n_samples-1, n_steps-1));
       auto agent_y_samples = arma::conv_to<arma::mat>::from(y_samples.submat(a*n_samples, 0, (a+1)*n_samples-1, n_steps-1));
       for (int i=0; i<n_samples; i++){
@@ -273,21 +268,21 @@ namespace brne
   {}
 
   std::vector<arma::mat> TrajGen::traj_sample(double lin_vel, double ang_vel, arma::rowvec state){
-    arma::vec lin_vel_vec(n_steps, arma::fill::value(lin_vel));
-    arma::vec ang_vel_vec(n_steps, arma::fill::value(ang_vel));
+    const arma::vec lin_vel_vec(n_steps, arma::fill::value(lin_vel));
+    const arma::vec ang_vel_vec(n_steps, arma::fill::value(ang_vel));
     arma::mat nominal_commands(n_steps, 2, arma::fill::zeros);
     nominal_commands.col(0) = lin_vel_vec;
     nominal_commands.col(1) = ang_vel_vec;
 
-    auto n_per_dim = static_cast<int>(sqrt(n_samples));
-    auto n_per_lin = static_cast<int>(n_per_dim*2);
-    auto n_per_ang = static_cast<int>(n_per_dim/2);
+    const auto n_per_dim = static_cast<int>(sqrt(n_samples));
+    const auto n_per_lin = static_cast<int>(n_per_dim*2);
+    const auto n_per_ang = static_cast<int>(n_per_dim/2);
 
-    auto lin_offset = std::min(lin_vel_vec.min(), max_lin_vel-lin_vel_vec.max());
-    auto ang_offset = std::min(max_ang_vel + ang_vel_vec.min(), max_ang_vel-ang_vel_vec.max());
+    const auto lin_offset = std::min(lin_vel_vec.min(), max_lin_vel-lin_vel_vec.max());
+    const auto ang_offset = std::min(max_ang_vel + ang_vel_vec.min(), max_ang_vel-ang_vel_vec.max());
 
-    auto lin_ls = arma::linspace<arma::vec>(-lin_offset, lin_offset, n_per_lin);
-    auto ang_ls = arma::linspace<arma::vec>(-ang_offset, ang_offset, n_per_ang);
+    const auto lin_ls = arma::linspace<arma::vec>(-lin_offset, lin_offset, n_per_lin);
+    const auto ang_ls = arma::linspace<arma::vec>(-ang_offset, ang_offset, n_per_ang);
 
     // want to get the combination of every single pair of lin/ang in these vectors
 
@@ -346,7 +341,7 @@ namespace brne
   arma::mat TrajGen::opt_controls(arma::rowvec goal){
     arma::mat goal_mat(n_samples, 2, arma::fill::zeros);
     goal_mat.each_row() = goal;
-    auto opt_idx = (arma::vecnorm(end_pose - goal_mat, 2, 1)).index_min();
+    const auto opt_idx = (arma::vecnorm(end_pose - goal_mat, 2, 1)).index_min();
     arma::mat opt_cmds(n_steps, 2, arma::fill::zeros);
     opt_cmds.each_row() = ulist.row(opt_idx);
     return opt_cmds;
@@ -366,10 +361,10 @@ namespace brne
   }
 
   arma::mat TrajGen::dyn_step(arma::mat state, arma::mat controls){
-    arma::mat k1 = dt * dyn(state, controls);
-    arma::mat k2 = dt * dyn(state + 0.5*k1, controls);
-    arma::mat k3 = dt * dyn(state + 0.5*k2, controls);
-    arma::mat k4 = dt * dyn(state + k3, controls);
+    const arma::mat k1 = dt * dyn(state, controls);
+    const arma::mat k2 = dt * dyn(state + 0.5*k1, controls);
+    const arma::mat k3 = dt * dyn(state + 0.5*k2, controls);
+    const arma::mat k4 = dt * dyn(state + k3, controls);
 
     return state + (k1 + 2.0*k2 + 2.0*k3 + k4)/6.0;
   }
@@ -384,10 +379,10 @@ namespace brne
   }
 
   arma::rowvec TrajGen::dyn_step(arma::rowvec state, arma::rowvec controls){
-    arma::rowvec k1 = dt * dyn(state, controls);
-    arma::rowvec k2 = dt * dyn(state + 0.5*k1, controls);
-    arma::rowvec k3 = dt * dyn(state + 0.5*k2, controls);
-    arma::rowvec k4 = dt * dyn(state + k3, controls);
+    const arma::rowvec k1 = dt * dyn(state, controls);
+    const arma::rowvec k2 = dt * dyn(state + 0.5*k1, controls);
+    const arma::rowvec k3 = dt * dyn(state + 0.5*k2, controls);
+    const arma::rowvec k4 = dt * dyn(state + k3, controls);
     return state + (k1 + 2.0*k2 + 2.0*k3 + k4)/6.0;
   }
 
