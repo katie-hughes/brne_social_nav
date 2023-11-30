@@ -43,7 +43,7 @@ class PathPlan : public rclcpp::Node
 {
 public:
   PathPlan()
-  : Node("brne"), goal_set{false}, walls_published{false}
+  : Node("brne"), goal_set{false}, walls_generated{false}
   {
     // define parameters
     declare_parameter("replan_freq", 1.0);
@@ -167,38 +167,42 @@ private:
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr path_pub_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr walls_pub_;
 
+  visualization_msgs::msg::MarkerArray wall_markers;
+
   bool goal_set;
-  bool walls_published;
+  bool walls_generated;
   geometry_msgs::msg::PoseStamped goal;
 
   void pub_walls()
   {
-    const auto now = this->get_clock()->now();
-    const auto height = 1.0;
-    const auto length = 10.0;
-    const auto thickness = 0.01;
-    const auto transparency = 0.2;
-    visualization_msgs::msg::MarkerArray ma;
-    for (int i = 0; i < 2; i++) {
-      visualization_msgs::msg::Marker wall;
-      wall.header.frame_id = "brne_odom";
-      wall.header.stamp = now;
-      wall.id = i;
-      wall.type = 1;   // cube
-      wall.action = 0;
-      wall.pose.position.x = 0.5 * length - 1.0;
-      wall.pose.position.y = y_min;
-      wall.pose.position.z = 0.5 * height;
-      wall.color.a = transparency;
-      wall.color.b = 1.0;
-      wall.scale.x = length;
-      wall.scale.y = thickness;
-      wall.scale.z = height;
-      ma.markers.push_back(wall);
+    if (!walls_generated){
+      const auto height = 1.0;
+      const auto length = 10.0;
+      const auto thickness = 0.01;
+      const auto transparency = 0.2;
+      for (int i = 0; i < 2; i++) {
+        visualization_msgs::msg::Marker wall;
+        wall.header.frame_id = "brne_odom";
+        wall.id = i;
+        wall.type = 1;   // cube
+        wall.action = 0;
+        wall.pose.position.x = 0.5 * length - 1.0;
+        wall.pose.position.z = 0.5 * height;
+        wall.color.a = transparency;
+        wall.color.b = 1.0;
+        wall.scale.x = length;
+        wall.scale.y = thickness;
+        wall.scale.z = height;
+        wall_markers.markers.push_back(wall);
+      }
+      wall_markers.markers.at(0).pose.position.y = y_min;
+      wall_markers.markers.at(1).pose.position.y = y_max;
+      walls_generated = true;
     }
-    ma.markers.at(0).pose.position.y = y_min;
-    ma.markers.at(0).pose.position.y = y_max;
-    walls_pub_->publish(ma);
+    const auto now = this->get_clock()->now();
+    wall_markers.markers.at(0).header.stamp = now;
+    wall_markers.markers.at(1).header.stamp = now;
+    walls_pub_->publish(wall_markers);
   }
 
   void goal_cb(const geometry_msgs::msg::PoseStamped & msg)
