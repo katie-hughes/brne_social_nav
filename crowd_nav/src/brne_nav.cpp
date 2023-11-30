@@ -173,11 +173,11 @@ private:
 
   void pub_walls()
   {
-    auto now = this->get_clock()->now();
-    auto height = 1.0;
-    auto length = 10.0;
-    auto thickness = 0.01;
-    auto transparency = 0.2;
+    const auto now = this->get_clock()->now();
+    const auto height = 1.0;
+    const auto length = 10.0;
+    const auto thickness = 0.01;
+    const auto transparency = 0.2;
     visualization_msgs::msg::MarkerArray ma;
     for (int i = 0; i < 2; i++) {
       visualization_msgs::msg::Marker wall;
@@ -258,26 +258,33 @@ private:
 
   void timer_callback()
   {
-    auto start = this->get_clock()->now();
+    // record time at start for benchmarking speed
+    const auto start = this->get_clock()->now();
+
+    // clear leftover messages
     robot_cmds.twists.clear();
-    builtin_interfaces::msg::Time current_timestamp;
-    current_timestamp = this->get_clock()->now();
-    auto current_time = current_timestamp.sec + 1e-9 * current_timestamp.nanosec;
     selected_peds.pedestrians.clear();
 
+    // record time in seconds to compare to pedestrian stamp
+    const builtin_interfaces::msg::Time current_timestamp = this->get_clock()->now();
+    const auto current_time_sec = current_timestamp.sec + 1e-9 * current_timestamp.nanosec;
+
+    // find pedestrians to interact with from pedestrian buffer
     std::vector<double> dists_to_peds;
     for (auto p:ped_buffer.pedestrians) {
-      auto ped_time = p.header.stamp.sec + 1e-9 * p.header.stamp.nanosec;
-      auto dt = current_time - ped_time;
+      auto ped_time_sec = p.header.stamp.sec + 1e-9 * p.header.stamp.nanosec;
+      auto dt = current_time_sec - ped_time_sec;
       // don't consider this pedestrian if it came in too long ago.
       if (dt > people_timeout) {
         continue;
       }
       // compute distance to the pedestrian from the robot
       auto dist_to_ped = dist(robot_pose.x, robot_pose.y, p.pose.position.x, p.pose.position.y);
+      // dont' consider this pedestrian if it is too far away
       if (dist_to_ped > brne_activate_threshold) {
         continue;
       }
+      // pedestrian has been selected
       dists_to_peds.push_back(dist_to_ped);
       selected_peds.pedestrians.push_back(p);
     }
@@ -285,6 +292,8 @@ private:
     const auto n_peds = static_cast<int>(selected_peds.pedestrians.size());
     const auto n_agents = std::min(maximum_agents, n_peds + 1);
 
+    // grab the goal. if there is no goal set, visualize a "fake" goal at (10,0) which 
+    // should be a straight trajectory forward
     arma::rowvec goal_vec;
     if (goal_set) {
       goal_vec = arma::rowvec(
@@ -294,7 +303,7 @@ private:
       goal_vec = arma::rowvec(std::vector<double>{10.0, 0.0});
     }
 
-    // get the controls to go to the goal
+    // get the controls to go to the goal assuming a diff drive model
     auto theta_a = robot_pose.theta;
     if (robot_pose.theta > 0.0) {
       theta_a -= M_PI_2;
@@ -308,13 +317,15 @@ private:
     const auto proj_len =
       arma::dot(axis_vec, vec_to_goal) / arma::dot(vec_to_goal, vec_to_goal) * dist_to_goal;
     const auto radius = 0.5 * dist_to_goal / proj_len;
-    // find nominal linear and angular velocity
+    // find nominal linear and angular velocity for diff drive model
     double nominal_ang_vel = 0;
     if (robot_pose.theta > 0.0) {
       nominal_ang_vel = -nominal_lin_vel / radius;
     } else {
       nominal_ang_vel = nominal_lin_vel / radius;
     }
+
+    // do control-space sampling for the robot given these nominal commands
     const auto traj_samples = trajgen.traj_sample(nominal_lin_vel, nominal_ang_vel, robot_pose.toVec());
 
     if (n_agents > 1) {
@@ -322,14 +333,14 @@ private:
       const auto x_pts = brne.mvn_sample_normal(n_agents - 1);
       const auto y_pts = brne.mvn_sample_normal(n_agents - 1);
 
-      // these have been filled in
+      // Will need to fill these in with samples of the robot and pedestrian
       arma::mat xtraj_samples(n_agents * n_samples, n_steps, arma::fill::zeros);
       arma::mat ytraj_samples(n_agents * n_samples, n_steps, arma::fill::zeros);
 
       // pick only the closest pedestrians to interact with
-      // dists_to_peds and selected_peds arrays
       const auto closest_idxs =
         arma::conv_to<arma::vec>::from(arma::sort_index(arma::vec(dists_to_peds)));
+      // iterate through pedestrians, closest to farthest
       for (int p = 0; p < (n_agents - 1); p++) {
         auto ped = selected_peds.pedestrians.at(closest_idxs.at(p));
         arma::vec ped_vel(std::vector<double>{ped.velocity.linear.x, ped.velocity.linear.y});
@@ -342,7 +353,6 @@ private:
         arma::mat ped_ymean_mat(n_samples, n_steps, arma::fill::zeros);
         ped_xmean_mat.each_row() = ped_xmean;
         ped_ymean_mat.each_row() = ped_ymean;
-        // RCLCPP_INFO_STREAM(get_logger(), "Ped xmean mat\n" << ped_xmean_mat);
         // set submatrix in xtraj and ytraj samples.
         // submatrix ((p+1)*nsamples, (p+2)*nsamples) = xpoints(p*nsamples, (p+1)*nsamples) * speed_factor + ped_xmean
         xtraj_samples.submat((p + 1) * n_samples, 0, (p + 2) * n_samples - 1, n_steps - 1) =
@@ -376,35 +386,38 @@ private:
       auto closest_to_ped = arma::conv_to<arma::vec>::from(arma::min(robot_samples_to_ped, 1));
       auto safety_mask = arma::conv_to<arma::rowvec>::from(closest_to_ped > close_stop_threshold);
 
-      // BRNE OPTIMIZATION 
+      // brne optimization
       auto weights = brne.brne_nav(xtraj_samples, ytraj_samples);
 
-      // check if a solution was not found.
+      // check if a solution was not found for the robot (agent 0). 
+      // This means we are going out of bounds and should stop before we hit the wall
       if (weights.row(0).is_zero()){
         if (goal_set){
-          RCLCPP_INFO_STREAM(get_logger(), "No path found -- stopping navigation to this goal.");
+          RCLCPP_WARN_STREAM(get_logger(), "No path found -- stopping navigation to this goal.");
           goal_set = false;
         }
-        return;
-      }
-
-      // apply the safety mask to the weights for the robot to stop if a pedestrian is too close
-      weights.row(0) %= safety_mask;
-      const double mean_weights = arma::mean(weights.row(0));
-      if (mean_weights != 0) {
-        weights.row(0) /= mean_weights;
+        // return;
       } else {
-        if (goal_set) {
-          RCLCPP_INFO_STREAM(get_logger(), "E-Stop from safety mask!");
+         // apply the safety mask to the weights for the robot to stop if a pedestrian is too close
+        weights.row(0) %= safety_mask;
+        const double mean_weights = arma::mean(weights.row(0));
+        if (mean_weights != 0) {
+          weights.row(0) /= mean_weights;
+        } else {
+          if (goal_set) {
+            RCLCPP_WARN_STREAM(get_logger(), "E-STOP: Pedestrian too close!");
+          }
         }
       }
 
+      // compute the optimal commands using the BRNE weights
       const auto ulist = trajgen.get_ulist();
       const auto ulist_lin = arma::conv_to<arma::rowvec>::from(ulist.col(0));
       const auto ulist_ang = arma::conv_to<arma::rowvec>::from(ulist.col(1));
       const auto opt_cmds_lin = arma::mean(ulist_lin % weights.row(0));
       const auto opt_cmds_ang = arma::mean(ulist_ang % weights.row(0));
 
+      // publish the appropriate series of commands
       if (goal_set) {
         for (int i = 0; i < n_steps; i++) {
           geometry_msgs::msg::Twist tw;
@@ -426,9 +439,7 @@ private:
       opt_cmds.col(0) = arma::vec(n_steps, arma::fill::value(opt_cmds_lin));
       opt_cmds.col(1) = arma::vec(n_steps, arma::fill::value(opt_cmds_ang));
 
-      // RCLCPP_INFO_STREAM(get_logger(), "Opt cmds\n" << opt_cmds);
-
-      // compute the optimal path
+      // compute the optimal path for visualization
       const auto opt_traj = trajgen.sim_traj(robot_pose.toVec(), opt_cmds);
       optimal_path.header.stamp = current_timestamp;
       optimal_path.poses.clear();
@@ -483,8 +494,8 @@ private:
     // publish the walls
     pub_walls();
 
-    auto end = this->get_clock()->now();
-    auto diff = end - start;
+    const auto end = this->get_clock()->now();
+    const auto diff = end - start;
     RCLCPP_DEBUG_STREAM(get_logger(), "Agents: " << n_agents << " Timer: " << diff.seconds() << " s");
   }
 };
