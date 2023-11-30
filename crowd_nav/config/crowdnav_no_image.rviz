@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /ZED odometry1/Shape1
         - /TF1/Frames1
-        - /BRNE odometry1/Shape1
       Splitter Ratio: 0.5312976837158203
     Tree Height: 797
   - Class: rviz_common/Selection
@@ -87,6 +86,45 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /odom
       Value: true
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz_default_plugins/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Keep: 100
+      Name: BRNE odometry
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 143; 240; 164
+        Head Length: 0.10000000149011612
+        Head Radius: 0.10000000149011612
+        Shaft Length: 0.20000000298023224
+        Shaft Radius: 0.05000000074505806
+        Value: Arrow
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /brne_odom
+      Value: true
     - Class: rviz_default_plugins/MarkerArray
       Enabled: true
       Name: Pedestrians
@@ -135,7 +173,7 @@ Visualization Manager:
       Enabled: true
       Head Length: 0.10000000149011612
       Head Radius: 0.10000000149011612
-      Name: Pose
+      Name: Goal Pose
       Shaft Length: 0.20000000298023224
       Shaft Radius: 0.05000000074505806
       Shape: Arrow
@@ -173,57 +211,6 @@ Visualization Manager:
         {}
       Update Interval: 0
       Value: false
-    - Angle Tolerance: 0.10000000149011612
-      Class: rviz_default_plugins/Odometry
-      Covariance:
-        Orientation:
-          Alpha: 0.5
-          Color: 255; 255; 127
-          Color Style: Unique
-          Frame: Local
-          Offset: 1
-          Scale: 1
-          Value: true
-        Position:
-          Alpha: 0.30000001192092896
-          Color: 204; 51; 204
-          Scale: 1
-          Value: true
-        Value: true
-      Enabled: true
-      Keep: 100
-      Name: BRNE odometry
-      Position Tolerance: 0.10000000149011612
-      Shape:
-        Alpha: 1
-        Axes Length: 1
-        Axes Radius: 0.10000000149011612
-        Color: 143; 240; 164
-        Head Length: 0.10000000149011612
-        Head Radius: 0.10000000149011612
-        Shaft Length: 0.20000000298023224
-        Shaft Radius: 0.05000000074505806
-        Value: Arrow
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        Filter size: 10
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /brne_odom
-      Value: true
-    - Class: rviz_default_plugins/MarkerArray
-      Enabled: true
-      Name: BRNE Peds
-      Namespaces:
-        "": true
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /brne_peds
-      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -277,9 +264,9 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 2.1302547454833984
-        Y: 0.12373445928096771
-        Z: 0.2577168643474579
+        X: 3.5703063011169434
+        Y: -0.09052003920078278
+        Z: 0.28076374530792236
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
