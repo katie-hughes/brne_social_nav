@@ -34,7 +34,27 @@ ros2 launch crowd_nav sim.launch.xml
 ```
 This will bring up an RVIZ window which represents the scene. If you select a goal pose in RVIZ, you will see the robot move to it, avoiding the static pedestrian obstacles. The number of pedestrians can be adjusted with the launch argument `n_peds:=0`, `1`, `2`, or `3`. 
 
+You can also simulate a moving pedestrian with the launch argument `sim_moving:=true` (it is `false` by default). To move the pedestrian, call the service `move_ped`. The velocity of this pedestrian, as well as 
+
 This project contains both Python and C++ implementations of the BRNE algorithm code. The behavior should be identical. To specify which nodes get run, use the launch argument `lang:=C++` or `lang:=PYTHON` (C++ is default). If you are interested in the time it takes for each iteration of the algorithm to execute, you can run with the launch argument `debug_level:=debug`.
+
+
+<details>
+  <summary>**Simulation Videos**</summary>
+
+  
+  Static Pedestrians
+  
+  https://github.com/katie-hughes/brne_social_nav/assets/53623710/f2a689e3-6436-4c2d-9448-64a67381cab7
+
+
+
+  Moving Pedestrian
+
+  https://github.com/katie-hughes/brne_social_nav/assets/53623710/21c80766-4698-4396-8ba6-d9a693172ade
+
+
+</details>
 
 # Running On a Unitree Go1
 
