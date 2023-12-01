@@ -173,6 +173,13 @@ private:
   bool walls_generated;
   geometry_msgs::msg::PoseStamped goal;
 
+  // trial information
+  double trial_closest_dst_to_ped;
+  double trial_path_length;
+  double trial_straight_line_length;
+  double trial_path_ratio;
+  rclcpp::Time trial_start;
+
   void pub_walls()
   {
     if (!walls_generated){
@@ -212,6 +219,7 @@ private:
     goal_set = true;
     goal = msg;
     check_goal();
+    trial_start = this->get_clock()->now();
   }
 
   void odom_cb(const nav_msgs::msg::Odometry & msg)
@@ -236,6 +244,9 @@ private:
       dist(robot_pose.x, robot_pose.y, goal.pose.position.x, goal.pose.position.y);
     if (dist_to_goal < goal_threshold) {
       RCLCPP_INFO_STREAM(get_logger(), "Goal Reached!");
+      const auto trial_end = this->get_clock()->now();
+      const auto trial_dt = trial_end - trial_start;
+      RCLCPP_INFO_STREAM(get_logger(), "Trial Time: "<<trial_dt.seconds() << " s");
       goal_set = false;
     }
   }
