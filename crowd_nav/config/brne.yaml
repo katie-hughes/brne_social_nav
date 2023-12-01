@@ -16,9 +16,9 @@
     cost_a2: 3.0  # control the safety zone, larger the value is, more conservative the robot will be.
     cost_a3: 20.0  #  control the safety penalty weight, larger the value is, more conservative the robot will be.
     ped_sample_scale: 0.1  # pedestrian's willingness for cooperation, default value is 1.0, the smaller it is, the less the robot would expect the pedestrians to make space for it
-    people_timeout: 5.0  # unit: seconds
-    y_min: -1.2  # lower bound of y coordinate (one side of corridor)
-    y_max:  1.2  # upper bound of y coordinate (the other side of corridor)
+    people_timeout: 0.5  # unit: seconds
+    y_min: -0.75  # lower bound of y coordinate (one side of corridor)
+    y_max:  0.75  # upper bound of y coordinate (the other side of corridor)
     people_timeout_off: true
     close_stop_threshold: 0.5  # threshold for safety mask, leading to estop
     brne_activate_threshold: 6.0  # distance threshold from a pedestrian to enable BRNE

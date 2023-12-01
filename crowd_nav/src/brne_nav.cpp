@@ -180,6 +180,7 @@ private:
   double trial_straight_line_length;
   double trial_path_ratio;
   rclcpp::Time trial_start;
+  int trial_n_estops;
 
   void pub_walls()
   {
@@ -224,6 +225,7 @@ private:
     trial_start_pose = robot_pose;
     trial_path_length = 0;
     trial_closest_dst_to_ped = 10000;
+    trial_n_estops = 0;
   }
 
   void odom_cb(const nav_msgs::msg::Odometry & msg)
@@ -256,11 +258,12 @@ private:
       const auto trial_dt = trial_end - trial_start;
       trial_straight_line_length = dist(trial_start_pose.x, trial_start_pose.y, robot_pose.x, robot_pose.y);
       RCLCPP_INFO_STREAM(get_logger(), "=========================================================");
-      RCLCPP_INFO_STREAM(get_logger(), "Trial Time: "<<trial_dt.seconds() << " s");
-      RCLCPP_INFO_STREAM(get_logger(), "Trial Straight Line Distance: "<<trial_straight_line_length << " m");
-      RCLCPP_INFO_STREAM(get_logger(), "Trial Path Distance: " <<trial_path_length << " m");
-      RCLCPP_INFO_STREAM(get_logger(), "Trial Path Ratio: " << trial_path_length/trial_straight_line_length);
-      RCLCPP_INFO_STREAM(get_logger(), "Trial Closest Dist to Ped: " << trial_closest_dst_to_ped << " m");
+      RCLCPP_INFO_STREAM(get_logger(), "Time: "<<trial_dt.seconds() << " s");
+      RCLCPP_INFO_STREAM(get_logger(), "Straight Line Path: "<<trial_straight_line_length << " m");
+      RCLCPP_INFO_STREAM(get_logger(), "Trial Path: " <<trial_path_length << " m");
+      RCLCPP_INFO_STREAM(get_logger(), "Path Ratio: " << trial_path_length/trial_straight_line_length);
+      RCLCPP_INFO_STREAM(get_logger(), "Closest Dist to Ped: " << trial_closest_dst_to_ped << " m");
+      RCLCPP_INFO_STREAM(get_logger(), "Number of E-STOPs: " << trial_n_estops);
       RCLCPP_INFO_STREAM(get_logger(), "=========================================================");
       goal_set = false;
     }
