@@ -176,6 +176,7 @@ private:
   // trial information
   double trial_closest_dst_to_ped;
   double trial_path_length;
+  RobotPose trial_start_pose;
   double trial_straight_line_length;
   double trial_path_ratio;
   rclcpp::Time trial_start;
@@ -220,6 +221,8 @@ private:
     goal = msg;
     check_goal();
     trial_start = this->get_clock()->now();
+    trial_start_pose = robot_pose;
+    trial_path_length = 0;
   }
 
   void odom_cb(const nav_msgs::msg::Odometry & msg)
@@ -246,7 +249,9 @@ private:
       RCLCPP_INFO_STREAM(get_logger(), "Goal Reached!");
       const auto trial_end = this->get_clock()->now();
       const auto trial_dt = trial_end - trial_start;
+      trial_straight_line_length = dist(trial_start_pose.x, trial_start_pose.y, robot_pose.x, robot_pose.y);
       RCLCPP_INFO_STREAM(get_logger(), "Trial Time: "<<trial_dt.seconds() << " s");
+      RCLCPP_INFO_STREAM(get_logger(), "Trial Straight Line Distance: "<<trial_straight_line_length << " m");
       goal_set = false;
     }
   }
