@@ -223,10 +223,15 @@ private:
     trial_start = this->get_clock()->now();
     trial_start_pose = robot_pose;
     trial_path_length = 0;
+    trial_closest_dst_to_ped = 10000;
   }
 
   void odom_cb(const nav_msgs::msg::Odometry & msg)
   {
+    if (goal_set){
+      trial_path_length += dist(robot_pose.x, robot_pose.y, 
+                                msg.pose.pose.position.x, msg.pose.pose.position.y);
+    }
     // get the angle from the quaternion
     tf2::Quaternion q(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y,
       msg.pose.pose.orientation.z, msg.pose.pose.orientation.w);
@@ -246,12 +251,17 @@ private:
     const auto dist_to_goal =
       dist(robot_pose.x, robot_pose.y, goal.pose.position.x, goal.pose.position.y);
     if (dist_to_goal < goal_threshold) {
-      RCLCPP_INFO_STREAM(get_logger(), "Goal Reached!");
       const auto trial_end = this->get_clock()->now();
+      RCLCPP_INFO_STREAM(get_logger(), "Goal Reached!");
       const auto trial_dt = trial_end - trial_start;
       trial_straight_line_length = dist(trial_start_pose.x, trial_start_pose.y, robot_pose.x, robot_pose.y);
+      RCLCPP_INFO_STREAM(get_logger(), "=========================================================");
       RCLCPP_INFO_STREAM(get_logger(), "Trial Time: "<<trial_dt.seconds() << " s");
       RCLCPP_INFO_STREAM(get_logger(), "Trial Straight Line Distance: "<<trial_straight_line_length << " m");
+      RCLCPP_INFO_STREAM(get_logger(), "Trial Path Distance: " <<trial_path_length << " m");
+      RCLCPP_INFO_STREAM(get_logger(), "Trial Path Ratio: " << trial_path_length/trial_straight_line_length);
+      RCLCPP_INFO_STREAM(get_logger(), "Trial Closest Dist to Ped: " << trial_closest_dst_to_ped << " m");
+      RCLCPP_INFO_STREAM(get_logger(), "=========================================================");
       goal_set = false;
     }
   }
@@ -395,16 +405,25 @@ private:
       // Safety mask calculation
       // the idea is to see if the distance to the closest pedestrian
       // in any of the robot samples is less than the close stop threshold
-      auto closest_ped = selected_peds.pedestrians.at(closest_idxs.at(0));
-      arma::mat robot_samples_to_ped = arma::sqrt(
+      const auto closest_ped = selected_peds.pedestrians.at(closest_idxs.at(0));
+      const arma::mat robot_samples_to_ped = arma::sqrt(
         arma::pow(
           robot_xtraj_samples -
           closest_ped.pose.position.x, 2) +
         arma::pow(
           robot_ytraj_samples -
           closest_ped.pose.position.y, 2));
-      auto closest_to_ped = arma::conv_to<arma::vec>::from(arma::min(robot_samples_to_ped, 1));
-      auto safety_mask = arma::conv_to<arma::rowvec>::from(closest_to_ped > close_stop_threshold);
+      const auto closest_to_ped = arma::conv_to<arma::vec>::from(arma::min(robot_samples_to_ped, 1));
+      const auto safety_mask = arma::conv_to<arma::rowvec>::from(closest_to_ped > close_stop_threshold);
+
+      // also update the closest pedestrian to the robot for trial statistics
+      if (goal_set){
+        const auto dst_to_closest_ped = dist(robot_pose.x, robot_pose.y, 
+          closest_ped.pose.position.x, closest_ped.pose.position.x);
+        if (dst_to_closest_ped < trial_closest_dst_to_ped){
+          trial_closest_dst_to_ped = dst_to_closest_ped;
+        }
+      }
 
       // brne optimization
       auto weights = brne.brne_nav(xtraj_samples, ytraj_samples);
