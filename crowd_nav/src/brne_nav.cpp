@@ -448,6 +448,7 @@ private:
         } else {
           if (goal_set) {
             RCLCPP_WARN_STREAM(get_logger(), "E-STOP: Pedestrian too close!");
+            trial_n_estops += 1;
           }
         }
       }
