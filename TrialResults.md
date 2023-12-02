@@ -109,7 +109,7 @@ Trial 5
 ```
 
 
-## One Ped on blue x, one ped on Pink X
+## Test 2: One Ped on blue x, one ped on Pink X
 
 
 Trial 1: failure??? 
@@ -216,13 +216,13 @@ Trial 5
 ```
 
 
-## Two walking down hallway, slightly spaced out
+## Test 4: Two walking down hallway, slightly spaced out
 
 
 
 
 
-Test with 4 people
+## Cool Test with 4 people
 
 
 ```
