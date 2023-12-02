@@ -10,29 +10,28 @@ y: 0.0"
 BRNE Params
 
 ```
-    replan_freq: 10.0  # unit: Hz
+    replan_freq: 10.0 
     dt: 0.1
-    maximum_agents: 5  # maximum number of agents BRNE will consider (including the robot)
-    n_samples: 196  # number of samples assigned to each agent. needs to be the square of an even number
-    n_steps: 25  # time steps of the planning horizon
-    max_lin_vel: 0.6  # 0.6,0.8 maximum linear velocity allowed on the robot
-    max_ang_vel: 1.0  # 1.0,1.2 maximum angular velocity allowed on the robot
-    nominal_lin_vel: 0.4  #0.4,0.5 nomimal (linear) velocity when plannig the initial trajectory
-    open_space_velocity: 0.6  # nominal velocity when the robot is in open space
-    kernel_a1: 0.2  # control the "straightness" of trajectory samples. Larger the value is, less straight the trajectory sample will be.
-    kernel_a2: 0.2  # control the "width/spreadness" of trajectory samples. Larger the value is, more spread the trajectory samples are.
-    # a1 probably makes safety zone narrower. try tuning a1 and a3
-    cost_a1: 15.0  # control the safety zone, smaller the value is, more conversative the robot will be.
-    cost_a2: 3.0  # control the safety zone, larger the value is, more conservative the robot will be.
-    cost_a3: 20.0  #  control the safety penalty weight, larger the value is, more conservative the robot will be.
-    ped_sample_scale: 0.1  # pedestrian's willingness for cooperation, default value is 1.0, the smaller it is, the less the robot would expect the pedestrians to make space for it
-    people_timeout: 0.5  # unit: seconds
-    y_min: -0.75  # lower bound of y coordinate (one side of corridor)
-    y_max:  0.75  # upper bound of y coordinate (the other side of corridor)
+    maximum_agents: 5 
+    n_samples: 196 
+    n_steps: 25 
+    max_lin_vel: 0.6 
+    max_ang_vel: 1.0 
+    nominal_lin_vel: 0.4 
+    open_space_velocity: 0.6 
+    kernel_a1: 0.2 
+    kernel_a2: 0.2 
+    cost_a1: 15.0 
+    cost_a2: 3.0 
+    cost_a3: 20.0 
+    ped_sample_scale: 0.1 
+    people_timeout: 0.5  
+    y_min: -0.75 
+    y_max:  0.75 
     people_timeout_off: true
-    close_stop_threshold: 0.5  # threshold for safety mask, leading to estop
-    brne_activate_threshold: 6.0  # distance threshold from a pedestrian to enable BRNE
-    goal_threshold: 0.5 # threshold for reaching the goal position (m)
+    close_stop_threshold: 0.5 
+    brne_activate_threshold: 6.0 
+    goal_threshold: 0.5 
 ```
 
 ## Test 1: One pedestrian standing on blue X
