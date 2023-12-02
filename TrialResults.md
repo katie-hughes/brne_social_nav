@@ -111,67 +111,131 @@ Trial 5
 
 
 ## One Ped on blue x, one ped on Pink X
-   
-## one walking on the hallway on the right hand side
-Trial 1
+
+
+Trial 1: failure??? 
+```
+[brne_nav-1] [WARN] [1701471809.521703797] [brne]: No path found -- stopping navigation to this goal.
 
 ```
-[brne_nav-1] [INFO] [1701469799.846495893] [brne]: Goal Reached!
-[brne_nav-1] [INFO] [1701469799.846563898] [brne]: =========================================================
-[brne_nav-1] [INFO] [1701469799.846588373] [brne]: Time: 12.5086 s
-[brne_nav-1] [INFO] [1701469799.846603763] [brne]: Straight Line Path: 5.53289 m
-[brne_nav-1] [INFO] [1701469799.846619096] [brne]: Trial Path: 5.94115 m
-[brne_nav-1] [INFO] [1701469799.846632886] [brne]: Path Ratio: 1.07379
-[brne_nav-1] [INFO] [1701469799.846646889] [brne]: Closest Dist to Ped: 2.38545 m
-[brne_nav-1] [INFO] [1701469799.846661130] [brne]: Number of E-STOPs: 0
-[brne_nav-1] [INFO] [1701469799.846673474] [brne]: =========================================================
 
-```
 
 Trial 2
 
 ```
-[brne_nav-1] [INFO] [1701469972.284623273] [brne]: =========================================================
-[brne_nav-1] [INFO] [1701469972.284901325] [brne]: Time: 11.6943 s
-[brne_nav-1] [INFO] [1701469972.285298306] [brne]: Straight Line Path: 5.5139 m
-[brne_nav-1] [INFO] [1701469972.296938733] [brne]: Trial Path: 5.75984 m
-[brne_nav-1] [INFO] [1701469972.298332272] [brne]: Path Ratio: 1.0446
-[brne_nav-1] [INFO] [1701469972.298867302] [brne]: Closest Dist to Ped: 2.46476 m
-[brne_nav-1] [INFO] [1701469972.299232188] [brne]: Number of E-STOPs: 0
-[brne_nav-1] [INFO] [1701469972.299609150] [brne]: =========================================================
+[brne_nav-1] [INFO] [1701472015.680164417] [brne]: Goal Reached!
+[brne_nav-1] [INFO] [1701472015.680226032] [brne]: =========================================================
+[brne_nav-1] [INFO] [1701472015.680246318] [brne]: Time: 14.496 s
+[brne_nav-1] [INFO] [1701472015.680257968] [brne]: Straight Line Path: 5.78871 m
+[brne_nav-1] [INFO] [1701472015.680270498] [brne]: Trial Path: 6.63759 m
+[brne_nav-1] [INFO] [1701472015.680281123] [brne]: Path Ratio: 1.14664
+[brne_nav-1] [INFO] [1701472015.680291390] [brne]: Closest Dist to Ped: 1.13486 m
+[brne_nav-1] [INFO] [1701472015.680302275] [brne]: Number of E-STOPs: 0
+[brne_nav-1] [INFO] [1701472015.680311107] [brne]: =========================================================
+
 ```
+
+   
+## Test 3: One Pedestrian walking straight down the right hand side of squares
+
+Trial 1
+
+```
+[brne_nav-1] [INFO] [1701475671.189178135] [brne]: Goal Reached!
+[brne_nav-1] [INFO] [1701475671.189262739] [brne]: =========================================================
+[brne_nav-1] [INFO] [1701475671.189291113] [brne]: Time: 11.9856 s
+[brne_nav-1] [INFO] [1701475671.189308074] [brne]: Straight Line Path: 5.62163 m
+[brne_nav-1] [INFO] [1701475671.189330668] [brne]: Trial Path: 5.83216 m
+[brne_nav-1] [INFO] [1701475671.189346398] [brne]: Path Ratio: 1.03745
+[brne_nav-1] [INFO] [1701475671.189364668] [brne]: Closest Dist to Ped: 3.07084 m
+[brne_nav-1] [INFO] [1701475671.189380597] [brne]: Number of E-STOPs: 0
+[brne_nav-1] [INFO] [1701475671.189394784] [brne]: =========================================================
+
+```
+
+
+Trial 2
+
+```
+[brne_nav-1] [INFO] [1701475829.506781352] [brne]: Goal Reached!
+[brne_nav-1] [INFO] [1701475829.506835991] [brne]: =========================================================
+[brne_nav-1] [INFO] [1701475829.506854312] [brne]: Time: 11.6663 s
+[brne_nav-1] [INFO] [1701475829.506866582] [brne]: Straight Line Path: 5.56225 m
+[brne_nav-1] [INFO] [1701475829.506878949] [brne]: Trial Path: 5.77776 m
+[brne_nav-1] [INFO] [1701475829.506890474] [brne]: Path Ratio: 1.03875
+[brne_nav-1] [INFO] [1701475829.506903593] [brne]: Closest Dist to Ped: 2.40846 m
+[brne_nav-1] [INFO] [1701475829.506914930] [brne]: Number of E-STOPs: 0
+[brne_nav-1] [INFO] [1701475829.506925461] [brne]: =========================================================
+
+```
+
 
 Trial 3
 
 ```
-[brne_nav-1] [INFO] [1701470124.868412220] [brne]: Goal Reached!
-[brne_nav-1] [INFO] [1701470124.869031973] [brne]: =========================================================
-[brne_nav-1] [INFO] [1701470124.869365211] [brne]: Time: 11.7817 s
-[brne_nav-1] [INFO] [1701470124.869620649] [brne]: Straight Line Path: 5.57591 m
-[brne_nav-1] [INFO] [1701470124.869860713] [brne]: Trial Path: 5.74593 m
-[brne_nav-1] [INFO] [1701470124.870098802] [brne]: Path Ratio: 1.03049
-[brne_nav-1] [INFO] [1701470124.870576522] [brne]: Closest Dist to Ped: 2.15796 m
-[brne_nav-1] [INFO] [1701470124.871010863] [brne]: Number of E-STOPs: 6
-[brne_nav-1] [INFO] [1701470124.871421535] [brne]: =========================================================
+[brne_nav-1] [INFO] [1701475948.716996593] [brne]: Goal Reached!
+[brne_nav-1] [INFO] [1701475948.717085043] [brne]: =========================================================
+[brne_nav-1] [INFO] [1701475948.717113321] [brne]: Time: 11.7836 s
+[brne_nav-1] [INFO] [1701475948.717125477] [brne]: Straight Line Path: 5.5596 m
+[brne_nav-1] [INFO] [1701475948.717138159] [brne]: Trial Path: 5.70086 m
+[brne_nav-1] [INFO] [1701475948.717148925] [brne]: Path Ratio: 1.02541
+[brne_nav-1] [INFO] [1701475948.717159604] [brne]: Closest Dist to Ped: 2.31984 m
+[brne_nav-1] [INFO] [1701475948.717171104] [brne]: Number of E-STOPs: 6
+[brne_nav-1] [INFO] [1701475948.717180555] [brne]: =========================================================
 
 ```
-
 
 Trial 4
-```
-[brne_nav-1] [INFO] [1701470366.805354369] [brne]: Goal Reached!
-[brne_nav-1] [INFO] [1701470366.805448598] [brne]: =========================================================
-[brne_nav-1] [INFO] [1701470366.805470263] [brne]: Time: 11.6882 s
-[brne_nav-1] [INFO] [1701470366.805482622] [brne]: Straight Line Path: 5.54166 m
-[brne_nav-1] [INFO] [1701470366.805494770] [brne]: Trial Path: 5.75213 m
-[brne_nav-1] [INFO] [1701470366.805505549] [brne]: Path Ratio: 1.03798
-[brne_nav-1] [INFO] [1701470366.805516263] [brne]: Closest Dist to Ped: 2.69147 m
-[brne_nav-1] [INFO] [1701470366.805530059] [brne]: Number of E-STOPs: 0
-[brne_nav-1] [INFO] [1701470366.805539889] [brne]: =========================================================
 
 ```
+[brne_nav-1] [INFO] [1701476150.660465504] [brne]: Goal Reached!
+[brne_nav-1] [INFO] [1701476150.660561078] [brne]: =========================================================
+[brne_nav-1] [INFO] [1701476150.660591221] [brne]: Time: 12.5897 s
+[brne_nav-1] [INFO] [1701476150.660610214] [brne]: Straight Line Path: 5.53588 m
+[brne_nav-1] [INFO] [1701476150.660627359] [brne]: Trial Path: 5.89053 m
+[brne_nav-1] [INFO] [1701476150.660642393] [brne]: Path Ratio: 1.06406
+[brne_nav-1] [INFO] [1701476150.660655616] [brne]: Closest Dist to Ped: 2.45876 m
+[brne_nav-1] [INFO] [1701476150.660669208] [brne]: Number of E-STOPs: 0
+[brne_nav-1] [INFO] [1701476150.660680877] [brne]: =========================================================
+
+```
+
+
+Trial 5
+
+```
+[brne_nav-1] [INFO] [1701476321.073141273] [brne]: Goal Reached!
+[brne_nav-1] [INFO] [1701476321.073230592] [brne]: =========================================================
+[brne_nav-1] [INFO] [1701476321.073262127] [brne]: Time: 11.9793 s
+[brne_nav-1] [INFO] [1701476321.073280870] [brne]: Straight Line Path: 5.54135 m
+[brne_nav-1] [INFO] [1701476321.073298889] [brne]: Trial Path: 5.89904 m
+[brne_nav-1] [INFO] [1701476321.073315894] [brne]: Path Ratio: 1.06455
+[brne_nav-1] [INFO] [1701476321.073332686] [brne]: Closest Dist to Ped: 2.27335 m
+[brne_nav-1] [INFO] [1701476321.073349584] [brne]: Number of E-STOPs: 0
+[brne_nav-1] [INFO] [1701476321.073364468] [brne]: =========================================================
+
+```
+
+
+## Two walking down hallway, slightly spaced out
 
 
 
 
-4. two walking down the hallway down the dogs
+
+Test with 4 people
+
+
+```
+
+[brne_nav-1] [INFO] [1701472153.590476969] [brne]: Goal Reached!
+[brne_nav-1] [INFO] [1701472153.590557836] [brne]: =========================================================
+[brne_nav-1] [INFO] [1701472153.590577987] [brne]: Time: 17.7492 s
+[brne_nav-1] [INFO] [1701472153.590592592] [brne]: Straight Line Path: 5.52631 m
+[brne_nav-1] [INFO] [1701472153.591006103] [brne]: Trial Path: 6.81133 m
+[brne_nav-1] [INFO] [1701472153.591021876] [brne]: Path Ratio: 1.23253
+[brne_nav-1] [INFO] [1701472153.591034552] [brne]: Closest Dist to Ped: 1.66046 m
+[brne_nav-1] [INFO] [1701472153.591127408] [brne]: Number of E-STOPs: 0
+[brne_nav-1] [INFO] [1701472153.591139160] [brne]: =========================================================
+
+```
