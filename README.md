@@ -132,3 +132,6 @@ sudo make install
 
 # Libraries
 - [brnelib](brnelib) - Implementation of the BRNE algorithm in C++
+
+# Misc
+- [trials](trials) - Results of physical trials run with the algorithm

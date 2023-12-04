@@ -1,4 +1,6 @@
-# Small Hallway 
+# Trial Results
+
+## Small Hallway 
 
 Goal pose set to (6,0) from starting square:
 
@@ -34,7 +36,7 @@ brne_activate_threshold: 6.0
 goal_threshold: 0.5 
 ```
 
-## Test 1: One pedestrian standing on blue X
+### Test 1: One pedestrian standing on blue X
 
 All goals were reached
 
@@ -48,7 +50,7 @@ All goals were reached
 
 
 
-## Test 2: One Ped on blue x, one ped on Pink X
+### Test 2: One Ped on blue x, one ped on Pink X
 
 | Trial | Time | Straight Line Path Distance | Path Distance | Path Ratio | Closest Dist To Pedestrian | Number Of E-STOPs | 
 | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
@@ -61,7 +63,7 @@ All goals were reached
 Something got messed up here as trial 1 and 2 have the same data but as my screen recordings got corrupted I can't say exactly what. 
 
 
-## Test 3: One Pedestrian walking straight down the right hand side of squares
+### Test 3: One Pedestrian walking straight down the right hand side of squares
 
 | Trial | Time | Straight Line Path Distance | Path Distance | Path Ratio | Closest Dist To Pedestrian | Number Of E-STOPs | 
 | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
@@ -72,7 +74,7 @@ Something got messed up here as trial 1 and 2 have the same data but as my scree
 | 5 |  11.9793 |  5.54135 |  5.89904 |  1.06455 |  2.27335 |  0 |
 
 
-## Test 4: Two walking down hallway, slightly spaced out
+### Test 4: Two walking down hallway, slightly spaced out
 
 | Trial | Time | Straight Line Path Distance | Path Distance | Path Ratio | Closest Dist To Pedestrian | Number Of E-STOPs | 
 | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
@@ -82,7 +84,7 @@ Something got messed up here as trial 1 and 2 have the same data but as my scree
 
 Didn't have time to do the last two tests as the wifi hotspot died and the dog was overheating
 
-## Cool Test with 4 people
+### Cool Test with 4 people
 
 ```
 
