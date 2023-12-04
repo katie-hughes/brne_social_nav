@@ -8,6 +8,7 @@
       <arg name="use_rviz" value="$(var use_rviz)" />
       <arg name="lang" value="$(var lang)" />
       <arg name="debug_level" value="$(var debug_level)" />
+      <arg name="offset_unitree_vel" value="true" />
     </include>
 
 </launch>

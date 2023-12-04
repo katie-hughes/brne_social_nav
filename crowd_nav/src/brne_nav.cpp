@@ -66,6 +66,8 @@ public:
     declare_parameter("max_ang_vel", 1.0);
     declare_parameter("close_stop_threshold", 1.0);
 
+    declare_parameter("offset_unitree_vel", false);
+
     // get parameters
     replan_freq = get_parameter("replan_freq").as_double();
     dt = get_parameter("dt").as_double();
@@ -86,6 +88,7 @@ public:
     max_lin_vel = get_parameter("max_lin_vel").as_double();
     nominal_lin_vel = get_parameter("nominal_lin_vel").as_double();
     close_stop_threshold = get_parameter("close_stop_threshold").as_double();
+    offset_unitree_vel = get_parameter("offset_unitree_vel").as_bool();
 
     // print out parameters
     RCLCPP_INFO_STREAM(get_logger(), "Replan frequency: " << replan_freq << " Hz");
@@ -104,6 +107,8 @@ public:
       get_logger(),
       "Max Lin: " << max_lin_vel << " nominal lin: " << nominal_lin_vel << " max ang: " <<
         max_ang_vel);
+    RCLCPP_INFO_STREAM(get_logger(), "Offset Unitree Velocity? " << offset_unitree_vel);
+
 
     brne = brne::BRNE{kernel_a1, kernel_a2,
       cost_a1, cost_a2, cost_a3,
@@ -181,6 +186,8 @@ private:
   double trial_path_ratio;
   rclcpp::Time trial_start;
   int trial_n_estops;
+
+  bool offset_unitree_vel;
 
   void pub_walls()
   {
@@ -467,12 +474,14 @@ private:
           tw.linear.x = opt_cmds_lin;
           tw.angular.z = opt_cmds_ang;
           // manually adjust for dog's drift (discovered these values experimentally)
-          if ((opt_cmds_lin > 0.1) && (opt_cmds_lin < 0.3)){
-            tw.angular.z -= 0.04;
-          } else if ((opt_cmds_lin >= 0.3) && (opt_cmds_lin < 0.5)){
-            tw.angular.z -= 0.05;
-          } else if (opt_cmds_lin >= 0.5){
-            tw.angular.z -= 0.06;
+          if (offset_unitree_vel){
+            if ((opt_cmds_lin > 0.1) && (opt_cmds_lin < 0.3)){
+              tw.angular.z -= 0.04;
+            } else if ((opt_cmds_lin >= 0.3) && (opt_cmds_lin < 0.5)){
+              tw.angular.z -= 0.05;
+            } else if (opt_cmds_lin >= 0.5){
+              tw.angular.z -= 0.06;
+            }
           }
           robot_cmds.twists.push_back(tw);
         }
@@ -507,12 +516,14 @@ private:
           tw.linear.x = opt_cmds_lin;
           tw.angular.z = opt_cmds_ang;
           // manually adjust for dog's drift (discovered these values experimentally)
-          if ((opt_cmds_lin > 0.1) && (opt_cmds_lin < 0.3)){
-            tw.angular.z -= 0.04;
-          } else if ((opt_cmds_lin >= 0.3) && (opt_cmds_lin < 0.5)){
-            tw.angular.z -= 0.05;
-          } else if (opt_cmds_lin >= 0.5){
-            tw.angular.z -= 0.06;
+          if (offset_unitree_vel){
+            if ((opt_cmds_lin > 0.1) && (opt_cmds_lin < 0.3)){
+              tw.angular.z -= 0.04;
+            } else if ((opt_cmds_lin >= 0.3) && (opt_cmds_lin < 0.5)){
+              tw.angular.z -= 0.05;
+            } else if (opt_cmds_lin >= 0.5){
+              tw.angular.z -= 0.06;
+            }
           }
           robot_cmds.twists.push_back(tw);
         }

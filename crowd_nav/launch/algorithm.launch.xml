@@ -3,18 +3,18 @@
   <arg name="lang" default="C++" description="Choose whether python or C++ BRNE nodes are launched (Right now, only Python is valid). options: PYTHON, C++"/>
   <arg name="debug_level" default="info" description="Choose the debug level for the BRNE node"/>
   <arg name="use_rviz" default="true" description="Launch rviz"/>
+  <arg name="offset_unitree_vel" default="true" description="Offset for the unitree's velocity drift"/>
 
   <!-- Python algorithm node -->
   <node pkg="brne_py" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'PYTHON\'')" 
         args="--ros-args --log-level brne_nav:=$(var debug_level)">
-        <remap from="/odom" to="/zed/zed_node/odom"/>
   </node>
 
   <!-- C++ algorithm nodes -->
   <node pkg="crowd_nav" exec="brne_nav" if="$(eval '\'$(var lang)\' == \'C++\'')" 
         args="--ros-args --log-level brne:=$(var debug_level)">
     <param from="$(find-pkg-share crowd_nav)/config/brne.yaml"/>
-    <remap from="/odom" to="/zed/zed_node/odom"/>
+    <param name="offset_unitree_vel" value="$(var offset_unitree_vel)"/>
   </node>
   <node pkg="crowd_nav" exec="controller" if="$(eval '\'$(var lang)\' == \'C++\'')">
     <param from="$(find-pkg-share crowd_nav)/config/brne.yaml"/>

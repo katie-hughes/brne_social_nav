@@ -13,6 +13,7 @@
       <arg name="use_rviz" value="true"/>
       <arg name="n_peds" value="$(var n_peds)"/>
       <arg name="sim_moving" value="$(var sim_moving)"/>
+      <arg name="offset_unitree_vel" value="false"/>
     </include>
 
 </launch>
