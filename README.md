@@ -41,9 +41,22 @@ This will bring up an RVIZ window which represents the scene. If you select a go
 
   ### Static Pedestrians
   
-  https://github.com/katie-hughes/brne_social_nav/assets/53623710/f2a689e3-6436-4c2d-9448-64a67381cab7
+  Example launch command:
+  ```
+  ros2 launch crowd_nav sim.launch.xml n_peds:=1
+  ```
+
+
+  [sim_static.webm](https://github.com/katie-hughes/brne_social_nav/assets/53623710/f94b9aa0-bca9-4670-a0ae-32c12c8cd684)
+
+
 
   ### Moving Pedestrian
+
+  Example launch command:
+  ```
+  ros2 launch crowd_nav sim.launch.xml sim_moving:=true
+  ```
 
   To replicate this test, you can run a script with these following service calls:
   ```
@@ -52,7 +65,8 @@ This will bring up an RVIZ window which represents the scene. If you select a go
   ros2 service call /move_ped std_srvs/srv/Empty
   ```
 
-  https://github.com/katie-hughes/brne_social_nav/assets/53623710/21c80766-4698-4396-8ba6-d9a693172ade
+  [sim_moving.webm](https://github.com/katie-hughes/brne_social_nav/assets/53623710/6ab29133-f452-426e-8718-595e5bfbdfc7)
+
 
 </details>
 
