@@ -34,41 +34,34 @@ ros2 launch crowd_nav sim.launch.xml
 ```
 This will bring up an RVIZ window which represents the scene. If you select a goal pose in RVIZ, you will see the robot move to it, avoiding the static pedestrian obstacles. The number of pedestrians can be adjusted with the launch argument `n_peds:=0`, `1`, `2`, or `3`. You can also simulate a single moving pedestrian with the launch argument `sim_moving:=true` (it is `false` by default). To move the pedestrian, call the service `move_ped`. 
 
-<details>
-  <summary><b>Simulation Videos</b></summary>
+Parameters for these simulations -- such as pedestrian locations and the moving pedestrian's speed -- can be set in [pedestrian_tracking/config/sim_ped.yaml](pedestrian_tracking/config/sim_ped.yaml).
 
-  Parameters for these simulations -- such as pedestrian locations and the moving pedestrian's speed -- can be set in [pedestrian_tracking/config/sim_ped.yaml](pedestrian_tracking/config/sim_ped.yaml).
+## Static Pedestrians
 
-  ### Static Pedestrians
-  
-  Example launch command:
-  ```
-  ros2 launch crowd_nav sim.launch.xml n_peds:=1
-  ```
+Example launch command:
+```
+ros2 launch crowd_nav sim.launch.xml n_peds:=1
+```
 
+[sim_static.webm](https://github.com/katie-hughes/brne_social_nav/assets/53623710/f94b9aa0-bca9-4670-a0ae-32c12c8cd684)
 
-  [sim_static.webm](https://github.com/katie-hughes/brne_social_nav/assets/53623710/f94b9aa0-bca9-4670-a0ae-32c12c8cd684)
+## Moving Pedestrian
 
+Example launch command:
+```
+ros2 launch crowd_nav sim.launch.xml sim_moving:=true
+```
 
+To replicate this test, you can run a script with these following service calls:
+```
+ros2 service call /set_goal_pose crowd_nav_interfaces/srv/GoalReq "x: 6.0
+y: 0.0"
+ros2 service call /move_ped std_srvs/srv/Empty
+```
 
-  ### Moving Pedestrian
+[sim_moving.webm](https://github.com/katie-hughes/brne_social_nav/assets/53623710/6ab29133-f452-426e-8718-595e5bfbdfc7)
 
-  Example launch command:
-  ```
-  ros2 launch crowd_nav sim.launch.xml sim_moving:=true
-  ```
-
-  To replicate this test, you can run a script with these following service calls:
-  ```
-  ros2 service call /set_goal_pose crowd_nav_interfaces/srv/GoalReq "x: 6.0
-  y: 0.0"
-  ros2 service call /move_ped std_srvs/srv/Empty
-  ```
-
-  [sim_moving.webm](https://github.com/katie-hughes/brne_social_nav/assets/53623710/6ab29133-f452-426e-8718-595e5bfbdfc7)
-
-
-</details>
+## Languages
 
 This project contains both Python and C++ implementations of the BRNE algorithm code. The behavior should be identical. To specify which nodes get run, use the launch argument `lang:=C++` or `lang:=PYTHON` (C++ is default). If you are interested in the time it takes for each iteration of the algorithm to execute, you can run with the launch argument `debug_level:=debug`.
 
@@ -93,7 +86,7 @@ If using a laptop strapped to the back of the robot, this computer will be respo
 ```
 ros2 launch crowd_nav onboard.launch.xml
 ```
-As in simulation, you can choose the C++ or Python implementation of the BRNE nodes with `lang:=C++` or `lang:=PYTHON` (Python is default), and you can see the time for each algorithm iteration to execute with the launch argument `debug_level:=debug`.
+As in simulation, you can choose the C++ or Python implementation of the BRNE nodes with `lang:=C++` or `lang:=PYTHON` (C++ is default), and you can see the time for each algorithm iteration to execute with the launch argument `debug_level:=debug`.
 
 Then, on an external computer, you will need to launch rviz to see the visualizations as well as to set the goal location. This can be done via
 ```
@@ -104,14 +97,14 @@ ros2 launch crowd_nav visualizations.launch.xml
 
 If using a Jetson Orin Nano mounted to the back of the robot, this board will be connected to the ZED and only responsible for the pedestrian tracking portion of the project. On this device, run:
 ```
-ros2 launch pedestrian_tracking perception.launch.xml
+ros2 launch pedestrian_tracking orin.launch.xml
 ```
 
 The external computer will be responsible for the BRNE nodes and visualization, as the Orin Nano does not have enough CPU to handle this algorithm. On this device, run:
 ```
 ros2 launch crowd_nav algorithm.launch.xml
 ```
-Once again, you can choose the C++ or Python implementation of the BRNE nodes with `lang:=C++` or `lang:=PYTHON` (Python is default), and you can see the time for each algorithm iteration to execute with the launch argument `debug_level:=debug`.
+Once again, you can choose the C++ or Python implementation of the BRNE nodes with `lang:=C++` or `lang:=PYTHON` (C++ is default), and you can see the time for each algorithm iteration to execute with the launch argument `debug_level:=debug`.
 
 # Dependencies
 
