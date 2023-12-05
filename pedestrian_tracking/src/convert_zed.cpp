@@ -29,6 +29,9 @@ public:
   ConvertPeds()
   : Node("convert_zed"), n_prev_peds{0}
   {
+    declare_parameter("vel_cutoff", 1.0); // m/s
+    vel_cutoff = get_parameter("vel_cutoff").as_double();
+
     zed_sub_ = create_subscription<zed_interfaces::msg::ObjectsStamped>(
       "zed/zed_node/obj_det/objects", 10,
       std::bind(&ConvertPeds::zed_cb, this, std::placeholders::_1));
@@ -55,6 +58,7 @@ public:
 
 private:
   double rate_hz;
+  double vel_cutoff;
   rclcpp::TimerBase::SharedPtr timer_;
 
   std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
@@ -136,6 +140,11 @@ private:
         f2f_vel = ped_array.row(i) - prev_ped_array.row(prev_association_index);
         const auto dt_ped = (ped_stamp - prev_ped_stamp).seconds();
         f2f_vel /= dt_ped;
+        // truncate velocity if too large
+        const auto abs_velocity = arma::norm(f2f_vel);
+        if (abs_velocity > vel_cutoff){
+          f2f_vel *= vel_cutoff/abs_velocity;
+        }
       }
       // RCLCPP_INFO_STREAM(get_logger(), "Vel " << f2f_vel.at(0) << " " << f2f_vel.at(1));
       pa.pedestrians.at(i).velocity.linear.x = f2f_vel.at(0);

@@ -41,8 +41,11 @@ int main(){
   arma::mat xtraj_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
   arma::mat ytraj_samples(n_agents*n_samples, n_steps, arma::fill::zeros);
 
-  xtraj_samples.submat(0, 0, n_samples-1, n_steps-1) = trajgen.get_xtraj_samples();
-  ytraj_samples.submat(0, 0, n_samples-1, n_steps-1) = trajgen.get_ytraj_samples();
+  const auto robot_xtraj_samples = trajgen.get_xtraj_samples();
+  const auto robot_ytraj_samples = trajgen.get_ytraj_samples();
+
+  xtraj_samples.submat(0, 0, n_samples-1, n_steps-1) = robot_xtraj_samples;
+  ytraj_samples.submat(0, 0, n_samples-1, n_steps-1) = robot_ytraj_samples;
 
   // pedestrian static at (1.0, 0.01)
   double ped_x = 1.0;

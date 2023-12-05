@@ -31,6 +31,9 @@ target_link_libraries(two_pedestrians brnelib)
 add_executable(robot_one_ped src/robot_one_ped.cpp)
 target_link_libraries(robot_one_ped brnelib)
 
+add_executable(sampling_test src/sampling_test.cpp)
+target_link_libraries(sampling_test brnelib)
+
 if(NOT CMAKE_CROSSCOMPILING)
 # stuff you don't want to be done when cross compiling
 # CMake also has the ability to generate doxygen documentation
@@ -53,10 +56,11 @@ target_include_directories(brnelib
     $<INSTALL_INTERFACE:include>)
 target_compile_options(two_pedestrians PUBLIC -Wall)
 target_compile_options(robot_one_ped PUBLIC -Wall)
+target_compile_options(sampling_test PUBLIC -Wall)
 # install the include directories
 install(DIRECTORY include/brnelib DESTINATION include)
 # Install the targets and create a CMake Exported Target
-install(TARGETS two_pedestrians robot_one_ped brnelib EXPORT brnelib-targets)
+install(TARGETS two_pedestrians robot_one_ped sampling_test brnelib EXPORT brnelib-targets)
 # The project_name-targets now also needs to be exported.
 install(EXPORT brnelib-targets
         FILE brnelib-config.cmake
