@@ -65,6 +65,9 @@ ros2 service call /move_ped std_srvs/srv/Empty
 
 This project contains both Python and C++ implementations of the BRNE algorithm code. The behavior should be identical. To specify which nodes get run, use the launch argument `lang:=C++` or `lang:=PYTHON` (C++ is default). If you are interested in the time it takes for each iteration of the algorithm to execute, you can run with the launch argument `debug_level:=debug`.
 
+## Parameters
+The parameters of the BRNE algorithm, such as the number of samples and the cost parameters, can be tuned by editing [brne.yaml](crowd_nav/config/brne.yaml).
+
 # Running On a Unitree Go1
 
 ## Connecting to the robot
