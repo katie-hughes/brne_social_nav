@@ -193,7 +193,7 @@ private:
   {
     if (!walls_generated){
       const auto height = 1.0;
-      const auto length = 10.0;
+      const auto length = 20.0;
       const auto thickness = 0.01;
       const auto transparency = 0.2;
       for (int i = 0; i < 2; i++) {

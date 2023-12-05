@@ -4,7 +4,6 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Grid1
         - /ZED odometry1/Shape1
         - /TF1/Frames1
       Splitter Ratio: 0.5312976837158203
@@ -105,7 +104,7 @@ Visualization Manager:
           Value: true
         Value: true
       Enabled: true
-      Keep: 100
+      Keep: 200
       Name: BRNE odometry
       Position Tolerance: 0.10000000149011612
       Shape:
@@ -130,7 +129,7 @@ Visualization Manager:
       Enabled: true
       Name: Pedestrians
       Namespaces:
-        {}
+        "": true
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -258,16 +257,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 12.057770729064941
+      Distance: 19.999303817749023
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 3.5703063011169434
-        Y: -0.09052003920078278
-        Z: 0.28076374530792236
+        X: 6.875150680541992
+        Y: -0.23730093240737915
+        Z: 0.33364903926849365
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
