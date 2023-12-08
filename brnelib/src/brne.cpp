@@ -2,7 +2,7 @@
 
 namespace brne
 {
-  BRNE::BRNE(){};
+  BRNE::BRNE(){}
   BRNE::BRNE(double kernel_a1, double kernel_a2,
              double cost_a1, double cost_a2, double cost_a3,
              double dt, int n_steps, int n_samples,
