@@ -24,7 +24,7 @@ colcon build --packages-select crowd_nav brnelib crowd_nav_interfaces pedestrian
 ```
 Finally, if you are building only the perception related portions of this project (for example, to deploy on an Orin Nano), you can build with the following command:
 ```
-colcon build --packages-select crowd_nav_interfaces zed_components zed_ros2 zed_wrapper zed_interfaces
+colcon build --packages-select crowd_nav_interfaces pedestrian_tracking zed_components zed_ros2 zed_wrapper zed_interfaces
 ```
 # Running In Simulation
 
@@ -82,6 +82,14 @@ The result of the BRNE algorithm is a motion plan represented as a series of `cm
 ```
 ros2 launch unitree_nav control.launch.py use_rviz:=false
 ```
+<details>
+  <summary>Northwestern Go1 Xavier Login Details</summary>
+  username: msr
+  <br>
+  IP address: 192.168.123.15
+  <br>
+  password: robotics!
+</details>
 
 ## Using an onboard laptop
 If using a laptop strapped to the back of the robot, this computer will be responsible for pedestrian tracking with the ZED, odometry updates from the ZED, and the BRNE algorithm itself. To set all of this up, run 
@@ -108,6 +116,15 @@ The external computer will be responsible for the BRNE nodes and visualization, 
 ros2 launch crowd_nav algorithm.launch.xml
 ```
 Once again, you can choose the C++ or Python implementation of the BRNE nodes with `lang:=C++` or `lang:=PYTHON` (C++ is default), and you can see the time for each algorithm iteration to execute with the launch argument `debug_level:=debug`.
+
+<details>
+  <summary>Northwestern Orin Nano Login Details</summary>
+  username: unitree
+  <br>
+  IP address: 192.168.123.102
+  <br>
+  password: 123
+</details>
 
 # Dependencies
 
