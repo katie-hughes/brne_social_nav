@@ -145,3 +145,8 @@ sudo make install
 
 # Misc
 - [trials](trials) - Results of physical trials run with the algorithm
+
+
+# References
+* Muchen Sun, Francesca Baldini, Peter Trautman, and Todd Murphey. ”**Move Beyond Trajectories: Distribution Space Coupling for Crowd Navigation.**” In *Robotics: Science and Systems (RSS)*. Virtual, 2021.
+* Muchen Sun, Francesca Baldini, Peter Trautman, and Todd Murphey. ”**Mixed-Strategy Nash Equilibrium for Crowd Navigation**.” *Under Review*. 2023.

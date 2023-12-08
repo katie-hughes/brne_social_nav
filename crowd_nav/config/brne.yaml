@@ -16,7 +16,7 @@
     max_ang_vel: 1.0  # 1.0,1.2 maximum angular velocity allowed on the robot
     nominal_lin_vel: 0.4  #0.4,0.5 nomimal (linear) velocity when plannig the initial trajectory
     open_space_velocity: 0.6  # nominal velocity when the robot is in open space
-    # environment parameters
+    # environment parameters. Atrium: +/- 1.5. small hallway: +/- 0.7
     y_min: -1.5  # lower bound of y coordinate (one side of corridor)
     y_max:  1.5  # upper bound of y coordinate (the other side of corridor)
     # thresholds
