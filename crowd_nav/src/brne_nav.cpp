@@ -429,7 +429,7 @@ private:
       // also update the closest pedestrian to the robot for trial statistics
       if (goal_set){
         const auto dst_to_closest_ped = dist(robot_pose.x, robot_pose.y, 
-          closest_ped.pose.position.x, closest_ped.pose.position.x);
+          closest_ped.pose.position.x, closest_ped.pose.position.y);
         if (dst_to_closest_ped < trial_closest_dst_to_ped){
           trial_closest_dst_to_ped = dst_to_closest_ped;
         }
